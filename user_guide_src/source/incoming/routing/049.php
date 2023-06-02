@@ -1,3 +1,0 @@
-<?php
-
-$routes->setTranslateURIDashes(true);
