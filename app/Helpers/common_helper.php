@@ -103,14 +103,25 @@ function customValidationErrorMessage()
     return [
         'username' => [
             'required' => 'Tài khoản không được để trống!',
+            'string' => 'Thông tin nhập vào phải là chuỗi',
+            'is_not_unique' => 'Tài khoản hoặc mật khẩu sai, vui lòng kiểm tra lại',
+            'is_unique' => 'Tài khoản đã tồn tại!'
         ],
         'email' => [
             'required' => 'Email không được để trống!',
             'valid_email' => 'Email không hợp lệ!',
+            'is_unique' => 'Email đã tồn tại!'
         ],
         'password' => [
             'required' => 'Mật khẩu không được để trống!',
-            'min_length' => 'Mật khẩu có ít nhất 3 kí tự!',
+            'string' => 'Thông tin nhập vào phải là chuỗi',
+            'min_length' => 'Mật khẩu có ít nhất 4 kí tự!',
+        ],
+        're_password' => [
+            'required' => 'Mật khẩu không được để trống!',
+            'string' => 'Thông tin nhập vào phải là chuỗi',
+            'min_length' => 'Mật khẩu có ít nhất 4 kí tự!',
+            'matches' => 'Nhập lại mật khẩu không khớp'
         ],
         'firstname' => [
             'required' => 'Họ không được để trống!',
@@ -133,11 +144,15 @@ function customValidationErrorMessage()
  * @param string $url URL to redirect
  * @param mixed $message Message to store in flash session
  * @param string $type Type of message
+ * @param bool $withInput With input?
  * @return \CodeIgniter\HTTP\RedirectResponse destination URL
  */
-function redirectWithMessage(string $url, $message, string $type = 'error_msg')
+function redirectWithMessage(string $url, $message, string $type = 'error_msg', $withInput = TRUE)
 {
     session()->setFlashdata($type, $message);
+    if ($withInput) {
+        return redirect()->withInput()->to($url);
+    }
     return redirect()->to($url);
 }
 

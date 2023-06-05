@@ -92,3 +92,6 @@ define('EVENT_PRIORITY_NORMAL', 100);
  * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_HIGH instead.
  */
 define('EVENT_PRIORITY_HIGH', 10);
+
+define('WRONG_LOGIN_INFORMATION_MESSAGE', 'Tài khoản hoặc mật khẩu sai, vui lòng kiểm tra lại!');
+define('PASSWORD_NOT_MATCH', 'Tài khoản hoặc mật khẩu sai, vui lòng kiểm tra lại!');
