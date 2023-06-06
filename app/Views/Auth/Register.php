@@ -24,6 +24,12 @@
 
     <!-- Style.css -->
     <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\assets\css\style.css">
+
+    <style>
+        label {
+            font-size: 0.75rem;
+        }
+    </style>
 </head>
 
 <body class="fix-menu">
@@ -34,7 +40,7 @@
                 <div class="col-sm-12">
                     <!-- Authentication card start -->
 
-                    <form class="md-float-material form-material" method="POST" action="<?= base_url('auth/register') ?>">
+                    <form class="md-float-material form-material needs-validation" method="POST" action="<?= base_url('auth/register') ?>" novalidate>
                         <div class="text-center">
                             <img src="<?= base_url() ?>\templates\libraries\assets\images\logo.png" alt="logo.png">
                         </div>
@@ -71,33 +77,31 @@
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Tài khoản <span class="text-danger">*</span></label>
-                                    <input type="text" name="username" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" required>
-                                    <span class="form-bar"></span>
+                                    <input type="text" name="username" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" minlength="3" required>
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Email <span class="text-danger">*</span></label>
                                     <input type="email" name="email" value="<?= set_value('email') ?>" class="form-control rounded" placeholder="Email" required>
-                                    <span class="form-bar"></span>
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập một địa chỉ email hợp lệ.
+                                    </div>
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Mật khẩu <span class="text-danger">*</span></label>
-                                    <input type="password" name="password" class="form-control rounded" placeholder="Mật khẩu" required>
-                                    <span class="form-bar"></span>
+                                    <input type="password" name="password" class="form-control rounded" placeholder="Mật khẩu" minlength="4" required>
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Nhập lại mật khẩu <span class="text-danger">*</span></label>
-                                    <input type="password" name="re_password" class="form-control rounded" placeholder="Nhập lại mật khẩu" required>
-                                    <span class="form-bar"></span>
+                                    <input type="password" name="re_password" class="form-control rounded" placeholder="Nhập lại mật khẩu" minlength="4" required>
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Họ</label>
                                     <input type="text" name="firstname" value="<?= set_value('firstname') ?>" class="form-control rounded" placeholder="Họ">
-                                    <span class="form-bar"></span>
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Tên</label>
                                     <input type="text" name="lastname" value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
-                                    <span class="form-bar"></span>
+
                                 </div>
 
                                 <div class="row m-t-30">
@@ -131,6 +135,27 @@
     <!-- notification js -->
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\js\bootstrap-growl.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\js\app.js"></script>
+
+    <script>
+        (() => {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
 
 </body>
 

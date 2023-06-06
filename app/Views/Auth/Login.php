@@ -22,6 +22,12 @@
 
     <!-- Style.css -->
     <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\assets\css\style.css">
+
+    <style>
+        label {
+            font-size: 0.75rem;
+        }
+    </style>
 </head>
 
 <body class="fix-menu">
@@ -31,7 +37,7 @@
             <div class="row">
                 <div class="col-sm-12">
                     <!-- Authentication card start -->
-                    <form class="md-float-material form-material" method="POST" action="<?= base_url('auth/login') ?>">
+                    <form class="md-float-material form-material needs-validation" method="POST" action="<?= base_url('auth/login') ?>" novalidate>
                         <div class="text-center">
                             <img src="<?= base_url() ?>\templates\libraries\assets\images\logo.png" alt="logo.png">
                         </div>
@@ -52,6 +58,7 @@
                                                 <?php foreach ($errors as $error) : ?>
                                                     <div class="alert alert-danger mb-1">
                                                         <?= $error ?>
+                                                        <i>&times;</i>
                                                     </div>
                                                 <?php endforeach ?>
                                             <?php endif ?>
@@ -60,12 +67,12 @@
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Tài khoản</label>
-                                    <input type="text" name="username" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" required>
+                                    <input type="text" name="username" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" minlength="3" required>
                                     <span class="form-bar"></span>
                                 </div>
                                 <div class="form-group form-primary">
                                     <label for="username">Mật khẩu</label>
-                                    <input type="password" name="password" class="form-control rounded" placeholder="Mật khẩu" required>
+                                    <input type="password" name="password" class="form-control rounded" placeholder="Mật khẩu" minlength="4" required>
                                     <span class="form-bar"></span>
                                 </div>
 
@@ -101,6 +108,26 @@
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\js\bootstrap-growl.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\js\app.js"></script>
 
+    <script>
+        (() => {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
 </body>
 
 </html>
