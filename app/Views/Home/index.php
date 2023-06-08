@@ -77,28 +77,27 @@
 </div>
 
 <div class="modal fade" id="createNewProject" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <!-- modal-xl -->
+    <div class="modal-dialog"> 
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Tạo dự án mới</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
                     <div class="mb-3">
-                        <label for="recipient-name" class="col-form-label">Tên dự án</label>
-                        <input type="text" name="project_name" class="form-control" id="recipient-name" placeholder="Nhập tên dự án">
+                        <label for="recipient-name" class="col-form-label">Tên dự án <span class="text-danger">*</span></label>
+                        <input type="text" name="project_name" class="form-control" id="project_name" placeholder="Nhập tên dự án" required>
                     </div>
                     <div class="mb-3">
-                        <label for="message-text" class="col-form-label">...</label>
-                        <textarea class="form-control" id="message-text"></textarea>
+                        <label for="message-text" class="col-form-label">Tiếp đầu ngữ <span class="text-danger">*</span></label>
+                        <input type="text" name="project_prefix" class="form-control" id="project_prefix" placeholder="Nhập tiếp đầu ngữ" required>
                     </div>
 
                     <div class="float-end">
                         <button type="button" class="btn btn-primary rounded">Tạo</button>
                         <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
                     </div>
-
                 </form>
             </div>
         </div>
@@ -106,8 +105,12 @@
 </div>
 
 <script>
-    const exampleModal = document.getElementById('createNewProject')
-    exampleModal.addEventListener('show.bs.modal', event => {
+    const createNewProjectModal = document.getElementById('createNewProject')
+    const projectName = document.getElementById('project_name')
+    const projectPrefix = document.getElementById('project_prefix')
+    let flag = false
+
+    createNewProjectModal.addEventListener('show.bs.modal', event => {
         // Button that triggered the modal
         const button = event.relatedTarget
         // Extract info from data-bs-* attributes
@@ -122,6 +125,27 @@
         // modalTitle.textContent = `New message to ${recipient}`
         // modalBodyInput.value = recipient
     })
+    
+        projectName.addEventListener('input', () => {
+            if (!flag) {
+                text = projectName.value.split(' ').map(str => str.charAt(0).toUpperCase()).join('');
+                projectPrefix.value = removeDiacritics(text)
+            }
+        })
+    
+        projectPrefix.addEventListener('input', () => {
+            flag = true
+            if (projectPrefix.value == '')
+            {
+                flag = false
+            }
+        })
+    
+
+
+    function removeDiacritics(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
 </script>
 <!-- </div> -->
 <?= $this->endSection() ?>

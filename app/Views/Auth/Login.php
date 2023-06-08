@@ -78,7 +78,12 @@
 
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded">Đăng nhập</button>
-                                    <p class="text-center m-b-5"><span class="text-decoration-line-through">------------</span> hoặc <span class="text-decoration-line-through">------------</span></p>
+                                    <div class="d-flex my-2 px-3">
+                                        <div class="w-50 border-top border-secondary mt-2"></div>
+                                        <div class="px-2"><label>hoặc</label></div>
+                                        <div class="w-50 border-top border-secondary mt-2"></div>
+                                    </div>
+                                    <!-- <p class="text-center m-b-5"><span class="text-decoration-line-through">------------</span> hoặc <span class="text-decoration-line-through">------------</span></p> -->
                                     <a href="register" class="btn btn-outline-secondary btn-md btn-block waves-effect waves-light text-center rounded">Đăng ký</a>
                                 </div>
                             </div>
