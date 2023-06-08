@@ -104,15 +104,11 @@
 
                                 </div>
 
-                                <div class="row m-t-30">
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center m-b-20 rounded">Đăng ký</button>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <a href="login" class="btn btn-outline-secondary btn-md btn-block waves-effect waves-light text-center m-b-20 rounded">Đăng nhập</a>
-                                    </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded">Đăng ký</button>
+                                    <div></div>
+                                    <p class="text-center m-b-5"><span class="text-decoration-line-through">------------</span> hoặc <span class="text-decoration-line-through">------------</span></p>
+                                    <a href="login" class="btn btn-outline-secondary btn-md btn-block waves-effect waves-light text-center rounded">Đăng nhập</a>
                                 </div>
                             </div>
                         </div>

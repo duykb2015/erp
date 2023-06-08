@@ -9,8 +9,8 @@
 
         <div class="navbar-container container-fluid">
             <ul class="nav-left">
-                <li class="">
-                    <a href="" class="btn ">Tạo mới dự án</a>
+                <li>
+                    <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">Tạo dự án mới</button>
                 </li>
             </ul>
             <ul class="nav-right">
