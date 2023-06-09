@@ -43,6 +43,11 @@ $routes->group('auth', function ($routes) {
     $routes->get('logout', 'Auth::logout');
 });
 
+$routes->group('project', function ($routes) {
+    $routes->post('create', 'Project::create');
+});
+
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing

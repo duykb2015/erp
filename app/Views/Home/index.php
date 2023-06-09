@@ -76,15 +76,16 @@
     </div>
 </div>
 
-<div class="modal fade" id="createNewProject" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="createNewProject" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <!-- modal-xl -->
-    <div class="modal-dialog"> 
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Tạo dự án mới</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <form action="<?= base_url('project/create') ?>" method="POST">
                     <div class="mb-3">
                         <label for="recipient-name" class="col-form-label">Tên dự án <span class="text-danger">*</span></label>
                         <input type="text" name="project_name" class="form-control" id="project_name" placeholder="Nhập tên dự án" required>
@@ -95,7 +96,7 @@
                     </div>
 
                     <div class="float-end">
-                        <button type="button" class="btn btn-primary rounded">Tạo</button>
+                        <button type="submit" class="btn btn-primary rounded">Tạo</button>
                         <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
                     </div>
                 </form>
@@ -125,22 +126,21 @@
         // modalTitle.textContent = `New message to ${recipient}`
         // modalBodyInput.value = recipient
     })
-    
-        projectName.addEventListener('input', () => {
-            if (!flag) {
-                text = projectName.value.split(' ').map(str => str.charAt(0).toUpperCase()).join('');
-                projectPrefix.value = removeDiacritics(text)
-            }
-        })
-    
-        projectPrefix.addEventListener('input', () => {
-            flag = true
-            if (projectPrefix.value == '')
-            {
-                flag = false
-            }
-        })
-    
+
+    projectName.addEventListener('input', () => {
+        if (!flag) {
+            text = projectName.value.split(' ').map(str => str.charAt(0).toUpperCase()).join('');
+            projectPrefix.value = removeDiacritics(text)
+        }
+    })
+
+    projectPrefix.addEventListener('input', () => {
+        flag = true
+        if (projectPrefix.value == '') {
+            flag = false
+        }
+    })
+
 
 
     function removeDiacritics(str) {

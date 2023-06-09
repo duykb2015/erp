@@ -18,6 +18,30 @@ function pre($value, bool $exit = true)
     }
 }
 
+function makeImage($character)
+{
+    $img_name = time() . ".png";
+    $path     = dirname(__DIR__, 2) . './public/imgs/' . $img_name;
+
+    $file = fopen($path, 'w');
+    fclose($file);
+
+    $image = imagecreate(200, 200);
+
+    $r = rand(0, 255);
+    $g = rand(0, 255);
+    $b = rand(0, 255);
+    imagecolorallocate($image, $r, $g, $b);
+
+    $textcolor = imagecolorallocate($image, 255, 255, 255);
+    $font = dirname(__DIR__, 2) . '/public/font/arial.ttf';
+    imagettftext($image, 100, 0, 55, 150, $textcolor, $font, $character);
+    imagepng($image, $path);
+    imagedestroy($image);
+    return $img_name;
+}
+
+
 /**
  * Encrypt email to protect it from hackers
  * 
