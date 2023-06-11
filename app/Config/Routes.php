@@ -29,11 +29,26 @@ $routes->set404Override();
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
-$routes->get('/', 'Home::index');
+$routes->group('/', ['filter' => 'login'], function ($routes) {
+    $routes->get('', 'Home::index');
+});
 
 $routes->group('auth', function ($routes) {
     $routes->get('login', 'Auth::login');
+    $routes->post('login', 'Auth::checkLogin');
+
+    $routes->get('register', 'Auth::register');
+    $routes->post('register', 'Auth::checkRegister');
+
+    $routes->get('logout', 'Auth::logout');
 });
+
+$routes->group('project', function ($routes) {
+    $routes->get(':any', 'Project::index');
+
+    $routes->post('create', 'Project::create');
+});
+
 
 /*
  * --------------------------------------------------------------------

@@ -1,20 +1,28 @@
 <?php
 
-namespace App\Controllers\Admin;
+namespace App\Controllers;
 
-use App\Controllers\BaseController;
-use App\Models\AdminModel;
-use CodeIgniter\I18n\Time;
+use App\Models\User;
 
 class Auth extends BaseController
 {
 	public function login()
 	{
-
+		if (session()->get('is_login')) {
+			return redirect()->to('/');
+		}
 		return view('Auth/Login');
 	}
 
-	public function authLogin()
+	public function register()
+	{
+		if (session()->get('is_login')) {
+			return redirect()->to('/');
+		}
+		return view('Auth/Register');
+	}
+
+	public function checkLogin()
 	{
 		$username = $this->request->getPost('username');
 		$password = $this->request->getPost('password');
@@ -23,51 +31,74 @@ class Auth extends BaseController
 			'password' => $password
 		);
 
-		//load validation service
 		$validation = service('validation');
 		$validation->setRules(
 			[
-				'username' => 'required',
-				'password' => 'required|min_length[3]'
+				'username' => 'required|string|min_length[3]|is_not_unique[user.username]',
+				'password' => 'required|string|min_length[4]'
 			],
-			//Custom error message
 			customValidationErrorMessage()
 		);
 
-		//if something wrong, redirect to login page and show error message
 		if (!$validation->run($inputs)) {
-			$error_msg = $validation->getErrors();
-			return redirectWithMessage(site_url('admin-login'), $error_msg);
+			return redirectWithMessage(site_url('auth/login'), $validation->getErrors());
 		}
 
-		//Get info user
-		$adminModel = new AdminModel();
-		$user = $adminModel->where('username', $username)->first();
-		if (!$user) {
-			return redirectWithMessage(site_url('admin-login'), WRONG_LOGIN_INFO_MESSAGE);
+		$userModel = new User();
+
+		$user 		   = $userModel->where('username', $username)->first();
+		$userPassword  = $user['password'];
+		$passwordMatch = md5((string)$password) === $userPassword;
+		if (!$passwordMatch) {
+			return redirectWithMessage(site_url('auth/login'), WRONG_LOGIN_INFORMATION_MESSAGE);
 		}
 
-		$pass = $user['password'];
-		$authPassword = md5((string)$password) === $pass;
-		if (!$authPassword) {
-			return redirectWithMessage(site_url('admin-login'), WRONG_LOGIN_INFO_MESSAGE);
-		}
+		$displayName = $user['firstname'] . ' ' .  $user['lastname'] === ' ' ? $user['username'] : $user['firstname'] . ' ' .  $user['lastname'];
 
 		$sessionData = [
-			'id' 	       => $user['id'],
-			'adminName'    => $user['username'],
-			'level'	       => $user['level'],
-			'isAdminLogin' => true,
+			'user_id'  => $user['id'],
+			'name'     => $displayName,
+			'type'	   => $user['type'],
+			'is_login' => TRUE,
 		];
 
-		$is_update = $adminModel->update($user['id'], ['last_login_at' => Time::now()]);
-		if (!$is_update) {
-			return redirectWithMessage(site_url('admin-login'), UNEXPECTED_ERROR_MESSAGE);
+		session()->set($sessionData);
+		return redirect()->to('/');
+	}
+
+	public function checkRegister()
+	{
+
+		$validation = service('validation');
+		$validation->setRules(
+			[
+				'username' 	  => 'required|string|min_length[3]|is_unique[users.username]',
+				'password' 	  => 'required|string|min_length[4]',
+				're_password' => 'required|string|min_length[4]|matches[password]',
+				'email' 	  => 'required|string|is_unique[users.email]',
+				'firstname'   => 'string',
+				'lastname' 	  => 'string',
+			],
+			customValidationErrorMessage()
+		);
+
+		if (!$validation->run($this->request->getPost())) {
+			return redirectWithMessage(site_url('auth/register'), $validation->getErrors());
 		}
 
-		//create new session and start to work
-		session()->set($sessionData);
-		return redirect()->to('/dashboard');
+		$data = [
+			'username'  => $this->request->getPost('username'),
+			'password'  => md5((string)$this->request->getPost('password')),
+			'email'	    => $this->request->getPost('email'),
+			'firstname' => $this->request->getPost('firstname'),
+			'lastname'  => $this->request->getPost('lastname'),
+			'type' 		=> 'user'
+		];
+
+		$userModel = new User();
+		$userModel->insert($data);
+
+		return redirectWithMessage(site_url('auth/register'), 'success', 'success', FALSE);
 	}
 
 
@@ -78,6 +109,6 @@ class Auth extends BaseController
 	function logout()
 	{
 		session()->destroy();
-		return redirect()->to('admin-login');
+		return redirect()->to('auth/login');
 	}
 }
