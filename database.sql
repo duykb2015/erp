@@ -2,7 +2,7 @@ DROP DATABASE IF EXISTS erp;
 CREATE DATABASE erp;
 USE erp;
 
-CREATE TABLE projects
+CREATE TABLE project
 (
   project_id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE projects
   PRIMARY KEY (project_id)
 );
 
-CREATE TABLE users
+CREATE TABLE user
 (
   user_id INT NOT NULL AUTO_INCREMENT,
   username VARCHAR(255) NOT NULL,
@@ -23,12 +23,12 @@ CREATE TABLE users
   PRIMARY KEY (user_id)
 );
 
-CREATE TABLE attachments
+CREATE TABLE attachment
 (
-  attachment_id INT NOT NULL AUTO_INCREMENT,
+  id INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
   type INT NOT NULL,
-  PRIMARY KEY (attachment_id)
+  PRIMARY KEY (id)
 );
 
 CREATE TABLE project_user
@@ -41,7 +41,7 @@ CREATE TABLE project_user
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-CREATE TABLE tasks
+CREATE TABLE task
 (
   task_id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(255) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE tasks
   FOREIGN KEY (assignee) REFERENCES users(user_id)
 );
 
-CREATE TABLE comments
+CREATE TABLE comment
 (
   comment_id INT NOT NULL AUTO_INCREMENT,
   text TEXT NOT NULL,

@@ -8,11 +8,13 @@
         </div>
 
         <div class="navbar-container container-fluid">
-            <ul class="nav-left">
-                <li>
-                    <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">Tạo dự án mới</button>
-                </li>
-            </ul>
+            <?php if (url_is('/')) : ?>
+                <ul class="nav-left">
+                    <li>
+                        <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">Tạo dự án mới</button>
+                    </li>
+                </ul>
+            <?php endif ?>
             <ul class="nav-right">
                 <li class="user-profile header-notification">
                     <div class="dropdown-primary dropdown">

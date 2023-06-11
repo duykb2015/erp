@@ -34,7 +34,7 @@ class Auth extends BaseController
 		$validation = service('validation');
 		$validation->setRules(
 			[
-				'username' => 'required|string|min_length[3]|is_not_unique[users.username]',
+				'username' => 'required|string|min_length[3]|is_not_unique[user.username]',
 				'password' => 'required|string|min_length[4]'
 			],
 			customValidationErrorMessage()
@@ -53,11 +53,11 @@ class Auth extends BaseController
 			return redirectWithMessage(site_url('auth/login'), WRONG_LOGIN_INFORMATION_MESSAGE);
 		}
 
-		$display_name = $user['firstname'] . ' ' .  $user['lastname'] === ' ' ? $user['username'] : $user['firstname'] . ' ' .  $user['lastname'];
+		$displayName = $user['firstname'] . ' ' .  $user['lastname'] === ' ' ? $user['username'] : $user['firstname'] . ' ' .  $user['lastname'];
 
 		$sessionData = [
-			'user_id'  => $user['user_id'],
-			'name'     => $display_name,
+			'user_id'  => $user['id'],
+			'name'     => $displayName,
 			'type'	   => $user['type'],
 			'is_login' => TRUE,
 		];

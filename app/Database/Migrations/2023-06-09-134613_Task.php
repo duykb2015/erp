@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class User extends Migration
+class Task extends Migration
 {
     public function up()
     {
@@ -14,52 +14,55 @@ class User extends Migration
                 'null'           => FALSE,
                 'auto_increment' => TRUE
             ],
-            'username' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 100,
+            'project_id' => [
+                'type'           => 'INT',
                 'null'           => FALSE,
             ],
-            'password' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 33,
+            'assignee' => [
+                'type'           => 'INT',
                 'null'           => FALSE,
             ],
-            'email' => [
+            'title' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 255,
                 'null'           => FALSE,
             ],
-            'firstname' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 100,
+            'descriptions' => [
+                'type'           => 'TEXT',
                 'null'           => TRUE,
             ],
-            'lastname' => [
+            'priority' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 20,
                 'null'           => TRUE,
             ],
-            'type' => [
-                'type'           => 'TINYINT',
+            'status' => [
+                'type'           => 'VARCHAR',
+                'constraint'     => 20,
                 'null'           => FALSE,
             ],
-            'photo' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 15,
+            'due_at' => [
+                'type'           => 'TIMESTAMP',
+                'null'           => TRUE,
+            ],
+            'start_at' => [
+                'type'           => 'TIMESTAMP',
                 'null'           => TRUE,
             ],
         ]);
         $this->forge->addPrimaryKey('id');
+        $this->forge->addForeignKey('project_id', 'project', 'id', '', '', 'fk_t_p_i_p_i');
+        $this->forge->addForeignKey('assignee', 'user', 'id', '', '', 'fk_t_a_u_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',
             'COLLATE' => 'utf8_general_ci'
         ];
-        $this->forge->createTable('user', TRUE, $attributes);
+        $this->forge->createTable('task', TRUE, $attributes);
     }
 
     public function down()
     {
-        $this->forge->dropTable('user', TRUE);
+        $this->forge->dropTable('task', TRUE);
     }
 }

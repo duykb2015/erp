@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class User extends Migration
+class Project extends Migration
 {
     public function up()
     {
@@ -14,33 +14,24 @@ class User extends Migration
                 'null'           => FALSE,
                 'auto_increment' => TRUE
             ],
-            'username' => [
+            'name' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 255,
                 'null'           => FALSE,
             ],
-            'password' => [
+            'key' => [
+                'type'           => 'VARCHAR',
+                'constraint'     => 30,
+                'null'           => FALSE,
+            ],
+            'descriptions' => [
+                'type'           => 'VARCHAR',
+                'constraint'     => 512,
+                'null'           => FALSE,
+            ],
+            'owner' => [
                 'type'           => 'VARCHAR',
                 'constraint'     => 33,
-                'null'           => FALSE,
-            ],
-            'email' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 100,
-                'null'           => FALSE,
-            ],
-            'firstname' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 100,
-                'null'           => TRUE,
-            ],
-            'lastname' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 100,
-                'null'           => TRUE,
-            ],
-            'type' => [
-                'type'           => 'TINYINT',
                 'null'           => FALSE,
             ],
             'photo' => [
@@ -48,6 +39,8 @@ class User extends Migration
                 'constraint'     => 15,
                 'null'           => TRUE,
             ],
+            'created_at DATETIME NOT NULL DEFAULT current_timestamp',
+            'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp'
         ]);
         $this->forge->addPrimaryKey('id');
         $attributes = [
@@ -55,11 +48,11 @@ class User extends Migration
             'CHARACTER SET' => 'utf8',
             'COLLATE' => 'utf8_general_ci'
         ];
-        $this->forge->createTable('user', TRUE, $attributes);
+        $this->forge->createTable('project', TRUE, $attributes);
     }
 
     public function down()
     {
-        $this->forge->dropTable('user', TRUE);
+        $this->forge->dropTable('project', TRUE);
     }
 }

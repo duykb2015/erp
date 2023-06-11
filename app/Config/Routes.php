@@ -44,6 +44,8 @@ $routes->group('auth', function ($routes) {
 });
 
 $routes->group('project', function ($routes) {
+    $routes->get(':any', 'Project::index');
+
     $routes->post('create', 'Project::create');
 });
 
