@@ -1,20 +1,59 @@
-<nav class="navbar header-navbar pcoded-header">
+<nav class="navbar header-navbar pcoded-header" header-theme="theme5">
     <div class="navbar-wrapper">
-
-        <div class="navbar-logo">
+        <div class="navbar-logo" logo-theme="theme5">
             <a href="<?= base_url() ?>">
                 <img class="img-fluid" src="<?= base_url() ?>\templates\libraries\assets\images\logo.png" alt="Theme-Logo">
             </a>
         </div>
-
         <div class="navbar-container container-fluid">
-            <?php if (url_is('/')) : ?>
-                <ul class="nav-left">
-                    <li>
-                        <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">Tạo dự án mới</button>
-                    </li>
-                </ul>
-            <?php endif ?>
+            <ul class="nav-left">
+                <li class="header-notification">
+                    <div class="dropdown-primary dropdown">
+                        <div class="dropdown-toggle <?= url_is('/') ? 'nav-active' : '' ?>" data-toggle="dropdown">
+                            <div class="hover px-2">
+                                <span>Không gian làm việc</span>
+                                <i class="feather icon-chevron-down"></i>
+                            </div>
+                        </div>
+                        <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                            <li class="nav-item dropdown" onclick="redirect_url('/')">
+                                <div class="media">
+                                    <a class="text-decoration-none d-flex">
+                                        Đi đến không gian làm việc
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="header-notification">
+                    <div class="dropdown-primary dropdown">
+                        <div class="dropdown-toggle <?= url_is('/project*') ? 'nav-active' : '' ?>" data-toggle="dropdown">
+                            <div class="hover px-2">
+                                <span>Dự án</span>
+                                <i class="feather icon-chevron-down"></i>
+                            </div>
+                        </div>
+                        <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                            <li class="nav-item dropdown" onclick="redirect_url('/project')">
+                                <div class="media">
+                                    <a class="text-decoration-none d-flex">
+                                        Danh sách dự án
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">
+                                <div class="media">
+                                    <a class="text-decoration-none d-flex">
+                                        Tạo dự án mới
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+
             <ul class="nav-right">
                 <li class="user-profile header-notification">
                     <div class="dropdown-primary dropdown">
@@ -24,16 +63,16 @@
                             <i class="feather icon-chevron-down"></i>
                         </div>
                         <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                            <li>
-                                <a href="<?= base_url('user-infomation') ?>">
-                                    <i class="feather icon-user"></i> Thông tin
+                            <li onclick="redirect_url('/user')">
+                                <a class="text-decoration-none">
+                                    <i class="feather icon-user"></i> Thông tin cá nhân
                                 </a>
                             </li>
-                            <a href="<?= base_url('auth/logout') ?>">
-                                <li>
+                            <li onclick="redirect_url('/auth/logout')">
+                                <a class="text-decoration-none">
                                     <i class="feather icon-log-out"></i> Đăng xuất
-                                </li>
-                            </a>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>

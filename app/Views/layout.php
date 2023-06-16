@@ -16,7 +16,7 @@
     <link rel="icon" href="<?= base_url() ?>\templates\libraries\assets\images\favicon.ico" type="image/x-icon">
     <!-- Google font-->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
-  
+
     <!-- feather Awesome -->
     <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\assets\icon\feather\css\feather.css">
 
@@ -47,6 +47,19 @@
 
         select.form-control:not([size]):not([multiple]) {
             height: auto !important;
+        }
+
+        .nav-active {
+            border-bottom: 4px solid #0099ff;
+            color: #0099ff;
+        }
+
+        .hover:hover {
+            background-color: #f0f5f5;
+        }
+        
+        label {
+            font-size: 0.75rem;
         }
     </style>
 </head>
@@ -82,7 +95,45 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Create new project Modal -->
+    <div class="modal fade mt-5" id="createNewProject" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <!-- modal-xl -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Tạo dự án mới</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="needs-validation" id="create-project">
+                        <div class="mb-3">
+                            <label for="recipient-name" class="col-form-label">Tên dự án <span class="text-danger">*</span></label>
+                            <input type="text" name="project_name" class="form-control rounded" id="project_name" placeholder="Nhập tên dự án" minlength="5" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Tiền tố <i class="fa fa-question-circle-o" title="Tiền tố là các chữ cái đầu của tên dự án được viết hoa và ghép lại. Giúp cho việc nhận biết các công việc nào của dự án nào một cách nhanh chóng. Bạn có thể tự định nghĩa chúng!"></i><span class="text-danger">*</span></label>
+                            <input type="text" name="project_key" class="form-control rounded" id="project_key" placeholder="Tiền tố" minlength="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Mô tả cho dự án</label>
+                            <textarea name="project_descriptions" class="form-control rounded" id="project_descriptions" maxlength="512" rows="5"></textarea>
+                        </div>
+
+                        <div class="float-end">
+                            <button type="submit" id="loading-on-click" onclick="createProject(event)" class="btn btn-primary rounded">
+                                Tạo
+                            </button>
+                            <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\jquery\js\jquery.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\jquery-ui\js\jquery-ui.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\popper.js\js\popper.min.js"></script>
@@ -95,8 +146,8 @@
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\js\bootstrap-growl.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\pages\notification\notification.js"></script>
 
-        <!-- jquery slimscroll js -->
-        <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\jquery-slimscroll\js\jquery.slimscroll.js"></script>
+    <!-- jquery slimscroll js -->
+    <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\jquery-slimscroll\js\jquery.slimscroll.js"></script>
 
     <!-- custom js -->
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\js\jquery.mCustomScrollbar.concat.min.js"></script>
@@ -107,20 +158,88 @@
     <!-- ajax -->
 
     <script src="<?= base_url() ?>\templates\js\jquery.growl.js" type="text/javascript"></script>
-    
-    <script>
-        $('#remove-alert').on('click', function() {
-            $('.alert').remove();
-        })
 
-        $(function() {
-            $('[data-toggle="popover"]').popover({
-                trigger: 'focus',
-                container: 'body',
-                boundary: 'body',
-                fallbackPlacement: ['bottom', 'bottom', 'bottom', 'bottom']
-            })
-        })
+    <script>
+        function createProject(event) {
+            if (alreadyClick) {
+                console.log('click!')
+                return
+            }
+            alreadyClick = true
+
+            if (projectName.value == '' ||
+                projectKey.value == '' ||
+                projectName.value.length < 5 ||
+                projectDescriptions.value.length > 512) {
+                return
+            }
+
+            createButton = document.getElementById('loading-on-click')
+            createButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+            const data = new FormData();
+            data.append('project_name', projectName.value);
+            data.append('project_key', projectKey.value)
+            data.append('project_descriptions', projectDescriptions.value)
+
+            var requestOptions = {
+                method: 'POST',
+                body: data,
+                redirect: 'follow'
+            };
+            fetch('<?= base_url('project/create') ?>', requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.errors) {
+                        setTimeout(() => {
+                            if (result.errors.project_name) {
+                                result.errors.project_name = result.errors.project_name.replace('project_name', 'Tên dự án')
+                                $.growl.error({
+                                    message: result.errors.project_name,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+                            if (result.errors.project_key) {
+                                result.errors.project_key = result.errors.project_key.replace('project_key', 'Tiền tố')
+                                $.growl.error({
+                                    message: result.errors.project_key,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+                            if (result.errors.project_descriptions) {
+                                result.errors.project_descriptions = result.errors.project_descriptions.replace('project_descriptions', 'Mô tả dự án')
+                                $.growl.error({
+                                    message: result.errors.project_descriptions,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+                            alreadyClick = false
+                            createButton.innerHTML = 'Tạo'
+                        }, 1000)
+                        return
+                    }
+
+                    if (result.project_id) {
+                        $.growl.notice({
+                            message: "Tạo mới dự án thành công"
+                        });
+
+                        setTimeout(() => {
+                            window.location.href = `<?= base_url('project') ?>/${result.project_id}`
+                        }, 2000)
+
+                        return
+                    }
+                }).catch(() => {
+                    $.growl.error({
+                        message: "Có lỗi xảy ra, vui lòng thử lại sau"
+                    });
+                    createButton.innerHTML = 'Tạo'
+                })
+        }
     </script>
 </body>
 

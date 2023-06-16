@@ -77,3 +77,52 @@ function msgbox_success(message) {
 function redirect_url(url) {
     window.location.href = url;
 }
+
+$(function () {
+    $('[data-toggle="popover"]').popover({
+        trigger: 'focus',
+        container: 'body',
+        boundary: 'body',
+        fallbackPlacement: ['bottom', 'bottom', 'bottom', 'bottom']
+    })
+})
+
+// ===========================>
+const createNewProjectModal = document.getElementById('createNewProject')
+const projectName = document.getElementById('project_name')
+const projectKey = document.getElementById('project_key')
+const projectDescriptions = document.getElementById('project_descriptions')
+
+let flag = false
+let alreadyClick = false
+
+createNewProjectModal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget
+    // const recipient = button.getAttribute('data-bs-whatever')
+})
+
+projectName.addEventListener('input', () => {
+    if (!flag) {
+        text = projectName.value.split(' ').map(str => str.charAt(0).toUpperCase()).join('');
+        projectKey.value = removeDiacritics(text)
+    }
+})
+
+projectKey.addEventListener('input', () => {
+    flag = true
+    if (projectKey.value == '') {
+        flag = false
+    }
+})
+// <===========================
+
+// ===========================>
+function removeDiacritics(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+document.getElementById("create-project").addEventListener("submit", function (event) {
+    event.preventDefault()
+});
+
+// <===========================

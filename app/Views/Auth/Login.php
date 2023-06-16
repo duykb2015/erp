@@ -23,6 +23,7 @@
     <!-- Style.css -->
     <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\assets\css\style.css">
 
+    <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\assets\icon\feather\css\feather.css">
     <style>
         label {
             font-size: 0.75rem;
@@ -51,14 +52,27 @@
                                         <?php $errors = session()->getFlashdata('error_msg') ?>
                                         <?php if (!empty($errors)) :  ?>
                                             <?php if (!is_array($errors)) : ?>
-                                                <div class="alert alert-danger mb-1">
-                                                    <?= $errors ?>
+                                                <div class="alert alert-danger mb-1 rounded">
+                                                    <div class="row">
+                                                        <div class="col-10">
+                                                            <?= $errors ?>
+                                                        </div>
+                                                        <div class="col-1">
+                                                            <i onclick="removeAlert()" class="feather icon-x-circle"></i>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             <?php else : ?>
                                                 <?php foreach ($errors as $error) : ?>
-                                                    <div class="alert alert-danger mb-1">
-                                                        <?= $error ?>
-                                                        <i>&times;</i>
+                                                    <div class="alert alert-danger mb-1 rounded">
+                                                        <div class="row">
+                                                            <div class="col-11">
+                                                                <?= $error ?>
+                                                            </div>
+                                                            <div class="col-1">
+                                                                <i onclick="removeAlert()" class="feather icon-x-circle"></i>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 <?php endforeach ?>
                                             <?php endif ?>
@@ -66,12 +80,12 @@
                                     </div>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Tài khoản</label>
+                                    <label class="p-1" for="username">Tài khoản</label>
                                     <input type="text" name="username" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" minlength="3" required>
                                     <span class="form-bar"></span>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Mật khẩu</label>
+                                    <label class="p-1" for="username">Mật khẩu</label>
                                     <input type="password" name="password" class="form-control rounded" placeholder="Mật khẩu" minlength="4" required>
                                     <span class="form-bar"></span>
                                 </div>
@@ -127,6 +141,10 @@
                 }, false)
             })
         })()
+
+        function removeAlert() {
+            document.querySelectorAll(".alert").forEach(e => e.remove());
+        }
     </script>
 </body>
 

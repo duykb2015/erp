@@ -53,7 +53,7 @@
                                     <div class="col-12">
                                         <?php $success = session()->getFlashdata('success') ?>
                                         <?php if (!empty($success)) :  ?>
-                                            <div class="alert alert-success mb-1">
+                                            <div class="alert alert-success mb-1  rounded">
                                                 Đăng ký thành công, giờ bạn có thể đăng nhập
                                             </div>
                                         <?php endif ?>
@@ -62,13 +62,27 @@
                                         <?php $errors = session()->getFlashdata('error_msg') ?>
                                         <?php if (!empty($errors)) :  ?>
                                             <?php if (!is_array($errors)) : ?>
-                                                <div class="alert alert-danger mb-1">
-                                                    <?= $errors ?>
+                                                <div class="alert alert-danger mb-1  rounded">
+                                                    <div class="row">
+                                                        <div class="col-10">
+                                                            <?= $errors ?>
+                                                        </div>
+                                                        <div class="col-1">
+                                                            <i onclick="removeAlert()" class="feather icon-x-circle"></i>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             <?php else : ?>
                                                 <?php foreach ($errors as $error) : ?>
-                                                    <div class="alert alert-danger mb-1">
-                                                        <?= $error ?>
+                                                    <div class="alert alert-danger mb-1 rounded">
+                                                        <div class="row">
+                                                            <div class="col-10">
+                                                                <?= $error ?>
+                                                            </div>
+                                                            <div class="col-1">
+                                                                <i onclick="removeAlert()" class="feather icon-x-circle"></i>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 <?php endforeach ?>
                                             <?php endif ?>
@@ -76,30 +90,30 @@
                                     </div>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Tài khoản <span class="text-danger">*</span></label>
+                                    <label class="p-1" for="username">Tài khoản <span class="text-danger">*</span></label>
                                     <input type="text" name="username" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" minlength="3" required>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Email <span class="text-danger">*</span></label>
+                                    <label class="p-1" for="username">Email <span class="text-danger">*</span></label>
                                     <input type="email" name="email" value="<?= set_value('email') ?>" class="form-control rounded" placeholder="Email" required>
                                     <div class="invalid-feedback">
                                         Vui lòng nhập một địa chỉ email hợp lệ.
                                     </div>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Mật khẩu <span class="text-danger">*</span></label>
+                                    <label class="p-1" for="username">Mật khẩu <span class="text-danger">*</span></label>
                                     <input type="password" name="password" class="form-control rounded" placeholder="Mật khẩu" minlength="4" required>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Nhập lại mật khẩu <span class="text-danger">*</span></label>
+                                    <label class="p-1" for="username">Nhập lại mật khẩu <span class="text-danger">*</span></label>
                                     <input type="password" name="re_password" class="form-control rounded" placeholder="Nhập lại mật khẩu" minlength="4" required>
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Họ</label>
+                                    <label class="p-1" for="username">Họ</label>
                                     <input type="text" name="firstname" value="<?= set_value('firstname') ?>" class="form-control rounded" placeholder="Họ">
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label for="username">Tên</label>
+                                    <label class="p-1" for="username">Tên</label>
                                     <input type="text" name="lastname" value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
 
                                 </div>
@@ -154,6 +168,10 @@
                 }, false)
             })
         })()
+
+        function removeAlert() {
+            document.querySelectorAll(".alert").forEach(e => e.remove());
+        }
     </script>
 
 </body>

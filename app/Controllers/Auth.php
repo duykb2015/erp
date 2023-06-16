@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use Config\Services;
 
 class Auth extends BaseController
 {
@@ -31,11 +32,12 @@ class Auth extends BaseController
 			'password' => $password
 		);
 
-		$validation = service('validation');
+		$validation = Services::validation();
+
 		$validation->setRules(
 			[
-				'username' => 'required|string|min_length[3]|is_not_unique[user.username]',
-				'password' => 'required|string|min_length[4]'
+				'username' => 'required|string|min_length[3]|max_length[100]|is_not_unique[user.username]',
+				'password' => 'required|string|min_length[4]|max_length[50]'
 			],
 			customValidationErrorMessage()
 		);
@@ -72,12 +74,12 @@ class Auth extends BaseController
 		$validation = service('validation');
 		$validation->setRules(
 			[
-				'username' 	  => 'required|string|min_length[3]|is_unique[users.username]',
-				'password' 	  => 'required|string|min_length[4]',
+				'username' 	  => 'required|string|min_length[3]|max_length[100]|is_unique[user.username]',
+				'password' 	  => 'required|string|min_length[4]|max_length[50]',
 				're_password' => 'required|string|min_length[4]|matches[password]',
-				'email' 	  => 'required|string|is_unique[users.email]',
-				'firstname'   => 'string',
-				'lastname' 	  => 'string',
+				'email' 	  => 'required|string|is_unique[user.email]',
+				'firstname'   => 'string|min_length[2]|max_length[100]',
+				'lastname' 	  => 'string|min_length[2]|max_length[100]',
 			],
 			customValidationErrorMessage()
 		);

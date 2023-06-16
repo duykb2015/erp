@@ -43,8 +43,15 @@ $routes->group('auth', function ($routes) {
     $routes->get('logout', 'Auth::logout');
 });
 
-$routes->group('project', function ($routes) {
-    $routes->get(':any', 'Project::index');
+$routes->group('user', ['filter' => 'login'], function ($routes) {
+    $routes->get('/', 'User::index');
+    
+    $routes->post('/', 'User::update');
+});
+
+$routes->group('project', ['filter' => 'login'], function ($routes) {
+    $routes->get('/', 'Project::list');
+    $routes->get(':any', 'Project::detail');
 
     $routes->post('create', 'Project::create');
 });
