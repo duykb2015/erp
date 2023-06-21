@@ -29,6 +29,10 @@
         label {
             font-size: 0.75rem;
         }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
     </style>
 </head>
 
@@ -115,11 +119,10 @@
                                 <div class="form-group form-primary">
                                     <label class="p-1" for="username">Tên</label>
                                     <input type="text" name="lastname" value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
-
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded">Đăng ký</button>
+                                    <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded mt-3">Đăng ký</button>
                                     <div class="d-flex my-2 px-3">
                                         <div class="w-50 border-top border-secondary mt-2"></div>
                                         <div class="px-2"><label>hoặc</label></div>

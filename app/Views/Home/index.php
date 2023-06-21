@@ -21,13 +21,13 @@
                 </div>
             </div>
         </div>
-        <div class="page-body">
+        <div class="page-body ">
             <div class="col-sm-12">
                 <!-- Panel card start -->
                 <?php if (!empty($projects)) : ?>
-                    <div class="card">
+                    <div class="card border">
                         <div class="card-header">
-                            <h5>Các dự án gần đây</h5>
+                            <h5 class="card-header-text">Công việc đang thực hiện</h5>
                             <div class="page-header-breadcrumb">
                                 <ul class="breadcrumb-title">
                                     <li class="breadcrumb-item"><a href="<?= base_url('project') ?>">Xem toàn bộ các dự án</a></li>
@@ -38,7 +38,7 @@
                             <div class="row">
                                 <?php foreach ($projects as $project) : ?>
                                     <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3">
-                                        <div class="card z-depth-bottom-2">
+                                        <div class="card shadow border bg-light text-dark">
                                             <div class="row m-3">
                                                 <div class="col-2 p-r-0">
                                                     <div class="u-img">
@@ -63,7 +63,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card user-activity-card">
+                    <div class="card user-activity-card border">
                         <?php if (!empty($projectss)) : ?>
                             <div class="card-header">
                                 <h5 class="card-header-text">Công việc đang thực hiện</h5>
@@ -88,8 +88,8 @@
                                 <?php endforeach ?>
                             </div>
                         <?php else : ?>
-                            <div class="card-header">
-                                <div class="text-center"><span>Hiện tại bạn không có công việc nào!</span></div>
+                            <div class="card-header rounded text-center">
+                                <h5 class="card-header-text ">Hiện tại bạn không có công việc nào!</h5>
                             </div>
                         <?php endif ?>
                     </div>

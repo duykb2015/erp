@@ -13,8 +13,14 @@ class Project extends BaseController
     {
         $projectModel = new ModelsProject();
         $now          = Carbon::now('Asia/Ho_Chi_Minh');
+
+        $name = $this->request->getGet('name');
+        if ($name)
+        {
+            $projectModel->like('name', $name);
+        }
         
-        $filter       = $this->request->getGet('dim');
+        $filter = $this->request->getGet('dim');
         switch ($filter) {
             case 'today':
                 $where = "updated_at BETWEEN '{$now->clone()->startOfDay()}' AND '{$now}'";
@@ -90,6 +96,7 @@ class Project extends BaseController
             $data['pager'] = $projectModel->pager;
         }
 
+        $data['name']   = $name;
         $data['dim']   = $filter;
         $data['sort']  = $sort;
         $data['limit'] = $limit;

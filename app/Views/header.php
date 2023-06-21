@@ -4,9 +4,11 @@
             <a href="<?= base_url() ?>">
                 <img class="img-fluid" src="<?= base_url() ?>\templates\libraries\assets\images\logo.png" alt="Theme-Logo">
             </a>
-            <a class="mobile-menu text-decoration-none" id="mobile-collapse">
-                <i class="feather icon-menu"></i>
-            </a>
+            <?php if (url_is('project/*')) : ?>
+                <a class="mobile-menu text-decoration-none" id="mobile-collapse">
+                    <i class="feather icon-menu"></i>
+                </a>
+            <?php endif ?>
         </div>
         <div class="navbar-container container-fluid">
             <ul class="nav-left">

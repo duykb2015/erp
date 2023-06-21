@@ -28,6 +28,10 @@
         label {
             font-size: 0.75rem;
         }
+
+        .form-group {
+            margin-bottom: 0.8em;
+        }
     </style>
 </head>
 
@@ -91,7 +95,7 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded">Đăng nhập</button>
+                                    <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded mt-3">Đăng nhập</button>
                                     <div class="d-flex my-2 px-3">
                                         <div class="w-50 border-top border-secondary mt-2"></div>
                                         <div class="px-2"><label>hoặc</label></div>

@@ -1,4 +1,8 @@
 <?= $this->extend('layout') ?>
+<?= $this->section('css') ?>
+<style>
+</style>
+<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
 <!-- Main-body start -->
@@ -24,10 +28,10 @@
             <div class="row">
                 <div class="col-xl-12 col-lg-12 pull-xl-12 filter-bar">
                     <!-- Nav Filter tab start -->
-                    <nav class="navbar navbar-light bg-faded m-b-30 p-10">
+                    <nav class="navbar navbar-light m-b-30 p-10 ">
                         <form class="form-material w-100" action="" id="filter" method="GET">
                             <div class="row">
-                                <div class="col-3">
+                                <div class="col-3 pb-2">
                                     <label class="p-1" for="dim"><i class="icofont icofont-filter"></i> Thời gian</label>
                                     <select class="form-control rounded" name="dim" onchange="submitForm()">
                                         <optgroup label="Lọc theo">
@@ -54,7 +58,11 @@
                                         </optgroup>
                                     </select>
                                 </div>
-                                <div class="col-1">
+                                <div class="col-3 pb-2">
+                                    <label class="p-1" for="name"><i class="icofont icofont-pencil-alt-5"></i> Tên dự án</label>
+                                    <input type="text" class="form-control rounded" value="<?= $name ?? '' ?>" name="name" onkeyup="afterInput()" placeholder="Nhập tên dự án...">
+                                </div>
+                                <div class="col-2">
                                     <label class="p-1" for="sort"><i class="icofont icofont-social-stack-exchange"></i> Hiển thị</label>
                                     <select class="form-control rounded" name="limit" onchange="submitForm()">
                                         <option <?= !empty($limit) && 10  == $limit ? 'selected' : ''  ?> value="10">10</option>
@@ -63,20 +71,24 @@
                                         <option <?= !empty($limit) && 100 == $limit ? 'selected' : ''  ?> value="100">100</option>
                                     </select>
                                 </div>
+                                <div class="col-1">
+                                    <label class="p-1">&nbsp;</label>
+                                    <a href="<?= base_url('project') ?>" class="text-decoration-none text-center form-control rounded">Xoá bộ lọc</a>
+                                </div>
                             </div>
                         </form>
                     </nav>
                     <!-- Nav Filter tab end -->
                     <!-- Task board design block start-->
-                    <div class="card">
+                    <div class="card border">
                         <?php if (!empty($projects)) : ?>
                             <div class="card-block">
                                 <?php foreach ($projects as $project) : ?>
-                                    <div class="card z-depth-bottom-2">
+                                    <div class="card shadow-sm border bg-light text-dark">
                                         <div class="row m-3">
                                             <div class="col-auto p-r-0">
                                                 <div class="u-img">
-                                                    <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" alt="user image" width="120" height="120" class="img-radius cover-img">
+                                                    <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" alt="user image" width="70" height="70" class="img-radius cover-img">
                                                 </div>
                                             </div>
                                             <div class="col">
@@ -109,50 +121,25 @@
     </div>
 </div>
 <!-- Main-body end -->
-
-<!-- <link rel="icon" href="libraries\assets\images\favicon.ico" type="image/x-icon"> -->
-<!-- Google font-->
-<!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,800" rel="stylesheet"> -->
-<!-- Required Fremwork -->
-<!-- <link rel="stylesheet" type="text/css" href="libraries\bower_components\bootstrap\css\bootstrap.min.css"> -->
-<!-- themify-icons line icon -->
-<!-- <link rel="stylesheet" type="text/css" href="libraries\assets\icon\themify-icons\themify-icons.css"> -->
-<!-- ico font -->
-<!-- <link rel="stylesheet" type="text/css" href="libraries\assets\icon\icofont\css\icofont.css"> -->
-<!-- feather Awesome -->
-<!-- <link rel="stylesheet" type="text/css" href="libraries\assets\icon\feather\css\feather.css"> -->
-<!-- Style.css -->
-<!-- <link rel="stylesheet" type="text/css" href="libraries\assets\css\style.css"> -->
-<!-- <link rel="stylesheet" type="text/css" href="libraries\assets\css\jquery.mCustomScrollbar.css"> -->
-
-<!-- <script type="text/javascript" src="libraries\bower_components\jquery\js\jquery.min.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\jquery-ui\js\jquery-ui.min.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\popper.js\js\popper.min.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\bootstrap\js\bootstrap.min.js"></script> -->
-<!-- jquery slimscroll js -->
-<!-- <script type="text/javascript" src="libraries\bower_components\jquery-slimscroll\js\jquery.slimscroll.js"></script> -->
-<!-- modernizr js -->
-<!-- <script type="text/javascript" src="libraries\bower_components\modernizr\js\modernizr.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\modernizr\js\css-scrollbars.js"></script> -->
-
-<!-- task board js -->
-<!-- <script type="text/javascript" src="libraries\assets\pages\task-board\task-board.js"></script> -->
-<!-- i18next.min.js -->
-<!-- <script type="text/javascript" src="libraries\bower_components\i18next\js\i18next.min.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\i18next-xhr-backend\js\i18nextXHRBackend.min.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\i18next-browser-languagedetector\js\i18nextBrowserLanguageDetector.min.js"></script> -->
-<!-- <script type="text/javascript" src="libraries\bower_components\jquery-i18next\js\jquery-i18next.min.js"></script> -->
-<!-- <script src="libraries\assets\js\pcoded.min.js"></script> -->
-<!-- <script src="libraries\assets\js\vartical-layout.min.js"></script> -->
-<!-- <script src="libraries\assets\js\jquery.mCustomScrollbar.concat.min.js"></script> -->
-<!-- Custom js -->
-<!-- <script type="text/javascript" src="libraries\assets\js\script.js"></script> -->
-<!-- </div> -->
-
 <script>
     function submitForm() {
         var form = document.getElementById('filter');
         form.submit();
     }
+
+    function afterInput() {
+        delay(function() {
+            var form = document.getElementById('filter');
+            form.submit();
+        }, 1500);
+    }
+
+    var delay = (function() {
+        var timer = 0;
+        return function(callback, ms) {
+            clearTimeout(timer);
+            timer = setTimeout(callback, ms);
+        };
+    })();
 </script>
 <?= $this->endSection() ?>
