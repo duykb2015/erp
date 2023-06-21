@@ -67,6 +67,7 @@
                         <?php if (!empty($projectss)) : ?>
                             <div class="card-header">
                                 <h5 class="card-header-text">Công việc đang thực hiện</h5>
+                                <div class="sub-title">Đang thực hiện</div>
                             </div>
                             <div class="card-block">
                                 <?php foreach ($projects as $project) : ?>

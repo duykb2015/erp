@@ -45,7 +45,7 @@ class User extends Migration
             ],
             'photo' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 15,
+                'constraint'     => 255,
                 'null'           => TRUE,
             ],
         ]);

@@ -95,3 +95,5 @@ define('EVENT_PRIORITY_HIGH', 10);
 
 define('WRONG_LOGIN_INFORMATION_MESSAGE', 'Tài khoản hoặc mật khẩu sai, vui lòng kiểm tra lại!');
 define('PASSWORD_NOT_MATCH', 'Tài khoản hoặc mật khẩu sai, vui lòng kiểm tra lại!');
+
+define('UPLOAD_PATH', FCPATH . 'imgs/');

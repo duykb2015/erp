@@ -210,18 +210,6 @@ $(document).ready(function(){
         },
         onEmpty: null,
         options: null,
-        captions: {
-            button: "Choose Files",
-            feedback: "Choose files To Upload",
-            feedback2: "files were chosen",
-            drop: "Drop file here to Upload",
-            removeConfirmation: "Are you sure you want to remove this file?",
-            errors: {
-                filesLimit: "Only {{fi-limit}} files are allowed to be uploaded.",
-                filesType: "Vui lòng chọn đúng định dạng file excel vd: *.xlsx,*.xls !",
-                filesSize: "{{fi-name}} is too large! Please upload file up to {{fi-maxSize}} MB.",
-                filesSizeAll: "Files you've choosed are too large! Please upload files up to {{fi-maxSize}} MB."
-            }
-        }
+
     });
 });

@@ -1,6 +1,11 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
+<link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\jquery.filer.css">
+<link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\themes\jquery.filer-dragdropbox-theme.css">
 <style>
+    .jFiler-item-trash-action {
+        text-decoration: none;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -26,7 +31,7 @@
                     <form class="md-float-material form-material needs-validation" method="POST" action="" novalidate>
                         <div class="auth-box card">
                             <div class="card-header">
-                                <h5 class="card-header-text">Thông tin cơ bản</h5>
+                                <h5 class="card-header-text sub-title d-flex">Thông tin cơ bản</h5>
                             </div>
                             <div class="card-block">
                                 <div class="row m-b-20">
@@ -104,7 +109,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <div class="row mb-3">
                                     <div class="col-6">
                                         <div class="form-group form-primary">
                                             <label class="p-1" for="lastname">Mật khẩu cũ</label>
@@ -120,7 +125,56 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-12">
-                                        Hình đại diện...
+                                        <h5 class="sub-title d-flex">Thay đổi ảnh đại diện</h5>
+                                    </div>
+
+                                    <div class="col-2">
+                                        <div class="card border">
+                                            <div class="social-profile">
+                                                <img class="img-fluid width-100 height-100 pb-3" src="<?= base_url('imgs/') . $user['photo'] ?>" alt="Avatar">
+                                                <div class="profile-hvr m-t-15" data-bs-toggle="modal" data-bs-target="#changeProfileAvatar">
+                                                    <i class="icofont icofont-ui-edit p-r-10" type="button"></i>
+                                                </div>
+                                            </div>
+                                            <!-- <div class="card-block social-follower"> -->
+                                            <!-- <h4>Josephin Villa</h4> -->
+                                            <!-- <h5>Softwear Engineer</h5>
+                                                <div class="row follower-counter">
+                                                    <div class="col-4">
+                                                        <button class="btn btn-primary btn-icon" data-toggle="tooltip" data-placement="top" title="" data-original-title="485"><i class="icofont icofont-user-alt-3"></i></button>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <button class="btn btn-danger btn-icon" data-toggle="tooltip" data-placement="top" title="" data-original-title="2k"><i class="icofont icofont-like"></i></button>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <button class="btn btn-success btn-icon" data-toggle="tooltip" data-placement="top" title="" data-original-title="90"><i class="icofont icofont-eye-alt"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="">
+                                                    <button type="button" class="btn btn-outline-primary waves-effect btn-block"><i class="icofont icofont-ui-user m-r-10"></i> Add as Friend</button>
+                                                </div> -->
+                                            <!-- </div> -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Create new project Modal -->
+                                    <div class="modal fade mt-5" id="changeProfileAvatar" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+                                        <!-- modal-xl -->
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Thay đổi ảnh đại diện</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="file" name="user_avatar" id="image-upload" accept="image/*">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" id="save-image" onclick="saveAvatar()" class="btn btn-primary rounded waves-effect waves-light float-end">Lưu</button>
+                                                    <button type="button" id="cancel-save-image" onclick="cancelSave()" class="btn btn-secondary rounded waves-effect waves-light float-end" data-bs-dismiss="modal">Huỷ</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -139,7 +193,62 @@
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('hidden')  ?>
+<?= $this->endSection() ?>
+
+<?= $this->section('js')  ?>
+
+<!-- jquery file upload js -->
+<script src="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>
+<script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\filer\custom-filer.js"></script>
+<script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js"></script>
+
 <script>
+    function saveAvatar() {
+
+        if (!window.localStorage.getItem('img-name')) {
+            return
+        }
+
+        if (alreadyClick) {
+            return
+        }
+        alreadyClick = true
+
+        saveButton = document.getElementById('save-image')
+        saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        setTimeout(() => {
+            window.localStorage.removeItem('img-name')
+            window.location.reload()
+        }, 500)
+    }
+
+    function cancelSave() {
+        cancelSaveButton = document.getElementById('cancel-save-image')
+        cancelSaveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        confirm = confirm('Bạn có chắc là muốn huỷ sự thay đổi này?')
+        if (!confirm) {
+            return
+        }
+
+        // img = window.localStorage.getItem('img-name')
+
+        // const data = new FormData()
+        // data.append('img', $img)
+
+        var requestOptions = {
+            method: 'POST',
+        }
+
+        fetch('<?= base_url('user/image/cancel') ?>', requestOptions)
+        cancelSaveButton.innerHTML = 'Huỷ'
+        // window.localStorage.removeItem('img-name')
+    }
+
     (() => {
         'use strict'
 

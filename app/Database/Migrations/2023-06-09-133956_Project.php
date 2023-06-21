@@ -36,7 +36,7 @@ class Project extends Migration
             ],
             'photo' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 15,
+                'constraint'     => 255,
                 'null'           => TRUE,
             ],
             'created_at DATETIME NOT NULL DEFAULT current_timestamp',

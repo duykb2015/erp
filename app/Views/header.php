@@ -4,6 +4,9 @@
             <a href="<?= base_url() ?>">
                 <img class="img-fluid" src="<?= base_url() ?>\templates\libraries\assets\images\logo.png" alt="Theme-Logo">
             </a>
+            <a class="mobile-menu text-decoration-none" id="mobile-collapse">
+                <i class="feather icon-menu"></i>
+            </a>
         </div>
         <div class="navbar-container container-fluid">
             <ul class="nav-left">
@@ -58,7 +61,7 @@
                 <li class="user-profile header-notification">
                     <div class="dropdown-primary dropdown">
                         <div class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="<?= base_url() ?>\templates\libraries\assets\images\avatar-4.jpg" class="img-radius" alt="User-Profile-Image">
+                            <img src="<?= !empty(session()->get('avatar')) ? base_url() . 'imgs/' . session()->get('avatar') : base_url() . '\templates\libraries\assets\images\avatar-4.jpg' ?>" class="img-radius" alt="User-Profile-Image">
                             <span><?= session()->get('name') ?></span>
                             <i class="feather icon-chevron-down"></i>
                         </div>

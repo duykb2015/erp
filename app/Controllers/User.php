@@ -4,7 +4,10 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\User as ModelsUser;
+use CodeIgniter\Config\Services;
+use Config\Cache;
 use Exception;
+use Illuminate\Support\Facades\Validator;
 
 class User extends BaseController
 {
@@ -13,11 +16,13 @@ class User extends BaseController
         $userModel = new ModelsUser();
         $user      = $userModel->find(session()->get('user_id'));
         $data['user'] = $user;
+
         return view('User/Profile', $data);
     }
 
     public function update()
     {
+
         $validation = service('validation');
         $validation->setRules(
             [
@@ -62,5 +67,52 @@ class User extends BaseController
             return redirectWithMessage(site_url('user'), $e->getMessage());
         }
         return redirectWithMessage(site_url('user'), 'success', 'success', FALSE);
+    }
+
+    public function upload()
+    {
+
+        $avatar = $this->request->getFile('user_avatar');
+
+        if (!$avatar->isValid() || $avatar->hasMoved()) {
+            return false;
+        }
+        $newName = $avatar->getRandomName();
+        $fileName = $newName;
+        $avatar->move(UPLOAD_PATH, $newName);
+
+        session()->set('avatar', $fileName);
+
+        $userModel = new ModelsUser();
+        $user      = $userModel->find(session()->get('user_id'));
+
+        $cache = Services::cache();
+        $cache->save('old-avatar', $user['photo'], 600);
+
+        // @unlink(UPLOAD_PATH . $user['photo']);
+
+        $userModel->update(session()->get('user_id'), ['photo' => $fileName]);
+
+        return $this->handleResponse($fileName);
+    }
+
+    public function cancelUpload()
+    {
+        // $img = $this->request->getPost('img');
+
+        $cache = Services::cache();
+        $old_avatar = $cache->get('old-avatar');
+        session()->set('avatar', $old_avatar);
+
+        $userModel = new ModelsUser();
+        $userModel->update(session()->get('user_id'), ['photo' => $old_avatar]);
+
+        return $this->handleResponse();
+    }
+
+    public function remove()
+    {
+
+        return $this->handleResponse();
     }
 }

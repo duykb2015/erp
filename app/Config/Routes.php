@@ -47,6 +47,9 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'User::index');
     
     $routes->post('/', 'User::update');
+    $routes->post('image/upload', 'User::upload');
+    $routes->post('image/cancel', 'User::cancelUpload');
+    $routes->post('image/remove', 'User::remove');
 });
 
 $routes->group('project', ['filter' => 'login'], function ($routes) {

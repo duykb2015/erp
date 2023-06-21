@@ -57,7 +57,8 @@
         .hover:hover {
             background-color: #f0f5f5;
         }
-        
+
+        .page-link,
         label {
             font-size: 0.75rem;
         }
@@ -90,6 +91,9 @@
             <!-- Sidebar inner chat end-->
             <div class="pcoded-main-container">
                 <div class="pcoded-wrapper">
+                    <?php if (url_is('project/*')) : ?>
+                        <?= $this->include("navbar") ?>
+                    <?php endif ?>
                     <?= $this->renderSection('content') ?>
                 </div>
             </div>
@@ -132,8 +136,6 @@
         </div>
     </div>
 
-
-
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\jquery\js\jquery.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\jquery-ui\js\jquery-ui.min.js"></script>
     <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\popper.js\js\popper.min.js"></script>
@@ -159,10 +161,11 @@
 
     <script src="<?= base_url() ?>\templates\js\jquery.growl.js" type="text/javascript"></script>
 
+    <?= $this->renderSection('js') ?>
+
     <script>
         function createProject(event) {
             if (alreadyClick) {
-                console.log('click!')
                 return
             }
             alreadyClick = true
