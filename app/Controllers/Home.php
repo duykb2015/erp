@@ -17,7 +17,8 @@ class Home extends BaseController
             $projects[$key]['updated_at'] = $time->humanize();
         }
 
-        $data = ['projects' => $projects];
+        $data['projects'] = $projects;
+        $data['title']    = 'Không gian làm việc';
         return view('Home/index', $data);
     }
 }

@@ -45,7 +45,7 @@ $routes->group('auth', function ($routes) {
 
 $routes->group('user', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'User::index');
-    
+
     $routes->post('/', 'User::update');
     $routes->post('image/upload', 'User::upload');
     $routes->post('image/cancel', 'User::cancelUpload');
@@ -54,9 +54,14 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 
 $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Project::list');
-    $routes->get(':any', 'Project::detail');
 
-    $routes->post('create', 'Project::create');
+    $routes->group('(:any)', function ($routes) {
+        $routes->get('/', 'Project::detail');
+        $routes->get('user', 'Project::user');
+        $routes->get('setting', 'Project::setting');
+
+        $routes->post('create', 'Project::create');
+    });
 });
 
 

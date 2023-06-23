@@ -36,6 +36,7 @@
     <footer class="light">
         <ul>
             <li><a href="/">Trang chủ</a></li>
+            <li><a href="<?= base_url($backLink ?? '') ?>">Quay lại trang trước đó</a></li>
         </ul>
     </footer>
     <script src="<?= base_url() ?>\templates\libraries\extra-pages\404\1\js\jquery.min.js"></script>

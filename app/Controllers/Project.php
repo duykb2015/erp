@@ -15,11 +15,10 @@ class Project extends BaseController
         $now          = Carbon::now('Asia/Ho_Chi_Minh');
 
         $name = $this->request->getGet('name');
-        if ($name)
-        {
+        if ($name) {
             $projectModel->like('name', $name);
         }
-        
+
         $filter = $this->request->getGet('dim');
         switch ($filter) {
             case 'today':
@@ -52,20 +51,18 @@ class Project extends BaseController
         }
 
         $sort = $this->request->getGet('sort');
-        switch ($sort)
-        {
+        switch ($sort) {
             case 'oldest':
                 $projectModel->orderBy('updated_at', 'ASC');
                 break;
 
             default:
                 $projectModel->orderBy('updated_at', 'DESC');
-                break;   
+                break;
         }
 
         $limit = $this->request->getGet('limit');
-        switch ($limit)
-        {
+        switch ($limit) {
             case 25:
                 $projectModel->limit(25);
                 break;
@@ -81,7 +78,7 @@ class Project extends BaseController
             default:
                 $limit = 10;
                 $projectModel->limit(10);
-                break;   
+                break;
         }
 
         $projects = $projectModel->where('owner', session()->get('user_id'))->paginate($limit);
@@ -89,26 +86,41 @@ class Project extends BaseController
             $time                         = new Time($project['updated_at']);
             $projects[$key]['updated_at'] = $time->humanize();
         }
-        
+
         $data['projects'] = $projects;
-        if (10 <= count($projects))
-        {
+        if (10 <= count($projects)) {
             $data['pager'] = $projectModel->pager;
         }
 
-        $data['name']   = $name;
+        $data['name']  = $name;
         $data['dim']   = $filter;
         $data['sort']  = $sort;
         $data['limit'] = $limit;
+        $data['title'] = 'Danh sách dự án';
         return view('Project/List', $data);
     }
 
     public function detail()
     {
-        $projectID = $this->request->getUri()->getSegment(2);
+        $segment = $this->request->getUri()->getSegments();
+        array_shift($segment); //remove segment 0 (project), we don't need it
+
+        $projectID = $segment[0];
+        $view = $segment[1] ?? null;
+
+        $allowedView = [
+            'user',
+            'setting'
+        ];
 
         if (!is_numeric($projectID)) {
-            return view('Error/NotFound');
+            $data['backLink']   = '/project';
+            return view('Error/NotFound', $data);
+        }
+
+        if (!empty($view) && !in_array($view, $allowedView)) {
+            $data['backLink']   = '/project//' . $projectID;
+            return view('Error/NotFound', $data);
         }
 
         $projectModel     = new ModelsProject();
@@ -124,13 +136,17 @@ class Project extends BaseController
         $userID = session()->get('user_id');
         if ($project['owner'] != $userID) {
             if (!in_array($userID, $projectUser)) {
-                return view('Error/Forbidden');
+                $data['backLink']   = '/project';
+                return view('Error/Forbidden', $data);
             }
         }
 
-        $data = ['project' => $project];
+        $view ??= 'Index';
 
-        return view('Project/Index', $data);
+        $data['project'] = $project;
+        $data['title']   = $project['name'];
+
+        return view('Project/' . ucfirst($view), $data);
     }
 
     public function create()
@@ -170,5 +186,17 @@ class Project extends BaseController
 
         $result       = ['project_id' => $projectID];
         return $this->handleResponse($result);
+    }
+
+    public function user()
+    {
+        $data['title']   = 'Thành viên';
+        return view('Project/User', $data);
+    }
+
+    public function setting()
+    {
+        $data['title']   = 'Cài đặt';
+        return view('Project/Setting', $data);
     }
 }

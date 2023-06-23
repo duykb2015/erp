@@ -69,6 +69,7 @@
 
         <ul>
             <li><a href="/">Trang chủ</a></li>
+            <li><a href="<?= base_url($backLink ?? '') ?>">Quay lại trang trước đó</a></li>
         </ul>
 
     </footer>

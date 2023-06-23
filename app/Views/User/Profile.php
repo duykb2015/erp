@@ -136,24 +136,6 @@
                                                     <i class="icofont icofont-ui-edit p-r-10" type="button"></i>
                                                 </div>
                                             </div>
-                                            <!-- <div class="card-block social-follower"> -->
-                                            <!-- <h4>Josephin Villa</h4> -->
-                                            <!-- <h5>Softwear Engineer</h5>
-                                                <div class="row follower-counter">
-                                                    <div class="col-4">
-                                                        <button class="btn btn-primary btn-icon" data-toggle="tooltip" data-placement="top" title="" data-original-title="485"><i class="icofont icofont-user-alt-3"></i></button>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <button class="btn btn-danger btn-icon" data-toggle="tooltip" data-placement="top" title="" data-original-title="2k"><i class="icofont icofont-like"></i></button>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <button class="btn btn-success btn-icon" data-toggle="tooltip" data-placement="top" title="" data-original-title="90"><i class="icofont icofont-eye-alt"></i></button>
-                                                    </div>
-                                                </div>
-                                                <div class="">
-                                                    <button type="button" class="btn btn-outline-primary waves-effect btn-block"><i class="icofont icofont-ui-user m-r-10"></i> Add as Friend</button>
-                                                </div> -->
-                                            <!-- </div> -->
                                         </div>
                                     </div>
 

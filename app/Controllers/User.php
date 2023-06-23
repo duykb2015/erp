@@ -5,9 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\User as ModelsUser;
 use CodeIgniter\Config\Services;
-use Config\Cache;
 use Exception;
-use Illuminate\Support\Facades\Validator;
 
 class User extends BaseController
 {
@@ -17,6 +15,7 @@ class User extends BaseController
         $user      = $userModel->find(session()->get('user_id'));
         $data['user'] = $user;
 
+        $data['title']   = 'Thông tin cá nhân';
         return view('User/Profile', $data);
     }
 
