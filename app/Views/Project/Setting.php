@@ -1,8 +1,12 @@
 <?= $this->extend('layout') ?>
-<?= $this->section('csss') ?>
+<?= $this->section('css') ?>
 <link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\jquery.filer.css">
 <link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\themes\jquery.filer-dragdropbox-theme.css">
 <style>
+    .breadcrumb-title div {
+        display: inline;
+    }
+
     .jFiler-item-trash-action {
         text-decoration: none;
     }
@@ -19,8 +23,25 @@
                         <div class="col-lg-8">
                             <div class="page-header-title">
                                 <div class="d-inline">
-                                    <h4>Thông tin cá nhân</h4>
-                                    <span>Thông tin về cá nhân</span>
+                                    <h4><?= $project['name'] ?></h4>
+                                    <span><?= $project['descriptions'] ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="page-header-breadcrumb">
+                                <div class="breadcrumb-title">
+                                    <div>
+                                        <a href="/" class="text-decoration-none"><i class="feather icon-home"></i></a>
+                                    </div>
+                                    /
+                                    <div>
+                                        <a href="<?= base_url('project') ?>" class="text-decoration-none">Dự án</a>
+                                    </div>
+                                    /
+                                    <div>
+                                        <a href="<?= base_url('project/') . $project['id'] ?>/setting" class="text-decoration-none">Cài đặt dự án</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -33,7 +54,11 @@
                             <form class="md-float-material form-material needs-validation" method="POST" action="" novalidate>
                                 <div class="auth-box card">
                                     <div class="card-header">
-                                        <h5 class="card-header-text sub-title d-flex">Thông tin cơ bản</h5>
+                                        <div class="row justify-content-center">
+                                            <div class="col-12">
+                                                <h5 class="card-header-text sub-title d-flex">Thông tin cơ bản</h5>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="card-block">
                                         <div class="row m-b-20">
@@ -83,90 +108,75 @@
                                                 <?php endif ?>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <div class="form-group form-primary">
-                                                    <label class="p-1" for="username">Tài khoản</label>
-                                                    <input type="text" value="" class="form-control rounded" placeholder="Tài khoản" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="form-group form-primary">
-                                                    <label class="p-1" for="email">Email</label>
-                                                    <input type="email" value="" class="form-control rounded" placeholder="Email" disabled>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <div class="form-group form-primary">
-                                                    <label class="p-1" for="lastname">Họ</label>
-                                                    <input type="text" name="firstname" value="" class="form-control rounded" placeholder="Nhập họ...">
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="form-group form-primary">
-                                                    <label class="p-1" for="lastname">Tên</label>
-                                                    <input type="text" name="lastname" value="" class="form-control rounded" placeholder="Nhập tên...">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-6">
-                                                <div class="form-group form-primary">
-                                                    <label class="p-1" for="lastname">Mật khẩu cũ</label>
-                                                    <input type="password" name="old_password" class="form-control rounded" placeholder="Nhập mật khẩu cũ" minlength="4">
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="form-group form-primary">
-                                                    <label class="p-1" for="lastname">Mật khẩu mới</label>
-                                                    <input type="password" name="new_password" class="form-control rounded" placeholder="Nhập khẩu mới nếu bạn muốn thay đổi" minlength="4">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <h5 class="sub-title d-flex">Thay đổi ảnh đại diện</h5>
-                                            </div>
-
+                                        <div class="row justify-content-center">
                                             <div class="col-2">
                                                 <div class="card border">
                                                     <div class="social-profile">
-                                                        <img class="img-fluid width-100 height-100 pb-3" src="" alt="Avatar">
-                                                        <div class="profile-hvr m-t-15" data-bs-toggle="modal" data-bs-target="#changeProfileAvatar">
+                                                        <img class="img-fluid width-90 height-90 pb-3" src="<?= base_url('imgs/') . $project['photo'] ?>" alt="Avatar">
+                                                        <div class="profile-hvr m-t-15" data-bs-toggle="modal" data-bs-target="#changeProjectAvatar">
                                                             <i class="icofont icofont-ui-edit p-r-10" type="button"></i>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Create new project Modal -->
-                                            <div class="modal fade mt-5" id="changeProfileAvatar" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
-                                                <!-- modal-xl -->
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Thay đổi ảnh đại diện</h1>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <input type="file" name="user_avatar" id="image-upload" accept="image/*">
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" id="save-image" onclick="saveAvatar()" class="btn btn-primary rounded waves-effect waves-light float-end">Lưu</button>
-                                                            <button type="button" id="cancel-save-image" onclick="cancelSave()" class="btn btn-secondary rounded waves-effect waves-light float-end" data-bs-dismiss="modal">Huỷ</button>
-                                                        </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label class="p-1" for="username">Tên dự án <span class="text-danger">*</span></label>
+                                                    <input type="text" value="<?= $project['name'] ?>" name="name" class="form-control rounded" placeholder="Tên dự án" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label class="p-1" for="prefix">Tiền tố <span class="text-danger">*</span></label>
+                                                    <input type="text" value="<?= $project['key'] ?>" class="form-control rounded" placeholder="Email" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label class="p-1" for="lastname">Chủ sở hữu</label>
+                                                    <input type="text" name="owner" value="" class="form-control rounded" placeholder="Nhập họ...">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label class="p-1" for="lastname">Mô tả</label>
+                                                    <textarea type="text" name="descriptions" value="" class="form-control rounded"><?= $project['key'] ?></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Create new project Modal -->
+                                        <div class="modal fade mt-5" id="changeProfileAvatar" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+                                            <!-- modal-xl -->
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Thay đổi ảnh đại diện</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <input type="file" name="user_avatar" id="image-upload" accept="image/*">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" id="save-image" onclick="saveAvatar()" class="btn btn-primary rounded waves-effect waves-light float-end">Lưu</button>
+                                                        <button type="button" id="cancel-save-image" onclick="cancelSave()" class="btn btn-secondary rounded waves-effect waves-light float-end" data-bs-dismiss="modal">Huỷ</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        <div class="d-grid gap-2">
-                                            <div class="col-12">
-                                                <a href="<?= base_url('user') ?>" id="edit-cancel" class=" rounded btn btn-default waves-effect float-end">Cancel</a>
-                                                <button class="btn btn-primary rounded waves-effect waves-light m-r-20 float-end">Save</button>
-                                            </div>
+                                    <div class="row justify-content-center">
+                                        <div class="col-4 mb-3">
+                                            <a href="<?= base_url('user') ?>" id="edit-cancel" class=" rounded btn btn-default waves-effect float-end">Cancel</a>
+                                            <button class="btn btn-primary rounded waves-effect waves-light m-r-20 float-end">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -181,7 +191,7 @@
 
 <?= $this->endSection() ?>
 
-<?= $this->section('jss')  ?>
+<?= $this->section('js')  ?>
 
 <!-- jquery file upload js -->
 <script src="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>

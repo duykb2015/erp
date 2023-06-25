@@ -123,23 +123,23 @@
 <!-- Main-body end -->
 <script>
     function submitForm() {
-        var form = document.getElementById('filter');
-        form.submit();
+        var form = document.getElementById('filter')
+        form.submit()
     }
 
     function afterInput() {
         delay(function() {
-            var form = document.getElementById('filter');
-            form.submit();
-        }, 1500);
+            var form = document.getElementById('filter')
+            form.submit()
+        }, 1500)
     }
 
     var delay = (function() {
-        var timer = 0;
+        var timer = 0
         return function(callback, ms) {
-            clearTimeout(timer);
-            timer = setTimeout(callback, ms);
-        };
-    })();
+            clearTimeout(timer)
+            timer = setTimeout(callback, ms)
+        }
+    })()
 </script>
 <?= $this->endSection() ?>

@@ -29,4 +29,13 @@ class Services extends BaseService
      *     return new \CodeIgniter\Example();
      * }
      */
+
+     public static function eloquent($getShared = true)
+     {
+         if ($getShared)
+         {
+             return static::getSharedInstance('eloquent');
+         }
+         return new \Config\Eloquent();
+     }
 }

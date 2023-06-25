@@ -14,13 +14,13 @@ class Task extends Migration
                 'null'           => FALSE,
                 'auto_increment' => TRUE
             ],
-            'project_id' => [
+            'section_id' => [
                 'type'           => 'INT',
                 'null'           => FALSE,
             ],
             'assignee' => [
                 'type'           => 'INT',
-                'null'           => FALSE,
+                'null'           => TRUE,
             ],
             'title' => [
                 'type'           => 'VARCHAR',
@@ -51,7 +51,7 @@ class Task extends Migration
             ],
         ]);
         $this->forge->addPrimaryKey('id');
-        $this->forge->addForeignKey('project_id', 'project', 'id', '', '', 'fk_t_p_i_p_i');
+        $this->forge->addForeignKey('section_id', 'section', 'id', '', '', 'fk_t_s_i_s_i');
         $this->forge->addForeignKey('assignee', 'user', 'id', '', '', 'fk_t_a_u_i');
         $attributes = [
             'ENGINE' => 'InnoDB',

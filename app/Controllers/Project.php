@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\Project as ModelsProject;
 use App\Models\ProjectUser;
+use App\Models\Section as ModelsSection;
+use App\Models\Task as ModelsTask;
 use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
 
@@ -143,6 +145,19 @@ class Project extends BaseController
 
         $view ??= 'Index';
 
+        if ('Index' == $view) {
+            $sectionModel = new ModelsSection();
+            $taskModel = new ModelsTask();
+
+            $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
+
+            foreach ($sections as $key => $section)
+            {
+                $sections[$key]['tasks'] = $taskModel->where('task.section_id', $section['id'])->findAll();
+            }
+            $data['sections'] = collect($sections)->sortBy('position')->toArray();
+        }
+
         $data['project'] = $project;
         $data['title']   = $project['name'];
 
@@ -184,7 +199,31 @@ class Project extends BaseController
         $projectModel = new ModelsProject();
         $projectID    = $projectModel->insert($data);
 
-        $result       = ['project_id' => $projectID];
+        unset($data);
+        $data = collect([
+            [
+                'project_id' => $projectID,
+                'title' => 'Khởi tạo',
+                'position' => 0
+            ],
+            [
+                'project_id' => $projectID,
+                'title' => 'Đang tiến hành',
+                'position' => 1
+            ],
+            [
+                'project_id' => $projectID,
+                'title' => 'Hoàn thành',
+                'position' => 2
+            ],
+        ]);
+
+        $sectionModel = new ModelsSection();
+        $data->each(function ($item) use ($sectionModel) {
+            $sectionModel->insert($item);
+        });
+
+        $result = ['project_id' => $projectID];
         return $this->handleResponse($result);
     }
 

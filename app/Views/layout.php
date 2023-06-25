@@ -62,6 +62,13 @@
         label {
             font-size: 0.75rem;
         }
+
+        .active-enable-color > a > span {
+            color: #FE8A7D
+        }
+        .active-enable-color > a > span > i::before {
+            color: #FE8A7D
+        }
     </style>
 </head>
 
