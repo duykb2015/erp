@@ -1,10 +1,17 @@
 <?php
+
 $menu = [
     [
         'url' => base_url('project') . '/' . $project['id'],
         'active' => 'project/' . $project['id'],
         'name' => 'Tổng quan dự án',
         'icon' => '<i class="feather icon-home"></i>',
+        'sub_menu' => [
+            [
+                'url' => base_url('project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : '')),
+                'name' => 'Chi tiết công việc',
+            ],
+        ]
     ],
     [
         'url' => base_url('project') . '/' . $project['id'] . '/user',

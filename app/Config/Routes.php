@@ -55,6 +55,8 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Project::list');
     
+    $routes->get('(:num)/task/(:num)', 'Project::task');
+
     $routes->group('(:any)', function ($routes) {
         $routes->get('/', 'Project::detail');
         $routes->get('user', 'Project::user');

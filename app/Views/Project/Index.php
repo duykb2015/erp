@@ -1,5 +1,7 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
+<!-- Select 2 css -->
+<link rel="stylesheet" href="<?= base_url() ?>templates\libraries\bower_components\select2\css\select2.min.css">
 <style>
     .breadcrumb-title div {
         display: inline;
@@ -66,8 +68,6 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card border d-flex">
-                                <!-- <div class="card-header">
-                                </div> -->
                                 <div class="card-block scroll-x">
                                     <div class="row flex-nowrap" id="draggablePanelList">
                                         <?php if (!empty($sections)) : ?>
@@ -124,12 +124,59 @@
         </div>
     </div>
 </div>
+
+<div class="modal modal-xl fade mt-5" id="createNewTask" tabindex="-1" data-bs-backdrop="static" aria-labelledby="" aria-hidden="true">
+    <!-- modal-xl -->
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form class="needs-validation" id="create-project">
+                    <div class="mb-3">
+                        <label for="task_name" class="col-form-label">Tên công việc<span class="text-danger">*</span></label>
+                        <input type="text" name="task_name" class="form-control rounded" id="project_name" placeholder="Nhập tên dự án" minlength="5" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Trạng thái công việc</label>
+                        <select name="choose_section" class="form-control">
+                            <?php if (!empty($sections)) : ?>
+                                <?php foreach ($sections as $section) : ?>
+                                    <option value="<?= $section['id'] ?>"><?= $section['title'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Tiền tố <i class="fa fa-question-circle-o" title="Tiền tố là các chữ cái đầu của tên dự án được viết hoa và ghép lại. Giúp cho việc nhận biết các công việc nào của dự án nào một cách nhanh chóng. Bạn có thể tự định nghĩa chúng!"></i><span class="text-danger">*</span></label>
+                        <input type="text" name="project_key" class="form-control rounded" id="project_key" placeholder="Tiền tố" minlength="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Mô tả cho dự án</label>
+                        <textarea name="project_descriptions" class="form-control rounded" id="project_descriptions" maxlength="512" rows="5"></textarea>
+                    </div>
+
+                    <div class="float-end">
+                        <button type="submit" id="loading-on-click" onclick="createTask(event)" class="btn btn-primary rounded">
+                            Tạo
+                        </button>
+                        <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <?= $this->endSection() ?>
 <?= $this->section('js') ?>
 
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\bower_components\Sortable\js\Sortable.js"></script>
+<!-- Select 2 js -->
+<script type="text/javascript" src="<?= base_url() ?>templates\libraries\bower_components\select2\js\select2.full.min.js"></script>
+<!-- Custom js -->
+<script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\advance-elements\select2-custom.js"></script>
 
 <script>
+    // window.addEventListener('beforeunload', function(){})
+
     draggablePanelList = document.getElementById('draggablePanelList');
     Sortable.create(draggablePanelList, {
         group: 'draggablePanelList',
@@ -143,7 +190,7 @@
             // console.log(evt.item, evt.oldIndex, evt.newIndex)
         },
     });
-    
+
     draggableMultiple = document.getElementById('draggableMultiple');
     Sortable.create(draggableMultiple, {
         group: 'draggableMultiple',
@@ -236,7 +283,7 @@
     }
 
     let sectionNameTemp = ''
-    let attempt = 2
+    let attempt = 1
 
     function editSectionName(id) {
         if ('flex' == document.getElementById(`input-group-section-${id}`).style.display) {
@@ -329,8 +376,9 @@
     }
 
     function deleteSection(id) {
-        confirm = confirm('Bạn có chắc muốn xoá đi section này?')
-        if (!confirm) {
+        attempt = 1
+        isConfirm = confirm('Bạn có chắc muốn xoá đi section này?')
+        if (!isConfirm) {
             return
         }
         btnDelete = document.getElementById(`delete-section-${id}`)
@@ -359,20 +407,15 @@
                     return
                 }
 
-                if (result.errors) {
-                    setTimeout(() => {
-                        if (result.errors.section_id) {
-                            result.errors.section_id = result.errors.section_id.replace('section_id', 'Mã Section')
-                            $.growl.error({
-                                message: result.errors.project_name,
-                                location: 'tr',
-                                size: 'large'
-                            });
-                        }
-                        alreadyClick = false
-                        btnSave.innerHTML = 'Xoá'
-                    }, 1000)
-                }
+                setTimeout(() => {
+                    $.growl.error({
+                        message: 'Section đang chứa công việc, không thể xoá!',
+                        location: 'tr',
+                        size: 'large'
+                    });
+                    alreadyClick = false
+                    btnDelete.innerHTML = 'Xoá'
+                }, 1000)
             })
     }
 </script>

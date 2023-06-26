@@ -95,7 +95,7 @@ class Section extends BaseController
         try {
             $sectionModel->delete($sectionID);
         } catch (Exception $e) {
-            return $this->handleResponse(['errors' => $e->getMessage()], 500);
+            return $this->handleResponse(['errors' => $e->getMessage()], 400);
         }
 
         return $this->handleResponse([]);

@@ -11,6 +11,7 @@ use CodeIgniter\I18n\Time;
 
 class Project extends BaseController
 {
+
     public function list()
     {
         $projectModel = new ModelsProject();
@@ -227,10 +228,12 @@ class Project extends BaseController
         return $this->handleResponse($result);
     }
 
-    public function user()
+    public function task()
     {
-        $data['title']   = 'Thành viên';
-        return view('Project/User', $data);
+        $segment = $this->request->getUri()->getSegments();
+        array_shift($segment); //remove segment 0 (project), we don't need it
+        
+        return view('Project/Index');
     }
 
     public function setting()

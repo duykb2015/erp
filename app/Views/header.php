@@ -57,6 +57,13 @@
                         </ul>
                     </div>
                 </li>
+                <?php if (url_is('project/' . $project['id'])) : ?>
+                    <li class="header-notification">
+                        <div class="hover px-2">
+                            <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewTask">Tạo mới công việc</button>
+                        </div>
+                    </li>
+                <?php endif ?>
             </ul>
 
             <ul class="nav-right">
