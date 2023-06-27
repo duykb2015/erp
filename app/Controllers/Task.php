@@ -14,6 +14,5 @@ class Task extends BaseController
     public function create()
     {
         $task = $this->request->getPost();
-        dd($task);
     }
 }

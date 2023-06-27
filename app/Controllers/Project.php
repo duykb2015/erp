@@ -232,8 +232,13 @@ class Project extends BaseController
     {
         $segment = $this->request->getUri()->getSegments();
         array_shift($segment); //remove segment 0 (project), we don't need it
+        $projectID = $segment[0];
+        $projectModel  = new ModelsProject();
+        $project = $projectModel->find($projectID);
         
-        return view('Project/Index');
+        $data['project'] =  $project;
+        $data['title']   = 'Chi tiết công việc';
+        return view('Task/Detail', $data);
     }
 
     public function setting()

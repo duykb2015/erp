@@ -7,10 +7,8 @@ $menu = [
         'name' => 'Tổng quan dự án',
         'icon' => '<i class="feather icon-home"></i>',
         'sub_menu' => [
-            [
-                'url' => base_url('project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : '')),
-                'name' => 'Chi tiết công việc',
-            ],
+            'url' => base_url('project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : '')),
+            'name' => 'Chi tiết công việc',
         ]
     ],
     [
@@ -39,6 +37,15 @@ $menu = [
                         <span class="pcoded-micon"><?= $row['icon'] ?></span>
                         <span class="pcoded-mtext"><?= $row['name'] ?></span>
                     </a>
+                    <?php if (!empty($row['sub_menu']) && url_is($row['sub_menu']['url'])) : ?>
+                        <ul class="pcoded-submenu">
+                            <li class="active">
+                                <a href="<?= $row['sub_menu']['url'] ?>">
+                                    <span class="pcoded-mtext"><?= $row['sub_menu']['name'] ?></span>
+                                </a>
+                            </li>
+                        </ul>
+                    <?php endif ?>
                 </li>
             <?php endforeach ?>
         </ul>
