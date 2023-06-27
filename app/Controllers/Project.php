@@ -131,7 +131,8 @@ class Project extends BaseController
 
         $project     = $projectModel->find($projectID);
         if (!$project) {
-            return view('Error/NotFound');
+            $data['backLink']   = '/project//' . $projectID;
+            return view('Error/NotFound', $data);
         }
 
         $projectUser = $projectUserModel->select('user_id')->where('project_id', $projectID)->findAll();
@@ -235,9 +236,23 @@ class Project extends BaseController
         $projectID = $segment[0];
         $projectModel  = new ModelsProject();
         $project = $projectModel->find($projectID);
+        if (! $project)
+        {
+            $data['backLink']   = '/project//';
+            return view('Error/NotFound', $data);
+        }
+
+        $taskModel = new ModelsTask();
+        $task = $taskModel->find($segment[2]);
+        if (! $task)
+        {
+            $data['backLink']   = '/project//' . $projectID;
+            return view('Error/NotFound', $data);
+        }
         
         $data['project'] =  $project;
-        $data['title']   = 'Chi tiết công việc';
+        $data['task'] =  $task;
+        $data['title'] = 'Chi tiết công việc';
         return view('Task/Detail', $data);
     }
 

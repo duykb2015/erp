@@ -63,11 +63,27 @@
             font-size: 0.75rem;
         }
 
-        .active-enable-color > a > span {
+        .active-enable-color>a>span {
             color: #FE8A7D
         }
-        .active-enable-color > a > span > i::before {
+
+        .active-enable-color>a>span>i::before {
             color: #FE8A7D
+        }
+
+        .pcoded-submenu {
+            margin-left: 47px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+        }
+
+        .pcoded-submenu > li > a {
+            text-decoration: none;
+        }
+
+        .pcoded-submenu li:hover > a {
+            color: #404e67 !important
         }
     </style>
 </head>

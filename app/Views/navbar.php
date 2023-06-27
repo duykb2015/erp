@@ -7,7 +7,7 @@ $menu = [
         'name' => 'Tổng quan dự án',
         'icon' => '<i class="feather icon-home"></i>',
         'sub_menu' => [
-            'url' => base_url('project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : '')),
+            'url' => 'project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : ''),
             'name' => 'Chi tiết công việc',
         ]
     ],
@@ -32,12 +32,13 @@ $menu = [
         <ul class="pcoded-item pcoded-left-item">
             <?php foreach ($menu as $row) : ?>
                 <?php $classActive = url_is($row['active']) ? ' pcoded-trigger active active-enable-color' : '' ?>
-                <li class="<?= $classActive ?>">
+                <?php  ?>
+                <li class="<?= $classActive ?> ">
                     <a href="<?= $row['url'] ?>">
                         <span class="pcoded-micon"><?= $row['icon'] ?></span>
                         <span class="pcoded-mtext"><?= $row['name'] ?></span>
                     </a>
-                    <?php if (!empty($row['sub_menu']) && url_is($row['sub_menu']['url'])) : ?>
+                    <?php if (!empty($row['sub_menu']) && url_is($row['sub_menu']['url'] . '*')) : ?>
                         <ul class="pcoded-submenu">
                             <li class="active">
                                 <a href="<?= $row['sub_menu']['url'] ?>">

@@ -27,17 +27,6 @@
         display: none;
     }
 
-    .context-menu {
-        background-color: #ffffff;
-        box-shadow: 0 0 20px rgba(37, 40, 42, 0.22);
-        color: #1f194c;
-        width: 6em;
-        padding: 0.8em 0.6em;
-        font-size: .85rem;
-        position: fixed;
-        visibility: hidden;
-    }
-
     .item {
         padding: 0.3em 1.2em;
     }
@@ -109,10 +98,14 @@
                                                                     <?php if (!empty($section['tasks'])) : ?>
                                                                         <?php foreach ($section['tasks'] as $task) : ?>
                                                                             <div class="sortable-moves border" oncontextmenu="showContextMenu(event, <?= $task['id'] ?>)">
-                                                                                <p id="task-num-<?= $task['id'] ?>"><?= $task['title'] ?></p>
-                                                                                <div id="context-menu-<?= $task['id'] ?>" class="context-menu float-end">
-                                                                                    <div class="item">Xem</div>
-                                                                                    <div class="item">Xoá</div>
+                                                                                <p id="task-num-<?= $task['id'] ?>" onclick="window.location.href = '<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>'"><?= $task['title'] ?></p>
+
+                                                                                <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
+                                                                                    <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                    <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                        <a class="dropdown-item waves-light waves-effect" href="<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>"><i class="icofont icofont-eye-alt"></i>Xem</a>
+                                                                                        <a class="dropdown-item waves-light waves-effect" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         <?php endforeach ?>
@@ -442,30 +435,6 @@
                 }, 1000)
             })
     }
-</script>
-<script>
-    //refer menu div
-    contextMenu = null
-    function showContextMenu(event, id) {
-        event.preventDefault()
-        contextMenu = document.getElementById(`context-menu-${id}`);
-
-        contextMenu.style.visibility = "visible"
-        contextMenu.style.zIndex = 9999
-        
-    }
-
-    //click outside the menu to close it (for click devices)
-    document.addEventListener("click", function(e) {
-        if(!contextMenu)
-        {
-            return
-        }
-        if (!contextMenu.contains(e.target)) {
-            contextMenu.style.visibility = "hidden";
-            return
-        }
-    });
 </script>
 
 <?= $this->endSection() ?>
