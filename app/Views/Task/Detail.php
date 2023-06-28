@@ -24,6 +24,10 @@
         display: block;
         float: none;
     }
+
+    #editorContainer {
+        width: 50.5vw;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -146,17 +150,28 @@
                                         <div class="tab-pane active" id="comment" role="tabpanel">
                                             <div class="md-float-material d-flex">
                                                 <div class="col-md-12 btn-add-task">
-                                                    <div class="input-group input-group-button">
+                                                    <form action="#" method="post" class="d-flex">
                                                         <input type="text" id="comment-decorator" onclick="showCommentEditor()" class="form-control" placeholder="Thêm bình luận ...">
-                                                        <textarea name="task_comment" id="task-comment" hidden></textarea>
-                                                    </div>
+                                                        <div id="form-comment" class="hidden">
+                                                            <div class="row">
+                                                                <div class="col-12 m-b-20" id="editorContainer">
+                                                                    <textarea name="task_comment" class="form-control" id="task-comment"></textarea>
+                                                                </div>
+                                                                <div class="col-12 ">
+                                                                    <button type="button" class="btn btn-secondary f-right rounded" onclick="clearComment()">Huỷ</button>
+                                                                    <button class="btn btn-primary f-right rounded mx-2">Bình luận</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
                                                 </div>
                                             </div>
-                                            <ul class="media-list">
+                                            <h6 class="sub-title m-t-30 m-b-15">Danh sách bình luận</h6>
+                                            <ul class="media-list mt-3">
                                                 <li class="media">
                                                     <div class="media-left">
                                                         <a href="#">
-                                                            <img class="media-object img-radius comment-img" src="libraries\assets\images\avatar-1.jpg" alt="Generic placeholder image">
+                                                            <img class="media-object img-radius comment-img" src="https://colorlib.com/polygon/adminty/files/assets/images/avatar-4.jpg" alt="Generic placeholder image">
                                                         </a>
                                                     </div>
                                                     <div class="media-body">
@@ -199,38 +214,25 @@
                                     <table class="table table-border table-xs">
                                         <tbody>
                                             <tr>
-                                                <td><i class="icofont icofont-contrast"></i> Project:</td>
-                                                <td class="text-right"><span class="f-right"><a href="#"> Singular app</a></span></td>
+                                                <td><i class="icofont icofont-contrast"></i> Dự án:</td>
+                                                <td class="text-right"><span class="f-right"> <?= $project['name'] ?></span></td>
                                             </tr>
                                             <tr>
-                                                <td><i class="icofont icofont-meeting-add"></i> Updated:</td>
-                                                <td class="text-right">12 May, 2015</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="icofont icofont-id-card"></i> Created:</td>
-                                                <td class="text-right">25 Feb, 2015</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="icofont icofont-spinner-alt-5"></i> Priority:</td>
+                                                <td><i class="icofont icofont-spinner-alt-5"></i> Độ ưu tiên:</td>
                                                 <td class="text-right">
                                                     <div class="btn-group">
-                                                        <a href="#">
-                                                            <i class="icofont icofont-upload m-r-5"></i> Highest
-                                                        </a>
+                                                        <?= $task['priority'] ?? 'Trung bình' ?>
                                                     </div>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td><i class="icofont icofont-spinner-alt-3"></i> Revisions:</td>
-                                                <td class="text-right">29</td>
+                                                <td><i class="icofont icofont-ui-love-add"></i> Người thực hiện: </td>
+                                                <!-- <td class="text-right"><a href="#"></a></td> -->
+                                                <td class="text-right"><?= $task['assignee'] ?? 'Trống' ?></td>
                                             </tr>
                                             <tr>
-                                                <td><i class="icofont icofont-ui-love-add"></i> Added by:</td>
-                                                <td class="text-right"><a href="#">Winnie</a></td>
-                                            </tr>
-                                            <tr>
-                                                <td><i class="icofont icofont-washing-machine"></i> Status:</td>
-                                                <td class="text-right">Published</td>
+                                                <td><i class="icofont icofont-washing-machine"></i> Trạng thái:</td>
+                                                <td class="text-right">Đang thực hiện</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -422,21 +424,49 @@
         });
     });
 
-    function showCommentEditor() {
-        document.getElementById('comment-decorator').hidden = true
-        editor = document.getElementById('task-comment')
-        editor.hidden = false
-        // CKEDITOR.replace(editor, {
-        //     language: 'vi',
-        //     width: '100%',
-        //     height: 150,
-        // })
+    var commentDecorator = document.getElementById('comment-decorator')
+    var formEditor = document.getElementById('form-comment')
+    var ckEditor = null
 
-        ClassicEditor
-        .create( editor )
-        .catch( error => {
-            console.error( error );
-        } );
+    function clearComment() {
+        document.getElementById('task-comment').value = ''
+        ckEditor.setData('')
+        formEditor.style.display = 'none'
+        commentDecorator.hidden = false
+    }
+
+    function showCommentEditor() {
+        commentDecorator.hidden = true
+        formEditor.style.display = 'flex'
+
+        if (ckEditor != null) {
+            return
+        }
+        ckEditor = CKEDITOR.replace('task-comment', {
+            width: '100%',
+            height: 150,
+            toolbar: [{
+                name: 'clipboard',
+                items: ['Undo', 'Redo']
+            }, {
+                name: 'styles',
+                items: ['Styles', 'Format']
+            }, {
+                name: 'basicstyles',
+                items: ['Bold', 'Italic', 'Strike', '-', 'RemoveFormat']
+            }, {
+                name: 'paragraph',
+                items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote']
+            }, {
+                name: 'links',
+                items: ['Link', 'Unlink']
+            }, {
+                name: 'insert',
+                items: ['Image', 'Table']
+            }],
+            removeDialogTabs: 'image:advanced;link:advanced',
+        })
     }
 </script>
+
 <?= $this->endSection() ?>

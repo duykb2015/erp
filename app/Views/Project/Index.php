@@ -22,10 +22,6 @@
         margin-right: 0px !important;
     }
 
-    .hidden {
-        display: none;
-    }
-
     .item {
         padding: 0.3em 1.2em;
     }

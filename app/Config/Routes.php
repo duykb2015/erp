@@ -72,7 +72,11 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
     });
 });
 
-
+$routes->group('upload', ['filter' => 'login'], function ($routes) {
+    $routes->group('task', function ($routes) {
+        $routes->post('attachment', 'Upload::task_attachment');
+    });
+});
 
 /*
  * --------------------------------------------------------------------
