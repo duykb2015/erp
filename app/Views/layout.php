@@ -37,6 +37,9 @@
 
     <!-- ckeditor js -->
     <script src="<?= base_url() ?>/ckeditor/ckeditor.js"></script>
+    <!-- <script src="<?= base_url() ?>/ck5/build/ckeditor.js"></script> -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/38.1.0/classic/ckeditor.js"></script>
+
 
     <?= $this->renderSection('css') ?>
 

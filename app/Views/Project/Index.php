@@ -1,6 +1,5 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
-<!-- Select 2 css -->
 <style>
     .breadcrumb-title div {
         display: inline;
@@ -104,7 +103,7 @@
                                                                                     <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                     <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                         <a class="dropdown-item waves-light waves-effect" href="<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>"><i class="icofont icofont-eye-alt"></i>Xem</a>
-                                                                                        <a class="dropdown-item waves-light waves-effect" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
+                                                                                        <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -124,7 +123,7 @@
                                                         <div class="input-group">
                                                             <input type="hidden" id="project-id" value="<?= $project['id'] ?>">
                                                             <input type="text" name="section_name" id="section-name" class="form-control hidden">
-                                                            <button type="button" id="submit-button" class="btn btn-primary input-group-addon" onclick="doCreateSection()"><i class="icofont icofont-plus-square"></i></button>
+                                                            <button type="button" id="submit-button" class="btn btn-primary input-group-addon" onclick="doCreateSection()"><i class="icofont icofont-plus"></i></button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -224,6 +223,7 @@
 
     let sectionName = document.getElementById('section-name')
     let submitButton = document.getElementById('submit-button')
+    let createSectionAlreadyActive = false
 
     sectionName.addEventListener("focusout", () => {
         if (sectionName.value == '') {
@@ -248,6 +248,14 @@
 
     function createSection(event) {
         event.preventDefault()
+
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        if (createSectionAlreadyActive)
+        {
+            return
+        }
+        createSectionAlreadyActive = true
 
         projectId = document.getElementById('project-id')
         const data = new FormData()
@@ -292,8 +300,8 @@
                                 size: 'large'
                             });
                         }
-                        alreadyClick = false
-                        createButton.innerHTML = 'Tạo'
+                        createSectionAlreadyActive = false
+                        submitButton.innerHTML = '<i class="icofont icofont-plus"></i>'
                     }, 1000)
                 }
             })
@@ -434,6 +442,25 @@
                     btnDelete.innerHTML = 'Xoá'
                 }, 1000)
             })
+    }
+
+    function deleteTask(id) {
+        btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
+        btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        isConfirm = confirm('Bạn có chắc là muốn xoá công việc này?')
+
+        if (!isConfirm) {
+            return
+        }
+
+        setTimeout(function() {
+            $.growl.notice({
+                message: "Xoá thành công"
+            });
+            btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
+        }, 3000)
+
     }
 </script>
 
