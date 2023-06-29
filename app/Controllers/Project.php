@@ -249,6 +249,9 @@ class Project extends BaseController
             $data['backLink']   = '/project//' . $projectID;
             return view('Error/NotFound', $data);
         }
+
+        $task['start_at'] = Carbon::createFromDate($task['start_at'])->format('d/m/Y');
+        $task['due_at'] = Carbon::createFromDate($task['due_at'])->format('d/m/Y');
         
         $data['project'] =  $project;
         $data['task'] =  $task;

@@ -1,5 +1,8 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
+<link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\jquery.filer.css">
+<link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\themes\jquery.filer-dragdropbox-theme.css">
+
 <style>
     .breadcrumb-title div {
         display: inline;
@@ -29,6 +32,18 @@
     .item:hover {
         background-color: rgba(44, 141, 247, 0.2);
         cursor: pointer;
+    }
+
+    .section-name {
+        width: 100%;
+    }
+
+    .task-name {
+        width: 100%;
+    }
+
+    .jFiler-input-dragDrop {
+        width: 100% !important;
     }
 </style>
 <?= $this->endSection() ?>
@@ -78,22 +93,22 @@
                                                 <div class="col-3">
                                                     <div class="card border">
                                                         <div class="card-header">
-                                                            <h5 class="card-header-text sub-title d-flex" onmouseenter="editSectionName(<?= $section['id'] ?>)" onmouseleave="rollBackEdit(<?= $section['id'] ?>)">
+                                                            <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="editSectionName(<?= $section['id'] ?>)" onmouseleave="hindenEditButton(<?= $section['id'] ?>)">
                                                                 <?= $section['title'] ?>&nbsp;<i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $section['id'] ?>" onclick="showEditSection(<?= $section['id'] ?>)"></i>
-                                                                <div class="input-group hidden" id="input-group-section-<?= $section['id'] ?>" onfocusout="inputGroupSectionOut(<?= $section['id'] ?>)">
-                                                                    <input type="text" class="form-control" id="section-name-num-<?= $section['id'] ?>" value="<?= $section['title'] ?>">
-                                                                    <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewName(<?= $section['id'] ?>)">Lưu</button>
-                                                                    <button type="button" id="delete-section-<?= $section['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $section['id'] ?>)">Xoá</button>
-                                                                </div>
                                                             </h5>
+                                                            <div class="input-group hidden" id="input-group-section-<?= $section['id'] ?>" onfocusout="inputGroupSectionOut(<?= $section['id'] ?>)">
+                                                                <input type="text" class="form-control" id="section-name-num-<?= $section['id'] ?>" value="<?= $section['title'] ?>">
+                                                                <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewName(<?= $section['id'] ?>)">Lưu</button>
+                                                                <button type="button" id="delete-section-<?= $section['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $section['id'] ?>)">Xoá</button>
+                                                            </div>
                                                         </div>
                                                         <div class="card-block p-b-0">
                                                             <div class="row">
                                                                 <div class="col-md-12" id="draggableMultiple">
                                                                     <?php if (!empty($section['tasks'])) : ?>
                                                                         <?php foreach ($section['tasks'] as $task) : ?>
-                                                                            <div class="sortable-moves border" oncontextmenu="showContextMenu(event, <?= $task['id'] ?>)">
-                                                                                <p id="task-num-<?= $task['id'] ?>" onclick="window.location.href = '<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>'"><?= $task['title'] ?></p>
+                                                                            <div class="sortable-moves border">
+                                                                                <p class="task-name overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="window.location.href = '<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>'"><?= $task['title'] ?></p>
 
                                                                                 <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                     <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
@@ -136,18 +151,18 @@
     </div>
 </div>
 
-<div class="modal modal-xl fade mt-5" id="createNewTask" tabindex="-1" data-bs-backdrop="static" aria-labelledby="" aria-hidden="true">
+<div class="modal fade mt-5" id="createNewTask" tabindex="-1" data-bs-backdrop="static" aria-labelledby="" aria-hidden="true">
     <!-- modal-xl -->
-    <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
         <div class="modal-content">
             <div class="modal-body">
                 <form class="needs-validation" id="create-project">
                     <div class="mb-3">
-                        <label for="task_name" class="col-form-label">Tên công việc<span class="text-danger">*</span></label>
-                        <input type="text" name="task_name" class="form-control rounded" id="project_name" placeholder="Nhập tên dự án" minlength="5" required>
+                        <label for="task_name" class="col-form-label">Tên công việc<span class="text-danger"> *</span></label>
+                        <input type="text" name="task_name" class="form-control rounded" id="project_name" placeholder="Nhập tên công việc ..." minlength="5" required>
                     </div>
                     <div class="mb-3">
-                        <label for="message-text" class="col-form-label">Trạng thái công việc</label>
+                        <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
                         <select name="choose_section" class="form-control">
                             <?php if (!empty($sections)) : ?>
                                 <?php foreach ($sections as $section) : ?>
@@ -157,15 +172,28 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="message-text" class="col-form-label">Tiền tố <i class="fa fa-question-circle-o" title="Tiền tố là các chữ cái đầu của tên dự án được viết hoa và ghép lại. Giúp cho việc nhận biết các công việc nào của dự án nào một cách nhanh chóng. Bạn có thể tự định nghĩa chúng!"></i><span class="text-danger">*</span></label>
-                        <input type="text" name="project_key" class="form-control rounded" id="project_key" placeholder="Tiền tố" minlength="1" required>
+                        <label for="message-text" class="col-form-label">Người được giao</label>
+                        <select name="assignee" class="form-control">
+                            <option value="">Trống</option>
+                            <option value="<?= session()->get('user_id') ?>">Cho tôi</option>
+                            <?php if (!empty($assignees)) : ?>
+                                <?php foreach ($assignees as $assignee) : ?>
+                                    <option value="<?= $assignee['id'] ?>"><?= $assignee['name'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
                     </div>
                     <div class="mb-3">
-                        <label for="message-text" class="col-form-label">Mô tả cho dự án</label>
-                        <textarea name="project_descriptions" class="form-control rounded" id="project_descriptions" maxlength="512" rows="5"></textarea>
+                        <label for="task_descriptions" class="col-form-label">Mô tả cho dự án</label>
+                        <textarea name="task_descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"></textarea>
                     </div>
 
-                    <div class="float-end">
+                    <div class="mb-3">
+                    <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
+                        <input type="file" name="user_avatar" id="image-upload" accept="*">
+                    </div>
+
+                    <div class="float-end mb-5">
                         <button type="submit" id="loading-on-click" onclick="createTask(event)" class="btn btn-primary rounded">
                             Tạo
                         </button>
@@ -179,6 +207,10 @@
 
 <?= $this->endSection() ?>
 <?= $this->section('js') ?>
+<!-- jquery file upload js -->
+<script src="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>
+<script src="<?= base_url() ?>templates\libraries\assets\pages\filer\custom-filer.js" type="text/javascript"></script>
+<script src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js" type="text/javascript"></script>
 
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\bower_components\Sortable\js\Sortable.js"></script>
 <!-- Select 2 js -->
@@ -187,12 +219,36 @@
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\advance-elements\select2-custom.js"></script>
 
 <script>
-    // window.addEventListener('beforeunload', function(){})
+    CKEDITOR.replace('task_descriptions', {
+        // width: '100%',
+        height: 300,
+        toolbar: [{
+            name: 'clipboard',
+            items: ['Undo', 'Redo']
+        }, {
+            name: 'styles',
+            items: ['Styles', 'Format']
+        }, {
+            name: 'basicstyles',
+            items: ['Bold', 'Italic', 'Strike', '-', 'RemoveFormat']
+        }, {
+            name: 'paragraph',
+            items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote']
+        }, {
+            name: 'links',
+            items: ['Link', 'Unlink']
+        }, {
+            name: 'insert',
+            items: ['Image', 'Table']
+        }],
+        removeDialogTabs: 'image:advanced;link:advanced',
+    })
 
     draggablePanelList = document.getElementById('draggablePanelList');
     Sortable.create(draggablePanelList, {
         group: 'draggablePanelList',
         animation: 150,
+        cursor: 'move',
         // Element dragging ended
         onEnd: function( /**Event*/ evt) {
             evt.to; // target list
@@ -207,6 +263,7 @@
     Sortable.create(draggableMultiple, {
         group: 'draggableMultiple',
         animation: 150,
+        cursor: 'move',
         // Element dragging ended
         onEnd: function( /**Event*/ evt) {
             evt.to; // target list
@@ -217,9 +274,9 @@
         },
     });
 
-    let sectionName = document.getElementById('section-name')
-    let submitButton = document.getElementById('submit-button')
-    let createSectionAlreadyActive = false
+    var sectionName = document.getElementById('section-name')
+    var submitButton = document.getElementById('submit-button')
+    var createSectionAlreadyActive = false
 
     sectionName.addEventListener("focusout", () => {
         if (sectionName.value == '') {
@@ -247,8 +304,7 @@
 
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
-        if (createSectionAlreadyActive)
-        {
+        if (createSectionAlreadyActive) {
             return
         }
         createSectionAlreadyActive = true
@@ -303,8 +359,8 @@
             })
     }
 
-    let sectionNameTemp = ''
-    let attempt = 1
+    var sectionNameTemp = ''
+    var attempt = 1
 
     function editSectionName(id) {
         if ('flex' == document.getElementById(`input-group-section-${id}`).style.display) {
@@ -336,16 +392,21 @@
         attempt++
     }
 
-    function rollBackEdit(id) {
+    function hindenEditButton(id) {
         editButton = document.getElementById(`edit-section-${id}`)
         editButton.style.display = 'none'
     }
 
-    function saveNewName(id) {
-        inputSectionName = document.getElementById(`section-name-num-${id}`)
-        btnSave = document.getElementById(`save-edit-section-${id}`)
-        btnSave.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+    var saveNewNameAlreadyActive = false
 
+    function saveNewName(id) {
+        if (saveNewNameAlreadyActive) {
+            return
+        }
+        saveNewNameAlreadyActive = true
+        inputSectionName = document.getElementById(`section-name-num-${id}`)
+        btnSaveSection = document.getElementById(`save-edit-section-${id}`)
+        btnSaveSection.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         const data = new FormData()
         data.append('section_id', id)
@@ -389,14 +450,21 @@
                                 size: 'large'
                             });
                         }
-                        alreadyClick = false
-                        btnSave.innerHTML = 'Lưu'
+                        saveNewNameAlreadyActive = false
+                        btnSaveSection.innerHTML = 'Lưu'
                     }, 1000)
                 }
             })
     }
 
+    var deleteSectionAlreadyActive = false
+
     function deleteSection(id) {
+        if (deleteSectionAlreadyActive) {
+            return
+        }
+        deleteSectionAlreadyActive = true
+
         attempt = 1
         isConfirm = confirm('Bạn có chắc muốn xoá đi section này?')
         if (!isConfirm) {
@@ -434,7 +502,7 @@
                         location: 'tr',
                         size: 'large'
                     });
-                    alreadyClick = false
+                    deleteSectionAlreadyActive = false
                     btnDelete.innerHTML = 'Xoá'
                 }, 1000)
             })

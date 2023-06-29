@@ -11,10 +11,6 @@
         display: inline;
     }
 
-    .yourCountdownContainer>.row {
-        display: inline;
-    }
-
     .scroll-y {
         overflow-y: auto;
         height: 80vh;
@@ -30,6 +26,8 @@
     }
 </style>
 <?= $this->endSection() ?>
+
+<?php $currentUser = session()->get('user_id') ?>
 
 <?= $this->section('content') ?>
 <div class="pcoded-content">
@@ -81,15 +79,18 @@
                                     <div class="f-left">
                                         <h4><i class="icofont icofont-tasks-alt m-r-5"></i> <?= $task['title'] ?? 'Dự án chưa có tiêu đề' ?></h4>
                                     </div>
-                                    <div class="f-right d-flex">
-                                        <div class="dropdown-secondary dropdown d-inline-block">
-                                            <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                            <div class="dropdown-menu" aria-labelledby="dropdown35" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-edit-alt m-r-10"></i>Chỉnh sửa</a>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
+                                    <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner']) : //|| $currentUser == $task['created_by']
+                                    ?>
+                                        <div class="f-right d-flex">
+                                            <div class="dropdown-secondary dropdown d-inline-block">
+                                                <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdown35" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-edit-alt m-r-10"></i>Chỉnh sửa</a>
+                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php endif ?>
                                 </div>
                                 <div class="card-block">
                                     <div class="">
@@ -168,34 +169,55 @@
                                             </div>
                                             <h6 class="sub-title m-t-30 m-b-15">Danh sách bình luận</h6>
                                             <ul class="media-list mt-3">
-                                                <li class="media">
-                                                    <div class="media-left">
-                                                        <a href="#">
-                                                            <img class="media-object img-radius comment-img" src="https://colorlib.com/polygon/adminty/files/assets/images/avatar-4.jpg" alt="Generic placeholder image">
-                                                        </a>
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <h6 class="media-heading txt-primary">Lorem Ipsum <span class="f-12 text-muted m-l-5">Just now</span></h6>
-                                                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                                                        <div class="m-t-10 m-b-25">
-                                                            <span><a href="#!" class="m-r-10 f-12">Edit</a></span><span><a href="#!" class="m-r-10 f-12">Delete</a> </span>
-                                                        </div>
-                                                        <hr>
-                                                    </div>
-                                                </li>
+                                                <?php if (!empty($comments)) : ?>
+                                                    <?php foreach ($comments as $comment) : ?>
+                                                        <li class="media d-flex">
+                                                            <div class="media-left">
+                                                                <a href="#">
+                                                                    <img class="media-object img-radius comment-img" src="https://colorlib.com/polygon/adminty/files/assets/images/avatar-4.jpg" alt="Generic placeholder image">
+                                                                </a>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h6 class="media-heading txt-primary"><?= $comment['user_name'] ?><span class="f-12 text-muted m-l-5"><?= $comment['updated_at'] ?></span></h6>
+                                                                <p><?= $comment['user'] ?></p>
+
+                                                                <?php if ($currentUser == $comment['user_id']) : ?>
+                                                                    <div class="m-t-10 m-b-25">
+                                                                        <span><a href="#!" class="m-r-10 f-12">Edit</a></span><span><a href="#!" class="m-r-10 f-12">Delete</a> </span>
+                                                                    </div>
+                                                                <?php endif ?>
+
+                                                                <hr>
+                                                            </div>
+                                                        </li>
+                                                    <?php endforeach ?>
+                                                <?php else : ?>
+                                                    <li>
+                                                        <p>Chưa có bình luận nào.</p>
+                                                    </li>
+                                                <?php endif ?>
                                             </ul>
                                         </div>
                                         <div class="tab-pane" id="activity" role="tabpanel">
                                             <div class="form-group">
                                                 <div class="row">
+                                                    <h6 class="sub-title m-t-30 m-b-15">Danh sách hoạt động</h6>
                                                     <ul class="media-list revision-blc">
-                                                        <li class="media d-flex m-b-15">
-                                                            <div class="p-l-15 p-r-20 d-inline-block v-middle"><a href="#" class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icon-ghost f-18 v-middle"></i></a></div>
-                                                            <div class="d-inline-block">
-                                                                Drop the IE <a href="#">specific hacks</a> for temporal inputs
-                                                                <div class="media-annotation">4 minutes ago</div>
-                                                            </div>
-                                                        </li>
+                                                        <?php if (!empty($activites)) : ?>
+                                                            <li class="media d-flex m-b-15">
+                                                                <div class="p-l-15 p-r-20 d-inline-block v-middle"><a href="#" class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icon-ghost f-18 v-middle"></i></a></div>
+                                                                <div class="d-inline-block">
+                                                                    Drop the IE <a href="#">specific hacks</a> for temporal inputs
+                                                                    <div class="media-annotation">4 minutes ago</div>
+                                                                </div>
+                                                            </li>
+                                                        <?php else : ?>
+                                                            <li>
+                                                                <div class="d-inline-block">
+                                                                    Chưa có hoạt động nào.
+                                                                </div>
+                                                            </li>
+                                                        <?php endif ?>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -226,7 +248,23 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td><i class="icofont icofont-ui-love-add"></i> Người thực hiện: </td>
+                                                <td><i class="icofont icofont-ui-calendar"></i> Ngày bắt đầu:</td>
+                                                <td class="text-right">
+                                                    <div class="btn-group">
+                                                        <?= $task['start_at'] ?? 'Trống' ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="icofont icofont-ui-calendar"></i> Ngày kết thúc:</td>
+                                                <td class="text-right">
+                                                    <div class="btn-group">
+                                                        <?= $task['due_at'] ?? 'Trống' ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="icofont icofont-user"></i> Người thực hiện: </td>
                                                 <!-- <td class="text-right"><a href="#"></a></td> -->
                                                 <td class="text-right"><?= $task['assignee'] ?? 'Trống' ?></td>
                                             </tr>
@@ -237,101 +275,76 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="card-footer">
-
-                                </div>
                             </div>
+                            <?php if ($currentUser != $task['assignee']) : ?>
+                                <div class="card border">
+                                    <div class="card-header">
+                                        <h5 class="card-header-text"><i class="icofont icofont-clock-time m-r-10"></i>Bộ đếm thời gian</h5>
+                                    </div>
+                                    <div class="card-block">
+                                        <div class="row">
+                                            <div class="col-xs-3 justify-content-center d-flex">
+                                                <h2>
+                                                    <div id="count">00:00:00</div>
+                                                </h2>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-3">
+                                                <div class="justify-content-center d-flex">
+                                                    <button class="btn btn-primary rounded mx-1" id="start-counter" onclick="doCounter()">Bắt đầu</button>
+                                                    <button class="btn btn-secondary rounded mx-1" id="stop-counter" onclick="stopCouter()">Dừng</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif ?>
                             <div class="card border">
                                 <div class="card-header">
-                                    <h5 class="card-header-text"><i class="icofont icofont-wheel m-r-10"></i> Task Settings</h5>
+                                    <h5 class="card-header-text"><i class="icofont icofont-wheel m-r-10"></i> Cài đặt</h5>
                                 </div>
                                 <div class="card-block task-setting">
                                     <div class="form-group">
-                                        <form action="" method="post">
+                                        <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner']) : //|| $currentUser == $task['created_by']
+                                        ?>
+                                            <form action="" method="post">
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-12">
+                                                        <label class="f-left">Cho phép bình luận</label>
+                                                        <input type="checkbox" class="js-small f-right" checked>
+                                                    </div>
+                                                </div>
+                                                <div class="row  mb-2">
+                                                    <div class="col-sm-12">
+                                                        <label class="f-left">Cho phép thành viên chỉnh sửa công việc</label>
+                                                        <input type="checkbox" class="js-small f-right" checked>
+                                                    </div>
+                                                </div>
+                                                <div class="row  mb-2">
+                                                    <div class="col-sm-12">
+                                                        <label class="f-left">Cho phép tải lên tệp đính kèm</label>
+                                                        <input type="checkbox" class="js-small f-right" checked>
+                                                    </div>
+                                                </div>
+                                                <div class="row text-center">
+                                                    <div class="col-sm-12">
+                                                        <button type="button" class="btn btn-primary waves-effect waves-light p-l-40 p-r-40">Save</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        <?php else : ?>
                                             <div class="row mb-2">
                                                 <div class="col-sm-12">
-                                                    <label class="f-left">Cho phép bình luận</label>
-                                                    <input type="checkbox" class="js-small f-right" checked>
+                                                    <label class="f-left">Bạn không có quyền chỉnh sửa công việc này.</label>
                                                 </div>
                                             </div>
-                                            <div class="row  mb-2">
-                                                <div class="col-sm-12">
-                                                    <label class="f-left">Cho phép thành viên chỉnh sửa công việc</label>
-                                                    <input type="checkbox" class="js-small f-right" checked>
-                                                </div>
-                                            </div>
-                                            <div class="row  mb-2">
-                                                <div class="col-sm-12">
-                                                    <label class="f-left">Cho phép tải lên tệp đính kèm</label>
-                                                    <input type="checkbox" class="js-small f-right" checked>
-                                                </div>
-                                            </div>
-                                            <div class="row text-center">
-                                                <div class="col-sm-12">
-                                                    <button type="button" class="btn btn-primary waves-effect waves-light p-l-40 p-r-40">Save</button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                        <?php endif ?>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card border">
-                                <div class="card-header">
-                                    <h5 class="card-header-text"><i class="icofont icofont-clock-time m-r-10"></i>Task Timer</h5>
-                                </div>
-                                <div class="card-block">
-                                    <div class="counter">
-                                        <div class="yourCountdownContainer">
-                                            <div class="row">
-                                                <div class="col-xs-3">
-                                                    <div id="count">0</div>
-                                                    <button class="btn btn-primary" onclick="clearInterval(counterInterval)">Dừng</button>
-                                                    <button class="btn btn-primary" onclick="doCounter()">Tiếp tục</button>
-                                                    <h2>12</h2>
-                                                    <p>Days</p>
-                                                </div>
-                                                <div class="col-xs-3">
-                                                    <h2>24</h2>
-                                                    <p>Hours</p>
-                                                </div>
-                                                <div class="col-xs-3">
-                                                    <h2>38</h2>
-                                                    <p>Minutes</p>
-                                                </div>
-                                                <div class="col-xs-3">
-                                                    <h2>56</h2>
-                                                    <p>Seconds</p>
-                                                </div>
-                                            </div>
-                                            <!-- end of row -->
-                                        </div>
-                                        <!-- end of yourCountdown -->
-                                    </div>
-                                    <!-- end of counter -->
-                                </div>
-                                <div class="card-footer">
-                                    <div class="f-left">
-                                        <i class="icofont icofont-rewind"></i> <i class="icofont icofont-pause"></i> <i class="icofont icofont-play-alt-1"></i>
-                                    </div>
-                                    <div class="f-right">
-                                        <div class="dropdown-secondary dropdown">
-                                            <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Open</button>
-                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown2" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                <a class="dropdown-item waves-light waves-effect active" href="#!">Open</a>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!">On hold</a>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!">Resolved</a>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!">Closed</a>
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!">Dublicate</a>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!">Invalid</a>
-                                                <a class="dropdown-item waves-light waves-effect" href="#!">Wontfix</a>
-                                            </div>
-                                            <!-- end of dropdown menu -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
+
+                            <!-- <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-header-text"><i class="icofont icofont-attachment"></i> Attached Files</h5>
                                 </div>
@@ -356,7 +369,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
 
                     </div>
@@ -382,11 +395,73 @@
 <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\js\swiper-custom.js"></script>
 
 <script>
-    let counter = 0
+
+    // window.addEventListener('beforeunload', function(){})
+
+    var counter = 0
     var counterInterval
+    var countBox = document.getElementById('count')
+
+    var isBtnStartCounterClick = false
+    var btnStartCounter = document.getElementById('start-counter')
+
+    var isBtnStopCounterClick = false
+    var btnStopCounter = document.getElementById('stop-counter')
 
     function doCounter() {
-        counterInterval = setInterval(timeZ, 1000)
+        if (isBtnStartCounterClick) {
+            return
+        }
+        isBtnStartCounterClick = true
+        btnStartCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        setTimeout(() => {
+            $.growl.notice({
+                message: "Bắt đầu ca làm việc"
+            });
+            counterInterval = setInterval(countTime, 1000)
+            btnStartCounter.innerHTML = 'Bắt đầu'
+        }, 500)
+    }
+
+    function countTime() {
+        counter++
+        countBox.innerHTML = toHHMMSS(counter)
+    }
+
+    function stopCouter() {
+        if (isBtnStopCounterClick) {
+            return
+        }
+        isBtnStopCounterClick = true
+
+        if (0 == counter) {
+            return
+        }
+
+        clearInterval(counterInterval)
+
+        // >> ===================================
+        btnStopCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        btnStartCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        setTimeout(() => {
+            //handle save counter
+
+            $.growl.notice({
+                message: "Đã ghi lại thời gian làm việc"
+            })
+
+            countBox.innerHTML = '00:00:00'
+            isBtnStopCounterClick = false
+            btnStopCounter.innerHTML = 'Dừng'
+            isBtnStartCounterClick = false
+            btnStartCounter.innerHTML = 'Bắt đầu'
+        }, 1500)
+        // =================================== <<
+
+        // >> ===================================
+        counter = 0
+        // =================================== <<
     }
 
     function toHHMMSS(second) {
@@ -394,7 +469,6 @@
         var hours = Math.floor(sec_num / 3600);
         var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
         var seconds = sec_num - (hours * 3600) - (minutes * 60);
-        console.log(sec_num)
 
         if (hours < 10) {
             hours = "0" + hours;
@@ -406,11 +480,6 @@
             seconds = "0" + seconds;
         }
         return hours + ':' + minutes + ':' + seconds;
-    }
-
-    function timeZ() {
-        counter++
-        document.getElementById('count').innerHTML = toHHMMSS(counter)
     }
 
     // Multiple swithces

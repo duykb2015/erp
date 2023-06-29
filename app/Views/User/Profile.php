@@ -184,8 +184,8 @@
 
 <!-- jquery file upload js -->
 <script src="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>
-<script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\filer\custom-filer.js"></script>
-<script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js"></script>
+<script src="<?= base_url() ?>templates\libraries\assets\pages\filer\custom-filer.js" type="text/javascript"></script>
+<script src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js" type="text/javascript"></script>
 
 <script>
     function saveAvatar() {
