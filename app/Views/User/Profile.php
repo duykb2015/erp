@@ -153,7 +153,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" id="save-image" onclick="saveAvatar()" class="btn btn-primary rounded waves-effect waves-light float-end">Lưu</button>
-                                                    <button type="button" id="cancel-save-image" onclick="cancelSave()" class="btn btn-secondary rounded waves-effect waves-light float-end" data-bs-dismiss="modal">Huỷ</button>
+                                                    <button type="button" id="cancel-save-image" onclick="cancelSave()" class="btn btn-secondary rounded waves-effect waves-light float-end" >Huỷ</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -188,16 +188,18 @@
 <script src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js" type="text/javascript"></script>
 
 <script>
+    var saveAvatarAlreadyClick = false
+
     function saveAvatar() {
 
         if (!window.localStorage.getItem('img-name')) {
             return
         }
 
-        if (alreadyClick) {
+        if (saveAvatarAlreadyClick) {
             return
         }
-        alreadyClick = true
+        saveAvatarAlreadyClick = true
 
         saveButton = document.getElementById('save-image')
         saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
@@ -227,6 +229,9 @@
         }
 
         fetch('<?= base_url('user/image/cancel') ?>', requestOptions)
+        setTimeout(() => {
+            window.location.reload()
+        }, 500)
         cancelSaveButton.innerHTML = 'Huỷ'
         // window.localStorage.removeItem('img-name')
     }

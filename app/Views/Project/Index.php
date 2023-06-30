@@ -93,12 +93,12 @@
                                                 <div class="col-3">
                                                     <div class="card border">
                                                         <div class="card-header">
-                                                            <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="editSectionName(<?= $section['id'] ?>)" onmouseleave="hindenEditButton(<?= $section['id'] ?>)">
+                                                            <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="showSectionEditButton(<?= $section['id'] ?>)" onmouseleave="hideSectionEditButton(<?= $section['id'] ?>)">
                                                                 <?= $section['title'] ?>&nbsp;<i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $section['id'] ?>" onclick="showEditSection(<?= $section['id'] ?>)"></i>
                                                             </h5>
                                                             <div class="input-group hidden" id="input-group-section-<?= $section['id'] ?>" onfocusout="inputGroupSectionOut(<?= $section['id'] ?>)">
                                                                 <input type="text" class="form-control" id="section-name-num-<?= $section['id'] ?>" value="<?= $section['title'] ?>">
-                                                                <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewName(<?= $section['id'] ?>)">Lưu</button>
+                                                                <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewSectionName(<?= $section['id'] ?>)">Lưu</button>
                                                                 <button type="button" id="delete-section-<?= $section['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $section['id'] ?>)">Xoá</button>
                                                             </div>
                                                         </div>
@@ -108,7 +108,7 @@
                                                                     <?php if (!empty($section['tasks'])) : ?>
                                                                         <?php foreach ($section['tasks'] as $task) : ?>
                                                                             <div class="sortable-moves border">
-                                                                                <p class="task-name overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="window.location.href = '<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>'"><?= $task['title'] ?></p>
+                                                                                <p class="task-name overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
 
                                                                                 <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                     <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
@@ -151,7 +151,7 @@
     </div>
 </div>
 
-<div class="modal fade mt-5" id="createNewTask" tabindex="-1" data-bs-backdrop="static" aria-labelledby="" aria-hidden="true">
+<div class="modal fade mt-5" id="createNewTask" tabindex="-1" aria-labelledby="" aria-hidden="true">
     <!-- modal-xl -->
     <div class="modal-dialog modal-dialog-scrollable modal-xl">
         <div class="modal-content">
@@ -159,11 +159,11 @@
                 <form class="needs-validation" id="create-project">
                     <div class="mb-3">
                         <label for="task_name" class="col-form-label">Tên công việc<span class="text-danger"> *</span></label>
-                        <input type="text" name="task_name" class="form-control rounded" id="project_name" placeholder="Nhập tên công việc ..." minlength="5" required>
+                        <input type="text" class="form-control rounded" id="task_name" placeholder="Nhập tên công việc ..." minlength="5" maxlength="512" required>
                     </div>
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
-                        <select name="choose_section" class="form-control">
+                        <select id="choose_section" class="form-control">
                             <?php if (!empty($sections)) : ?>
                                 <?php foreach ($sections as $section) : ?>
                                     <option value="<?= $section['id'] ?>"><?= $section['title'] ?></option>
@@ -173,7 +173,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Người được giao</label>
-                        <select name="assignee" class="form-control">
+                        <select id="assignee" class="form-control">
                             <option value="">Trống</option>
                             <option value="<?= session()->get('user_id') ?>">Cho tôi</option>
                             <?php if (!empty($assignees)) : ?>
@@ -185,16 +185,18 @@
                     </div>
                     <div class="mb-3">
                         <label for="task_descriptions" class="col-form-label">Mô tả cho dự án</label>
-                        <textarea name="task_descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"></textarea>
+                        <textarea id="task_descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"></textarea>
                     </div>
 
                     <div class="mb-3">
-                    <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
-                        <input type="file" name="user_avatar" id="image-upload" accept="*">
+                        <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
+                        <br>
+                        <label for="user_avatar" class="col-form-label">Tính năng đang được bảo trì</label>
+                        <!-- <input type="file" id="attachment" accept="*"> -->
                     </div>
 
                     <div class="float-end mb-5">
-                        <button type="submit" id="loading-on-click" onclick="createTask(event)" class="btn btn-primary rounded">
+                        <button type="submit" id="btn-create-task" onclick="createNewTask(<?= $project['id'] ?>)" class="btn btn-primary rounded">
                             Tạo
                         </button>
                         <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
@@ -218,8 +220,9 @@
 <!-- Custom js -->
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\advance-elements\select2-custom.js"></script>
 
+<!-- CK4 -->
 <script>
-    CKEDITOR.replace('task_descriptions', {
+    var task_descriptions = CKEDITOR.replace('task_descriptions', {
         // width: '100%',
         height: 300,
         toolbar: [{
@@ -243,7 +246,10 @@
         }],
         removeDialogTabs: 'image:advanced;link:advanced',
     })
+</script>
 
+<!-- Dragable -->
+<script>
     draggablePanelList = document.getElementById('draggablePanelList');
     Sortable.create(draggablePanelList, {
         group: 'draggablePanelList',
@@ -273,7 +279,86 @@
             // console.log(evt.item, evt.oldIndex, evt.newIndex)
         },
     });
+</script>
 
+<script>
+    // var files
+    var btnCreateTask = null
+    var isCreateNewTaskAlreadyClick = false
+
+    function createNewTask(projectID) {
+        if (isCreateNewTaskAlreadyClick) return
+        isCreateNewTaskAlreadyClick = true
+
+        btnCreateTask = document.getElementById('btn-create-task')
+        btnCreateTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('task_name', document.getElementById('task_name').value)
+        data.append('choose_section', document.getElementById('choose_section').value)
+        data.append('assignee', document.getElementById('assignee').value)
+        data.append('task_descriptions', task_descriptions.getData())
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/create') ?>', requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                if (result.errors) {
+                    setTimeout(() => {
+                        if (result.errors.choose_section) {
+                            result.errors.choose_section = result.errors.choose_section.replace('choose_section', 'Section')
+                            $.growl.error({
+                                message: result.errors.choose_section,
+                                location: 'tr',
+                                size: 'large'
+                            });
+                        }
+                        if (result.errors.assignee) {
+                            result.errors.assignee = result.errors.assignee.replace('assignee', 'Người được giao')
+                            $.growl.error({
+                                message: result.errors.assignee,
+                                location: 'tr',
+                                size: 'large'
+                            });
+                        }
+                        if (result.errors.task_name) {
+                            result.errors.task_name = result.errors.task_name.replace('task_name', 'Tên công việc')
+                            $.growl.error({
+                                message: result.errors.task_name,
+                                location: 'tr',
+                                size: 'large'
+                            });
+                        }
+                        isCreateNewTaskAlreadyClick = false
+                        btnCreateTask.innerHTML = 'Tạo'
+                    }, 1000)
+                    return
+                }
+
+                $.growl.notice({
+                    message: "Tạo mới dự án thành công"
+                });
+
+                setTimeout(() => {
+                    window.location.href = `<?= base_url('project') ?>/${projectID}/task/${result.task_id}`
+                }, 1000)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: "Có lỗi xảy ra, vui lòng thử lại sau"
+                });
+                createButton.innerHTML = 'Tạo'
+            })
+    }
+</script>
+
+<script>
     var sectionName = document.getElementById('section-name')
     var submitButton = document.getElementById('submit-button')
     var createSectionAlreadyActive = false
@@ -361,18 +446,25 @@
 
     var sectionNameTemp = ''
     var attempt = 1
+    var inputGroutSection
+    var editButton
 
-    function editSectionName(id) {
-        if ('flex' == document.getElementById(`input-group-section-${id}`).style.display) {
-            return
-        }
+    function showSectionEditButton(id) {
+        // if (editButton) {
+        //     return
+        // }
         editButton = document.getElementById(`edit-section-${id}`)
         editButton.style.display = 'block'
     }
 
+    function hideSectionEditButton(id) {
+        editButton = document.getElementById(`edit-section-${id}`)
+        editButton.style.display = 'none'
+    }
+
     function showEditSection(id) {
-        div = document.getElementById(`input-group-section-${id}`)
-        div.style.display = 'flex'
+        inputGroutSection = document.getElementById(`input-group-section-${id}`)
+        inputGroutSection.style.display = 'flex'
 
         inputSectionName = document.getElementById(`section-name-num-${id}`)
         inputSectionName.focus()
@@ -392,14 +484,9 @@
         attempt++
     }
 
-    function hindenEditButton(id) {
-        editButton = document.getElementById(`edit-section-${id}`)
-        editButton.style.display = 'none'
-    }
-
     var saveNewNameAlreadyActive = false
 
-    function saveNewName(id) {
+    function saveNewSectionName(id) {
         if (saveNewNameAlreadyActive) {
             return
         }
@@ -508,7 +595,12 @@
             })
     }
 
+    var isDeleteTaskAlreadyClick = false
+
     function deleteTask(id) {
+        if (isDeleteTaskAlreadyClick) return
+        isDeleteTaskAlreadyClick = true
+
         btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
         btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
@@ -518,12 +610,32 @@
             return
         }
 
-        setTimeout(function() {
-            $.growl.notice({
-                message: "Xoá thành công"
+        const data = new FormData()
+        data.append('task_id', id)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/delete') ?>', requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                setTimeout(function() {
+                    $.growl.notice({
+                        message: "Xoá thành công"
+                    });
+                    window.location.reload()                    
+                }, 1500)
+            }).catch(error => {
+                $.growl.error({
+                    message: error,
+                    location: 'tr',
+                    size: 'large'
+                });
+                btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
             });
-            btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
-        }, 3000)
 
     }
 </script>

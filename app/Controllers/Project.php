@@ -250,8 +250,8 @@ class Project extends BaseController
             return view('Error/NotFound', $data);
         }
 
-        $task['start_at'] = Carbon::createFromDate($task['start_at'])->format('d/m/Y');
-        $task['due_at'] = Carbon::createFromDate($task['due_at'])->format('d/m/Y');
+        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('d/m/Y') : NULL ;
+        $task['due_at'] = $task['due_at'] ? Carbon::createFromDate($task['due_at'])->format('d/m/Y') : NULL ;
         
         $data['project'] =  $project;
         $data['task'] =  $task;

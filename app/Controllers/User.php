@@ -104,6 +104,8 @@ class User extends BaseController
         session()->set('avatar', $old_avatar);
 
         $userModel = new ModelsUser();
+        $img = $userModel->find(session()->get('user_id'))['photo'];
+        @unlink(UPLOAD_PATH . $img);
         $userModel->update(session()->get('user_id'), ['photo' => $old_avatar]);
 
         return $this->handleResponse();

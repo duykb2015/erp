@@ -95,7 +95,7 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded mt-3">Đăng nhập</button>
+                                    <button type="submit" id="btn-login" onclick="login()" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded mt-3">Đăng nhập</button>
                                     <div class="d-flex my-2 px-3">
                                         <div class="w-50 border-top border-secondary mt-2"></div>
                                         <div class="px-2"><label>hoặc</label></div>
@@ -148,6 +148,11 @@
 
         function removeAlert() {
             document.querySelectorAll(".alert").forEach(e => e.remove());
+        }
+
+        function login() {
+            btnLogin = document.getElementById('btn-login')
+            btnLogin.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
         }
     </script>
 </body>

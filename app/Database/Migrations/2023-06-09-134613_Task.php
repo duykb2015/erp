@@ -28,7 +28,7 @@ class Task extends Migration
                 'null'           => FALSE,
             ],
             'descriptions' => [
-                'type'           => 'TEXT',
+                'type'           => 'LONGTEXT',
                 'null'           => TRUE,
             ],
             'priority' => [

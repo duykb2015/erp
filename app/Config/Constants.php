@@ -97,3 +97,17 @@ define('WRONG_LOGIN_INFORMATION_MESSAGE', 'Tài khoản hoặc mật khẩu sai,
 define('PASSWORD_NOT_MATCH', 'Tài khoản hoặc mật khẩu sai, vui lòng kiểm tra lại!');
 
 define('UPLOAD_PATH', FCPATH . 'imgs/');
+
+define('LOWEST', 'lowest');
+define('LOW', 'low');
+define('NORMAL', 'normal');
+define('HIGH', 'high');
+define('HIGHEST', 'highest');
+
+define('TASK_PRIORITY', [
+    LOWEST => 'Rất thấp',
+    LOW => 'Thấp',
+    NORMAL => 'Bình thường',
+    HIGH => 'Cao',
+    HIGHEST => 'Rất cao',
+]);

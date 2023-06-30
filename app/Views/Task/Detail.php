@@ -243,7 +243,7 @@
                                                 <td><i class="icofont icofont-spinner-alt-5"></i> Độ ưu tiên:</td>
                                                 <td class="text-right">
                                                     <div class="btn-group">
-                                                        <?= $task['priority'] ?? 'Trung bình' ?>
+                                                        <?= $task['priority'] ? TASK_PRIORITY[$task['priority']] : TASK_PRIORITY[NORMAL] ?>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -531,7 +531,7 @@
                 items: ['Link', 'Unlink']
             }, {
                 name: 'insert',
-                items: ['Image', 'Table']
+                items: ['Table'] //'Image', 
             }],
             removeDialogTabs: 'image:advanced;link:advanced',
         })

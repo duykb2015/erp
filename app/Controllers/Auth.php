@@ -95,6 +95,7 @@ class Auth extends BaseController
 			'email'	    => $this->request->getPost('email'),
 			'firstname' => $this->request->getPost('firstname'),
 			'lastname'  => $this->request->getPost('lastname'),
+			'photo'		=> makeImage(strtoUpper($this->request->getPost('username')[0])),
 			'type' 		=> 'user'
 		];
 
