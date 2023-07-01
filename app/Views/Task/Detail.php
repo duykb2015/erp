@@ -230,7 +230,7 @@
                         <div class="col-xl-4 col-lg-12 push-xl-8 task-detail-right scroll-y">
                             <div class="card border">
                                 <div class="card-header">
-                                    <h5 class="card-header-text"><i class="icofont icofont-ui-note m-r-10"></i> Task Details</h5>
+                                    <h5 class="card-header-text"><i class="icofont icofont-ui-note m-r-10"></i> Chi tiết công việc</h5>
                                 </div>
                                 <div class="card-block task-details">
                                     <table class="table table-border table-xs">
@@ -276,7 +276,7 @@
                                     </table>
                                 </div>
                             </div>
-                            <?php if ($currentUser != $task['assignee']) : ?>
+                            <?php if ($currentUser == $task['assignee']) : ?>
                                 <div class="card border">
                                     <div class="card-header">
                                         <h5 class="card-header-text"><i class="icofont icofont-clock-time m-r-10"></i>Bộ đếm thời gian</h5>
@@ -306,8 +306,7 @@
                                 </div>
                                 <div class="card-block task-setting">
                                     <div class="form-group">
-                                        <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner']) : //|| $currentUser == $task['created_by']
-                                        ?>
+                                        <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner'] || $currentUser == $task['created_by']) : ?>
                                             <form action="" method="post">
                                                 <div class="row mb-2">
                                                     <div class="col-sm-12">
@@ -531,7 +530,7 @@
                 items: ['Link', 'Unlink']
             }, {
                 name: 'insert',
-                items: ['Table'] //'Image', 
+                items: ['Image', 'Table'] //'Image', 
             }],
             removeDialogTabs: 'image:advanced;link:advanced',
         })

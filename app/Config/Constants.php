@@ -111,3 +111,15 @@ define('TASK_PRIORITY', [
     HIGH => 'Cao',
     HIGHEST => 'Rất cao',
 ]);
+
+define('CUSTOM', 0);
+define('INIT', 1);
+define('INPROGRESS', 2);
+define('DONE', 3);
+
+define('BASE_SECTION', [
+    CUSTOM     => ['background' => '#e9f2ff', 'color' => '#0055cc'],
+    INIT       => ['background' => '#e9eaee', 'color' => '#44546f'],
+    INPROGRESS => ['background' => '#e9f2ff', 'color' => '#0055cc'],
+    DONE       => ['background' => '#dffcf0', 'color' => '#216e4e'],
+]);

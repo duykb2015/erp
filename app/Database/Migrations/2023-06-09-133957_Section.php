@@ -28,6 +28,10 @@ class Section extends Migration
                 'null'           => FALSE,
                 'default'        => 0
             ],
+            'base_section' => [
+                'type'           => 'TINYINT',
+                'default'        => 0
+            ],
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('project_id', 'section', 'id', '', '', 'fk_s_p_i_p_i');

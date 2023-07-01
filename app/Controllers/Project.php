@@ -206,17 +206,20 @@ class Project extends BaseController
             [
                 'project_id' => $projectID,
                 'title' => 'Khởi tạo',
-                'position' => 0
+                'position' => 0,
+                'base_section' => 1
             ],
             [
                 'project_id' => $projectID,
                 'title' => 'Đang tiến hành',
-                'position' => 1
+                'position' => 1,
+                'base_section' => 2
             ],
             [
                 'project_id' => $projectID,
                 'title' => 'Hoàn thành',
-                'position' => 2
+                'position' => 2,
+                'base_section' => 3
             ],
         ]);
 

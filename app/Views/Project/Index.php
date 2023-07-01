@@ -45,6 +45,38 @@
     .jFiler-input-dragDrop {
         width: 100% !important;
     }
+
+    .icofont-pencil-alt-5 {
+        margin-top: 6px !important;
+    }
+
+    .badge-custom-0 {
+        border-radius: 4px;
+        padding: 2px 6px;
+        color: <?= BASE_SECTION[0]['color'] ?> !important;
+        background-color: <?= BASE_SECTION[0]['background'] ?> !important;
+    }
+
+    .badge-custom-1 {
+        border-radius: 4px;
+        padding: 2px 6px;
+        color: <?= BASE_SECTION[1]['color'] ?> !important;
+        background-color: <?= BASE_SECTION[1]['background'] ?> !important;
+    }
+
+    .badge-custom-2 {
+        border-radius: 4px;
+        padding: 2px 6px;
+        color: <?= BASE_SECTION[2]['color'] ?> !important;
+        background-color: <?= BASE_SECTION[2]['background'] ?> !important;
+    }
+
+    .badge-custom-3 {
+        border-radius: 4px;
+        padding: 2px 6px;
+        color: <?= BASE_SECTION[3]['color'] ?> !important;
+        background-color: <?= BASE_SECTION[3]['background'] ?> !important;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -94,7 +126,10 @@
                                                     <div class="card border">
                                                         <div class="card-header">
                                                             <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="showSectionEditButton(<?= $section['id'] ?>)" onmouseleave="hideSectionEditButton(<?= $section['id'] ?>)">
-                                                                <?= $section['title'] ?>&nbsp;<i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $section['id'] ?>" onclick="showEditSection(<?= $section['id'] ?>)"></i>
+                                                                <span class="d-flex badge-custom-<?= $section['base_section'] ?>">
+                                                                    <?= $section['title'] ?>
+                                                                </span>
+                                                                <i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $section['id'] ?>" onclick="showEditSection(<?= $section['id'] ?>)"></i>
                                                             </h5>
                                                             <div class="input-group hidden" id="input-group-section-<?= $section['id'] ?>" onfocusout="inputGroupSectionOut(<?= $section['id'] ?>)">
                                                                 <input type="text" class="form-control" id="section-name-num-<?= $section['id'] ?>" value="<?= $section['title'] ?>">
@@ -111,7 +146,7 @@
                                                                                 <p class="task-name overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
 
                                                                                 <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
-                                                                                    <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                    <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                     <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                         <a class="dropdown-item waves-light waves-effect" href="<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>"><i class="icofont icofont-eye-alt"></i>Xem</a>
                                                                                         <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
@@ -119,6 +154,8 @@
                                                                                 </div>
                                                                             </div>
                                                                         <?php endforeach ?>
+                                                                    <?php else : ?>
+                                                                        <p class="overflow-auto">Hiện không có công việc nào ở đây.</p>
                                                                     <?php endif ?>
                                                                 </div>
                                                             </div>
@@ -163,11 +200,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
-                        <select id="choose_section" class="form-control">
+                        <select id="choose_section" class="form-control" disabled>
                             <?php if (!empty($sections)) : ?>
-                                <?php foreach ($sections as $section) : ?>
-                                    <option value="<?= $section['id'] ?>"><?= $section['title'] ?></option>
-                                <?php endforeach ?>
+                                <option value="<?= $sections[0]['id'] ?>"><?= $sections[0]['title'] ?></option>
                             <?php endif ?>
                         </select>
                     </div>
@@ -595,14 +630,17 @@
             })
     }
 
+    var menuContext
     var isDeleteTaskAlreadyClick = false
 
     function deleteTask(id) {
+        menuContext = document.getElementById(`dropdown-${id}`)
         if (isDeleteTaskAlreadyClick) return
         isDeleteTaskAlreadyClick = true
 
-        btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
-        btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        // btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
+        // btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        menuContext.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         isConfirm = confirm('Bạn có chắc là muốn xoá công việc này?')
 
@@ -626,7 +664,7 @@
                     $.growl.notice({
                         message: "Xoá thành công"
                     });
-                    window.location.reload()                    
+                    window.location.reload()
                 }, 1500)
             }).catch(error => {
                 $.growl.error({
@@ -634,7 +672,8 @@
                     location: 'tr',
                     size: 'large'
                 });
-                btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
+                // btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
+                menuContext.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
             });
 
     }
