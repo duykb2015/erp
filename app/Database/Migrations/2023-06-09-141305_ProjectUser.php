@@ -22,6 +22,11 @@ class ProjectUser extends Migration
                 'type'           => 'INT',
                 'null'           => FALSE,
             ],
+            'role' => [
+                'type'           => 'VARCHAR',
+                'constraint'     => 50,
+                'default'        => 'member',
+            ],
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('project_id', 'project', 'id', '', '', 'fk_p_u_p_i_p_i');

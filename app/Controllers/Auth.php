@@ -55,7 +55,9 @@ class Auth extends BaseController
 			return redirectWithMessage(site_url('auth/login'), WRONG_LOGIN_INFORMATION_MESSAGE);
 		}
 
-		$displayName = $user['firstname'] . ' ' .  $user['lastname'] === ' ' ? $user['username'] : $user['firstname'] . ' ' .  $user['lastname'];
+		$displayName = $user['firstname'] . ' ' .  $user['lastname'] === ' ' 
+			? $user['username'] 
+			: $user['firstname'] . ' ' .  $user['lastname'];
 
 		$sessionData = [
 			'user_id'  => $user['id'],

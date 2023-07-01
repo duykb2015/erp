@@ -147,18 +147,34 @@ class Project extends BaseController
 
         $view ??= 'Index';
 
-        if ('Index' == $view) {
-            $sectionModel = new ModelsSection();
-            $taskModel = new ModelsTask();
+        switch (ucfirst($view))
+        {
+            case 'Index':
+                $sectionModel = new ModelsSection();
+                $taskModel = new ModelsTask();
 
-            $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
+                $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
 
-            foreach ($sections as $key => $section)
-            {
-                $sections[$key]['tasks'] = $taskModel->where('task.section_id', $section['id'])->findAll();
-            }
-            $data['sections'] = collect($sections)->sortBy('position')->toArray();
+                foreach ($sections as $key => $section)
+                {
+                    $sections[$key]['tasks'] = $taskModel->where('task.section_id', $section['id'])->findAll();
+                }
+                $data['sections'] = collect($sections)->sortBy('position')->toArray();
+                break;
+
+            case 'Setting':
+                $members = $projectUserModel->select(['user.id as user_id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username'])
+                    ->join('user', 'user.id = project_user.user_id')
+                    ->where('project_user.project_id', $projectID)
+                    ->find();
+                $data['members'] = $members;
+                break;
+        
+            default:
+                $data['backLink']   = '/project';
+                return view('Error/NotFound', $data);
         }
+
 
         $data['project'] = $project;
         $data['title']   = $project['name'];
@@ -168,6 +184,7 @@ class Project extends BaseController
 
     public function create()
     {
+        return $this->handleResponse([], 500);
         $validation = service('validation');
         $validation->setRules(
             [
@@ -200,8 +217,17 @@ class Project extends BaseController
 
         $projectModel = new ModelsProject();
         $projectID    = $projectModel->insert($data);
-
         unset($data);
+
+        $projectUserModel = new ProjectUser();
+        $data = [
+            'project_id' => $projectID,
+            'user_id' => session()->get('user_id'),
+            'role' => 'owner'
+        ];
+        $projectUserModel->insert($data);
+        unset($data);
+
         $data = collect([
             [
                 'project_id' => $projectID,

@@ -99,7 +99,6 @@
                                         </div>
                                     </div>
                                 <?php endforeach ?>
-
                                 <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
                             </div>
                         <?php else : ?>

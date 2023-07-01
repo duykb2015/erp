@@ -47,12 +47,17 @@
     }
 
     .icofont-pencil-alt-5 {
-        margin-top: 6px !important;
+        margin-top: 8px !important;
     }
 
+    .hover-pointer:hover {
+        cursor: pointer !important;
+    }
+    
     .badge-custom-0 {
         border-radius: 4px;
         padding: 2px 6px;
+        margin-right: 4px;
         color: <?= BASE_SECTION[0]['color'] ?> !important;
         background-color: <?= BASE_SECTION[0]['background'] ?> !important;
     }
@@ -60,6 +65,7 @@
     .badge-custom-1 {
         border-radius: 4px;
         padding: 2px 6px;
+        margin-right: 4px;
         color: <?= BASE_SECTION[1]['color'] ?> !important;
         background-color: <?= BASE_SECTION[1]['background'] ?> !important;
     }
@@ -67,6 +73,7 @@
     .badge-custom-2 {
         border-radius: 4px;
         padding: 2px 6px;
+        margin-right: 4px;
         color: <?= BASE_SECTION[2]['color'] ?> !important;
         background-color: <?= BASE_SECTION[2]['background'] ?> !important;
     }
@@ -74,6 +81,7 @@
     .badge-custom-3 {
         border-radius: 4px;
         padding: 2px 6px;
+        margin-right: 4px;
         color: <?= BASE_SECTION[3]['color'] ?> !important;
         background-color: <?= BASE_SECTION[3]['background'] ?> !important;
     }
@@ -126,36 +134,36 @@
                                                     <div class="card border">
                                                         <div class="card-header">
                                                             <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="showSectionEditButton(<?= $section['id'] ?>)" onmouseleave="hideSectionEditButton(<?= $section['id'] ?>)">
-                                                                <span class="d-flex badge-custom-<?= $section['base_section'] ?>">
+                                                                <span class="d-flex badge-custom-<?= $section['base_section'] ?>" id="section-title-<?= $section['id'] ?>">
                                                                     <?= $section['title'] ?>
                                                                 </span>
                                                                 <i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $section['id'] ?>" onclick="showEditSection(<?= $section['id'] ?>)"></i>
                                                             </h5>
                                                             <div class="input-group hidden" id="input-group-section-<?= $section['id'] ?>" onfocusout="inputGroupSectionOut(<?= $section['id'] ?>)">
                                                                 <input type="text" class="form-control" id="section-name-num-<?= $section['id'] ?>" value="<?= $section['title'] ?>">
-                                                                <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewSectionName(<?= $section['id'] ?>)">Lưu</button>
+                                                                <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewSection(<?= $section['id'] ?>)">Lưu</button>
                                                                 <button type="button" id="delete-section-<?= $section['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $section['id'] ?>)">Xoá</button>
                                                             </div>
                                                         </div>
                                                         <div class="card-block p-b-0">
                                                             <div class="row">
-                                                                <div class="col-md-12" id="draggableMultiple">
+                                                                <div class="col-md-12 section-container" id="draggableMultiple">
                                                                     <?php if (!empty($section['tasks'])) : ?>
                                                                         <?php foreach ($section['tasks'] as $task) : ?>
-                                                                            <div class="sortable-moves border">
-                                                                                <p class="task-name overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
+                                                                            <div class="sortable-moves border box">
+                                                                                <p class="task-name hover-pointer overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
 
                                                                                 <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                     <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                     <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                        <a class="dropdown-item waves-light waves-effect" href="<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>"><i class="icofont icofont-eye-alt"></i>Xem</a>
+                                                                                        <!-- <a class="dropdown-item waves-light waves-effect" href="<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>"><i class="icofont icofont-eye-alt"></i>Xem</a> -->
                                                                                         <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
                                                                         <?php endforeach ?>
                                                                     <?php else : ?>
-                                                                        <p class="overflow-auto">Hiện không có công việc nào ở đây.</p>
+                                                                        <p class="overflow-auto">Hiện không có công việc nào.</p>
                                                                     <?php endif ?>
                                                                 </div>
                                                             </div>
@@ -440,7 +448,7 @@
             redirect: 'follow'
         };
 
-        fetch('<?= base_url('project/section/create') ?>', requestOptions)
+        fetch('<?= base_url('section/create') ?>', requestOptions)
             .then(response => response.json())
             .then(result => {
                 if (0 == result.length) {
@@ -497,7 +505,12 @@
         editButton.style.display = 'none'
     }
 
+    var sectionTitle
+
     function showEditSection(id) {
+        sectionTitle = document.getElementById(`section-title-${id}`)
+        sectionTitle.setAttribute('style', 'display:none !important');
+
         inputGroutSection = document.getElementById(`input-group-section-${id}`)
         inputGroutSection.style.display = 'flex'
 
@@ -513,6 +526,7 @@
         }
         inputSectionName = document.getElementById(`section-name-num-${id}`)
         if (sectionNameTemp == inputSectionName.value) {
+            sectionTitle.style.display = 'block'
             div = document.getElementById(`input-group-section-${id}`)
             div.style.display = 'none'
         }
@@ -521,7 +535,7 @@
 
     var saveNewNameAlreadyActive = false
 
-    function saveNewSectionName(id) {
+    function saveNewSection(id) {
         if (saveNewNameAlreadyActive) {
             return
         }
@@ -540,7 +554,7 @@
             redirect: 'follow'
         };
 
-        fetch('<?= base_url('project/section/update') ?>', requestOptions)
+        fetch('<?= base_url('section/update') ?>', requestOptions)
             .then(response => response.json())
             .then(result => {
                 if (0 == result.length) {
@@ -604,7 +618,7 @@
             redirect: 'follow'
         };
 
-        fetch('<?= base_url('project/section/delete') ?>', requestOptions)
+        fetch('<?= base_url('section/delete') ?>', requestOptions)
             .then(response => response.json())
             .then(result => {
                 if (0 == result.length) {

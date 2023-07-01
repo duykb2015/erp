@@ -132,7 +132,7 @@
                                             <div class="col-4">
                                                 <div class="form-group form-primary">
                                                     <label class="p-1" for="prefix">Tiền tố <span class="text-danger">*</span></label>
-                                                    <input type="text" value="<?= $project['key'] ?>" class="form-control rounded" placeholder="Email" disabled>
+                                                    <input type="text" value="<?= $project['key'] ?>" class="form-control rounded" placeholder="Email" disabled title="Tiền tố không thể sửa.">
                                                 </div>
                                             </div>
                                         </div>
@@ -140,7 +140,11 @@
                                             <div class="col-4">
                                                 <div class="form-group form-primary">
                                                     <label class="p-1" for="lastname">Chủ sở hữu</label>
-                                                    <input type="text" name="owner" value="" class="form-control rounded" placeholder="Nhập họ...">
+                                                    <select name="owner" class="form-control rounded">
+                                                        <?php foreach ($members as $member) : ?>
+                                                            <option value="<?= $member['user_id'] ?>"><?= $member['username'] ?> <?= $member['user_id'] == session()->get('user_id') ? '(Chủ sở hữu)' : '' ?></option>
+                                                        <?php endforeach ?>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -148,7 +152,7 @@
                                             <div class="col-4">
                                                 <div class="form-group form-primary">
                                                     <label class="p-1" for="lastname">Mô tả</label>
-                                                    <textarea type="text" name="descriptions" value="" class="form-control rounded"><?= $project['key'] ?></textarea>
+                                                    <textarea type="text" name="descriptions" value="" class="form-control rounded"><?= $project['descriptions'] ?></textarea>
                                                 </div>
                                             </div>
                                         </div>

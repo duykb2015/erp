@@ -11,6 +11,7 @@ class User extends BaseController
 {
     public function index()
     {
+
         $userModel = new ModelsUser();
         $user      = $userModel->find(session()->get('user_id'));
         $data['user'] = $user;
@@ -21,7 +22,7 @@ class User extends BaseController
 
     public function update()
     {
-
+       
         $validation = service('validation');
         $validation->setRules(
             [
@@ -62,6 +63,12 @@ class User extends BaseController
 
         try {
             $userModel->save($user);
+            $displayName = $user['username'];
+            if ($user['firstname'] && $user['lastname'])
+            {
+                $displayName = $user['firstname'] . ' ' .  $user['lastname'];
+            }
+            session()->set('name', $displayName);
         } catch (Exception $e) {
             return redirectWithMessage(site_url('user'), $e->getMessage());
         }

@@ -26,13 +26,26 @@ class Section extends BaseController
         }
 
         $sectionModel = new ModelsSection();
-        $count = count($sectionModel->select('id')->where('project_id', $projectId)->findAll());
+        $sections     = $sectionModel->select(['id', 'base_section', 'position'])->where('project_id', $projectId)->findAll();
+        $sections     = collect($sections);
+        $base_section = $sections->where('base_section', '=', 3)->first();
+        $count = count($sections);
 
         $data = [
             'project_id' => $projectId,
             'title' => $section,
+            // The case where the section finish has been moved to a non-last position, ignore and do nothing.
             'position' => $count
         ];
+        // In case the section finish is in the last position, we will swap them to make their state clear.
+        // (if it's finished, it should be last)
+        if (($count - 1) == $base_section['position'])
+        {
+            $data['position'] = $base_section['position'];
+            $base_section['position'] = $count;
+
+            $sectionModel->save($base_section);
+        }
 
         try {
             $sectionModel->insert($data);

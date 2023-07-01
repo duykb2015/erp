@@ -54,6 +54,7 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 
 $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Project::list');
+    $routes->post('create', 'Project::create');
     
     $routes->get('(:num)/task/(:num)', 'Project::task');
 
@@ -62,14 +63,13 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
         $routes->get('user', 'Project::user');
         $routes->get('setting', 'Project::setting');
     });
-    
-    $routes->post('create', 'Project::create');
+});
 
-    $routes->group('section', function ($routes) {
-        $routes->post('create', 'Section::create');
-        $routes->post('update', 'Section::update');
-        $routes->post('delete', 'Section::delete');
-    });
+$routes->group('section', ['filter' => 'login'], function ($routes) {
+    $routes->get('create', 'Section::create');
+    $routes->post('create', 'Section::create');
+    $routes->post('update', 'Section::update');
+    $routes->post('delete', 'Section::delete');
 });
 
 $routes->group('task', ['filter' => 'login'], function ($routes) {

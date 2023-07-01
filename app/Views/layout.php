@@ -220,7 +220,12 @@
                 redirect: 'follow'
             };
             fetch('<?= base_url('project/create') ?>', requestOptions)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Máy chủ đang bảo trì, vui lòng thử lại sau!')
+                    }
+                    return response.json();
+                })
                 .then(result => {
                     if (result.errors) {
                         setTimeout(() => {
@@ -248,27 +253,27 @@
                                     size: 'large'
                                 });
                             }
+
                             createProjectAlreadyClick = false
                             createButton.innerHTML = 'Tạo'
                         }, 1000)
                         return
                     }
 
-                    if (result.project_id) {
-                        $.growl.notice({
-                            message: "Tạo mới dự án thành công"
-                        });
-
-                        setTimeout(() => {
-                            window.location.href = `<?= base_url('project') ?>/${result.project_id}`
-                        }, 2000)
-
-                        return
-                    }
-                }).catch(() => {
-                    $.growl.error({
-                        message: "Có lỗi xảy ra, vui lòng thử lại sau"
+                    $.growl.notice({
+                        message: "Tạo mới dự án thành công"
                     });
+
+                    setTimeout(() => {
+                        window.location.href = `<?= base_url('project') ?>/${result.project_id}`
+                    }, 1000)
+
+                    return
+                }).catch((error) => {
+                    $.growl.error({
+                        message: error
+                    });
+                    createProjectAlreadyClick = false
                     createButton.innerHTML = 'Tạo'
                 })
         }

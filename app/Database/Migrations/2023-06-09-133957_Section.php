@@ -34,7 +34,7 @@ class Section extends Migration
             ],
         ]);
         $this->forge->addPrimaryKey('id');
-        $this->forge->addForeignKey('project_id', 'section', 'id', '', '', 'fk_s_p_i_p_i');
+        $this->forge->addForeignKey('project_id', 'project', 'id', '', '', 'fk_s_p_i_p_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',
@@ -45,6 +45,6 @@ class Section extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('section', TRUE);
     }
 }
