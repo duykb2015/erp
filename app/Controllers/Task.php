@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\Project;
 use App\Models\Task as ModelsTask;
 
 class Task extends BaseController
@@ -18,6 +19,7 @@ class Task extends BaseController
         $validation = service('validation');
 
         $rule = [
+            'project_id'        => 'required|integer|is_not_unique[project.id]',
             'task_name'         => 'required|string|min_length[5]|max_length[512]',
             'choose_section'    => 'required|integer|is_not_unique[section.id]',
             'task_descriptions' => 'string',
@@ -35,7 +37,18 @@ class Task extends BaseController
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
 
+        $projectModel = new Project();
+        $project = $projectModel->select('key')->where('id', $taskRawData['project_id'])->first();
+
+        $taskModel = new ModelsTask();
+
+        $count = count($taskModel
+            ->join('section', 'section.id = task.section_id')
+            ->join('project', 'project.id = section.project_id')
+            ->where('project.id', $taskRawData['project_id'])->find());
+
         $data = [
+            'task_key'      => $project['key'] . '-' . ($count + 1),
             'section_id'    => $taskRawData['choose_section'],
             'title'         => $taskRawData['task_name'],
             'descriptions'  => $taskRawData['task_descriptions'],
@@ -43,12 +56,10 @@ class Task extends BaseController
             'created_by'    => session()->get('user_id'),
         ];
 
-        if ($taskRawData['assignee'])
-        {
+        if ($taskRawData['assignee']) {
             $data['assignee'] = $taskRawData['assignee'];
         }
 
-        $taskModel = new ModelsTask();
         $taskID = $taskModel->insert($data);
 
         return $this->handleResponse(['task_id' => $taskID]);
@@ -65,5 +76,4 @@ class Task extends BaseController
         $taskModel->delete($taskID);
         return $this->handleResponse();
     }
-
 }

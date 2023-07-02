@@ -55,13 +55,19 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Project::list');
     $routes->post('create', 'Project::create');
-    
+    $routes->post('find/user', 'Project::findUser');
+    $routes->post('(:num)/image/upload', 'Project::upload');
+    $routes->post('(:num)/image/cancel', 'Project::cancelUpload');
+    $routes->post('(:num)/image/remove', 'User::remove');
+
     $routes->get('(:num)/task/(:num)', 'Project::task');
 
     $routes->group('(:any)', function ($routes) {
         $routes->get('/', 'Project::detail');
         $routes->get('user', 'Project::user');
+        $routes->post('user', 'Project::addUser');
         $routes->get('setting', 'Project::setting');
+        $routes->post('setting', 'Project::saveSetting');
     });
 });
 

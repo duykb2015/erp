@@ -53,7 +53,7 @@
     .hover-pointer:hover {
         cursor: pointer !important;
     }
-    
+
     .badge-custom-0 {
         border-radius: 4px;
         padding: 2px 6px;
@@ -328,6 +328,7 @@
     // var files
     var btnCreateTask = null
     var isCreateNewTaskAlreadyClick = false
+    var projectId = document.getElementById('project-id')
 
     function createNewTask(projectID) {
         if (isCreateNewTaskAlreadyClick) return
@@ -341,6 +342,7 @@
         data.append('choose_section', document.getElementById('choose_section').value)
         data.append('assignee', document.getElementById('assignee').value)
         data.append('task_descriptions', task_descriptions.getData())
+        data.append('project_id', projectId.value)
 
         var requestOptions = {
             method: 'POST',
@@ -349,7 +351,12 @@
         };
 
         fetch('<?= base_url('task/create') ?>', requestOptions)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server đang bảo trì, vui lòng thử lại sau!')
+                }
+                return response.json()
+            })
             .then(result => {
                 if (result.errors) {
                     setTimeout(() => {
@@ -392,12 +399,61 @@
                 }, 1000)
 
                 return
-            }).catch(() => {
+            }).catch(error => {
                 $.growl.error({
-                    message: "Có lỗi xảy ra, vui lòng thử lại sau"
+                    message: error
                 });
-                createButton.innerHTML = 'Tạo'
+                isCreateNewTaskAlreadyClick = false
+                btnCreateTask.innerHTML = 'Tạo'
             })
+    }
+
+    var menuContext
+    var isDeleteTaskAlreadyClick = false
+
+    function deleteTask(id) {
+        menuContext = document.getElementById(`dropdown-${id}`)
+        if (isDeleteTaskAlreadyClick) return
+        isDeleteTaskAlreadyClick = true
+
+        // btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
+        // btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        menuContext.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        isConfirm = confirm('Bạn có chắc là muốn xoá công việc này?')
+
+        if (!isConfirm) {
+            return
+        }
+
+        const data = new FormData()
+        data.append('task_id', id)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/delete') ?>', requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                setTimeout(function() {
+                    $.growl.notice({
+                        message: "Xoá thành công"
+                    });
+                    window.location.reload()
+                }, 1500)
+            }).catch(error => {
+                $.growl.error({
+                    message: error,
+                    location: 'tr',
+                    size: 'large'
+                });
+                // btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
+                menuContext.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+            });
+
     }
 </script>
 
@@ -437,7 +493,6 @@
         }
         createSectionAlreadyActive = true
 
-        projectId = document.getElementById('project-id')
         const data = new FormData()
         data.append('section_name', sectionName.value)
         data.append('project_id', projectId.value)
@@ -642,54 +697,6 @@
                     btnDelete.innerHTML = 'Xoá'
                 }, 1000)
             })
-    }
-
-    var menuContext
-    var isDeleteTaskAlreadyClick = false
-
-    function deleteTask(id) {
-        menuContext = document.getElementById(`dropdown-${id}`)
-        if (isDeleteTaskAlreadyClick) return
-        isDeleteTaskAlreadyClick = true
-
-        // btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
-        // btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-        menuContext.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-
-        isConfirm = confirm('Bạn có chắc là muốn xoá công việc này?')
-
-        if (!isConfirm) {
-            return
-        }
-
-        const data = new FormData()
-        data.append('task_id', id)
-
-        var requestOptions = {
-            method: 'POST',
-            body: data,
-            redirect: 'follow'
-        };
-
-        fetch('<?= base_url('task/delete') ?>', requestOptions)
-            .then(response => response.json())
-            .then(result => {
-                setTimeout(function() {
-                    $.growl.notice({
-                        message: "Xoá thành công"
-                    });
-                    window.location.reload()
-                }, 1500)
-            }).catch(error => {
-                $.growl.error({
-                    message: error,
-                    location: 'tr',
-                    size: 'large'
-                });
-                // btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
-                menuContext.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
-            });
-
     }
 </script>
 

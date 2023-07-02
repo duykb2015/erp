@@ -1,6 +1,9 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
 <style>
+    .task > .sub-title {
+        margin-bottom: 0px !important;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -69,26 +72,31 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card user-activity-card border">
-                        <?php if (!empty($projectss)) : ?>
+                        <?php if (!empty($recentTasks)) : ?>
                             <div class="card-header">
                                 <h5 class="card-header-text">Công việc đang thực hiện</h5>
-                                <div class="sub-title">Đang thực hiện</div>
                             </div>
                             <div class="card-block">
-                                <?php foreach ($projects as $project) : ?>
+                                <?php foreach ($recentTasks as $section => $tasks) : ?>
                                     <div class="card z-depth-bottom-2">
-                                        <div class="row m-3">
-                                            <div class="col-auto p-r-0">
-                                                <div class="u-img">
-                                                    <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" alt="user image" class="img-radius cover-img">
+                                        <div class="card-header task">
+                                            <div class="sub-title"><?= $section ?></div>
+                                        </div>
+                                        <?php foreach ($tasks as $task) : ?>
+                                            <div class="card-block">
+                                                <div class="row m-3">
+                                                    <div class="col-auto p-r-0">
+                                                        <div class="u-img">
+                                                            <img src="<?= base_url() . '/imgs/' . $task['project_photo'] ?>" alt="user image" class="img-radius cover-img">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <h6 class="m-b-5"><a href="<?= base_url('project') . '/' . $task['project_id'] . '/task/' . $task['id'] ?>" class="text-decoration-none">[<?= $task['task_key'] ?>] <?= $task['title'] ?></a></h6>
+                                                        <p class="text-muted m-b-0"><?= $task['project_name'] ?></p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col">
-                                                <h6 class="m-b-5"><a href="<?= base_url('project') . '/' . $project['id'] ?>" class="text-decoration-none">[<?= $project['key'] ?>] <?= $project['name'] ?></a></h6>
-                                                <p class="text-muted m-b-0"><?= $project['descriptions'] ?></p>
-                                                <p class="text-muted m-b-0"><i class="feather icon-clock m-r-10"></i>Cập nhật: <?= $project['updated_at'] ?>.</p>
-                                            </div>
-                                        </div>
+                                        <?php endforeach ?>
                                     </div>
                                 <?php endforeach ?>
                             </div>

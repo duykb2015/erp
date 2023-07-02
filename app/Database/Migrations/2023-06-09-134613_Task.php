@@ -14,6 +14,11 @@ class Task extends Migration
                 'null'           => FALSE,
                 'auto_increment' => TRUE
             ],
+            'task_key' => [
+                'type'           => 'VARCHAR',
+                'constraint'     => 25,
+                'null'           => FALSE,
+            ],
             'section_id' => [
                 'type'           => 'INT',
                 'null'           => FALSE,
@@ -52,6 +57,7 @@ class Task extends Migration
             'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp'
         ]);
         $this->forge->addPrimaryKey('id');
+        $this->forge->addUniqueKey('task_key');
         $this->forge->addForeignKey('section_id', 'section', 'id', '', '', 'fk_t_s_i_s_i');
         $this->forge->addForeignKey('assignee', 'user', 'id', '', '', 'fk_t_a_u_i');
         $this->forge->addForeignKey('created_by', 'user', 'id', '', '', 'fk_t_c_b_u_i');

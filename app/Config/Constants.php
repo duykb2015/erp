@@ -123,3 +123,10 @@ define('BASE_SECTION', [
     INPROGRESS => ['background' => '#e9f2ff', 'color' => '#0055cc'],
     DONE       => ['background' => '#dffcf0', 'color' => '#216e4e'],
 ]);
+
+define('LEADER', 'leader');
+define('MEMBER', 'member');
+define('PROJECT_ROLE',[
+    LEADER => 'Trưởng nhóm',
+    MEMBER => 'Thành viên'
+] );

@@ -111,8 +111,8 @@ class User extends BaseController
         session()->set('avatar', $old_avatar);
 
         $userModel = new ModelsUser();
-        $img = $userModel->find(session()->get('user_id'))['photo'];
-        @unlink(UPLOAD_PATH . $img);
+        // $img = $userModel->find(session()->get('user_id'))['photo'];
+        // @unlink(UPLOAD_PATH . $img);
         $userModel->update(session()->get('user_id'), ['photo' => $old_avatar]);
 
         return $this->handleResponse();
@@ -120,7 +120,8 @@ class User extends BaseController
 
     public function remove()
     {
-
+        // $fileName = $this->request->getPost('file_name');
+        // @unlink(UPLOAD_PATH . $fileName);
         return $this->handleResponse();
     }
 }

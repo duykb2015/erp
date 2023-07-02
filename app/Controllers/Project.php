@@ -6,8 +6,10 @@ use App\Models\Project as ModelsProject;
 use App\Models\ProjectUser;
 use App\Models\Section as ModelsSection;
 use App\Models\Task as ModelsTask;
+use App\Models\User;
 use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
+use Config\Services;
 
 class Project extends BaseController
 {
@@ -135,11 +137,13 @@ class Project extends BaseController
             return view('Error/NotFound', $data);
         }
 
-        $projectUser = $projectUserModel->select('user_id')->where('project_id', $projectID)->findAll();
-
+        $projectUser = $projectUserModel->select('user_id')->where('project_id', $projectID)->find();
+        $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
+        
         $userID = session()->get('user_id');
+        
         if ($project['owner'] != $userID) {
-            if (!in_array($userID, $projectUser)) {
+            if (!in_array($userID, $projectUserID)) {
                 $data['backLink']   = '/project';
                 return view('Error/Forbidden', $data);
             }
@@ -147,29 +151,34 @@ class Project extends BaseController
 
         $view ??= 'Index';
 
-        switch (ucfirst($view))
-        {
+        switch (ucfirst($view)) {
             case 'Index':
                 $sectionModel = new ModelsSection();
                 $taskModel = new ModelsTask();
 
                 $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
 
-                foreach ($sections as $key => $section)
-                {
+                foreach ($sections as $key => $section) {
                     $sections[$key]['tasks'] = $taskModel->where('task.section_id', $section['id'])->findAll();
                 }
                 $data['sections'] = collect($sections)->sortBy('position')->toArray();
                 break;
 
             case 'Setting':
-                $members = $projectUserModel->select(['user.id as user_id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username'])
-                    ->join('user', 'user.id = project_user.user_id')
+            case 'User':
+                $members = $projectUserModel->select([
+                    'user.id as user_id',
+                    'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username',
+                    'email',
+                    'photo',
+                    'role'
+                ])->join('user', 'user.id = project_user.user_id')
                     ->where('project_user.project_id', $projectID)
                     ->find();
                 $data['members'] = $members;
+
                 break;
-        
+
             default:
                 $data['backLink']   = '/project';
                 return view('Error/NotFound', $data);
@@ -184,7 +193,6 @@ class Project extends BaseController
 
     public function create()
     {
-        return $this->handleResponse([], 500);
         $validation = service('validation');
         $validation->setRules(
             [
@@ -223,7 +231,7 @@ class Project extends BaseController
         $data = [
             'project_id' => $projectID,
             'user_id' => session()->get('user_id'),
-            'role' => 'owner'
+            'role' => 'leader'
         ];
         $projectUserModel->insert($data);
         unset($data);
@@ -258,6 +266,52 @@ class Project extends BaseController
         return $this->handleResponse($result);
     }
 
+    public function addUser()
+    {
+        $validation = service('validation');
+        $validation->setRules(
+            [
+                'project_id' => 'required|integer|is_not_unique[project.id]',
+                'user_id'    => 'required|integer|is_not_unique[user.id]',
+            ],
+            customValidationErrorMessage()
+        );
+
+        $projectID = ($this->request->getPost('project_id'));
+        $userID = ($this->request->getPost('user_id'));
+
+        if (!$validation->run($this->request->getPost())) {
+            return redirectWithMessage(base_url('project/') . $projectID . '/user', $validation->getErrors());
+        }
+
+        $projectUserModel = new ProjectUser();
+        $data = [
+            'user_id' => $userID,
+            'project_id' => $projectID,
+            'role' => 'member'
+        ];
+
+        $projectUser = $projectUserModel->where($data)->find();
+
+        if ($projectUser) {
+            return redirectWithMessage(base_url('project/') . $projectID . '/user', 'Người dùng đã tham gia dự án');
+        }
+
+        $projectUserModel->insert($data);
+
+        return redirectWithMessage(base_url('project/') . $projectID . '/user', 'success', 'success', FALSE);
+    }
+
+    public function findUser()
+    {
+        $email = $this->request->getPost('email');
+
+        $userModel = new User();
+        $user      = $userModel->select(['id', 'email as text'])->like('email', $email)->find();
+
+        return $this->handleResponse(json_encode($user));
+    }
+
     public function task()
     {
         $segment = $this->request->getUri()->getSegments();
@@ -265,23 +319,21 @@ class Project extends BaseController
         $projectID = $segment[0];
         $projectModel  = new ModelsProject();
         $project = $projectModel->find($projectID);
-        if (! $project)
-        {
+        if (!$project) {
             $data['backLink']   = '/project//';
             return view('Error/NotFound', $data);
         }
 
         $taskModel = new ModelsTask();
         $task = $taskModel->find($segment[2]);
-        if (! $task)
-        {
+        if (!$task) {
             $data['backLink']   = '/project//' . $projectID;
             return view('Error/NotFound', $data);
         }
 
-        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('d/m/Y') : NULL ;
-        $task['due_at'] = $task['due_at'] ? Carbon::createFromDate($task['due_at'])->format('d/m/Y') : NULL ;
-        
+        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('d/m/Y') : NULL;
+        $task['due_at'] = $task['due_at'] ? Carbon::createFromDate($task['due_at'])->format('d/m/Y') : NULL;
+
         $data['project'] =  $project;
         $data['task'] =  $task;
         $data['title'] = 'Chi tiết công việc';
@@ -292,5 +344,85 @@ class Project extends BaseController
     {
         $data['title']   = 'Cài đặt';
         return view('Project/Setting', $data);
+    }
+
+    public function saveSetting()
+    {
+        $projectID = $this->request->getPost('id');
+
+        $validation = service('validation');
+        $validation->setRules(
+            [
+                'id'           => 'required|integer|is_not_unique[project.id]',
+                'name'         => 'required|string|min_length[5]|max_length[255]',
+                'owner'        => 'required|is_not_unique[user.id]',
+                'descriptions' => 'string|max_length[512]',
+            ],
+            customValidationErrorMessage()
+        );
+
+        if (!$validation->run($this->request->getPost())) {
+            return redirectWithMessage(base_url('project/') . $projectID . '/setting', $validation->getErrors());
+        }
+
+        $data = [
+            'name' => $this->request->getPost('name'),
+            'descriptions' => $this->request->getPost('descriptions'),
+            'owner' => $this->request->getPost('owner'),
+        ];
+
+        $projectModel = new ModelsProject();
+
+        $projectModel->update($projectID, $data);
+
+        return redirectWithMessage(base_url('project/') . $projectID . '/setting', 'success', 'success', FALSE);
+    }
+
+    public function upload()
+    {
+        $projectID = $this->request->getUri()->getSegment(2);
+        $avatar = $this->request->getFile('project_avatar');
+
+        if (!$avatar->isValid() || $avatar->hasMoved()) {
+            return false;
+        }
+        $newName = $avatar->getRandomName();
+        $fileName = $newName;
+        $avatar->move(UPLOAD_PATH, $newName);
+
+        $projectModel = new ModelsProject();
+        $project      = $projectModel->find($projectID);
+
+        $cache = Services::cache();
+        $cache->save('old-project-avatar', $project['photo'], 600);
+
+        // @unlink(UPLOAD_PATH . $user['photo']);
+
+        $projectModel->update($projectID, ['photo' => $fileName]);
+
+        return $this->handleResponse($fileName);
+    }
+
+    public function cancelUpload()
+    {
+        $projectID = $this->request->getUri()->getSegment(2);
+
+        $cache = Services::cache();
+        $old_avatar = $cache->get('old-project-avatar');
+        session()->set('avatar', $old_avatar);
+
+        $projectModel = new ModelsProject();
+        // $img = $projectModel->find($projectID)['photo'];
+        // @unlink(UPLOAD_PATH . $img);
+        $projectModel->update($projectID, ['photo' => $old_avatar]);
+
+        return $this->handleResponse();
+    }
+
+    public function remove()
+    {
+        // $fileName = $this->request->getPost('file_name');
+        // @unlink(UPLOAD_PATH . $fileName);
+        return $this->handleResponse('success');
     }
 }

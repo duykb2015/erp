@@ -255,9 +255,7 @@
         })
     })()
 
-    function removeAlert() {
-        document.querySelectorAll(".alert").forEach(e => e.remove());
-    }
+
 </script>
 
 <?= $this->endSection() ?>

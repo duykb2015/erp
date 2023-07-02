@@ -91,7 +91,7 @@ $(document).ready(function () {
 				window.localStorage.setItem('img-name', data)
 				var parent = itemEl.find(".jFiler-jProgressBar").parent(),
 					new_file_name = data//JSON.parse(),
-					filerKit = inputEl.prop("jFiler");
+				filerKit = inputEl.prop("jFiler");
 
 				filerKit.files_list[id].name = new_file_name;
 
@@ -151,7 +151,5 @@ $(document).ready(function () {
 			}
 		}
 	});
-
-
 
 })

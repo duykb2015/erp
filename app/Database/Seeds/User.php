@@ -4,6 +4,7 @@ namespace App\Database\Seeds;
 
 use App\Models\User as ModelsUser;
 use CodeIgniter\Database\Seeder;
+use Faker\Factory as Faker;
 
 class User extends Seeder
 {
@@ -18,6 +19,21 @@ class User extends Seeder
         ];
         $user = new ModelsUser();
         $user->insert($data);
+
+        $faker = Faker::create('Asia/Ho_Chi_Minh');
+
+        for ($i = 0; $i < 20; $i++) {
+            $data = [
+                'username' => $faker->userName(),
+                'password' => md5('1112'),
+                'email' => $faker->email(),
+                'photo' => $this->makeImage(strtoUpper('A')),
+                'firstname' => $faker->firstName(),
+                'lastname'  => $faker->lastName(),
+                'type' => 'user'
+            ];
+            $user->insert($data);
+        }
     }
 
     public function makeImage($character)
