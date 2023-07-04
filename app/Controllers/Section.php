@@ -28,7 +28,7 @@ class Section extends BaseController
         $sectionModel = new ModelsSection();
         $sections     = $sectionModel->select(['id', 'base_section', 'position'])->where('project_id', $projectId)->findAll();
         $sections     = collect($sections);
-        $base_section = $sections->where('base_section', '=', 3)->first();
+        $baseDoneSection = $sections->where('base_section', '=', 3)->first();
         $count = count($sections);
 
         $data = [
@@ -39,12 +39,13 @@ class Section extends BaseController
         ];
         // In case the section finish is in the last position, we will swap them to make their state clear.
         // (if it's finished, it should be last)
-        if (($count - 1) == $base_section['position'])
-        {
-            $data['position'] = $base_section['position'];
-            $base_section['position'] = $count;
+        if (NULL != $baseDoneSection) {
+            if (($count - 1) == $baseDoneSection['position']) {
+                $data['position'] = $baseDoneSection['position'];
+                $base_section['position'] = $count;
 
-            $sectionModel->save($base_section);
+                $sectionModel->save($base_section);
+            }
         }
 
         try {
