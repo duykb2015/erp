@@ -42,9 +42,9 @@ class Section extends BaseController
         if (NULL != $baseDoneSection) {
             if (($count - 1) == $baseDoneSection['position']) {
                 $data['position'] = $baseDoneSection['position'];
-                $base_section['position'] = $count;
+                $baseDoneSection['position'] = $count;
 
-                $sectionModel->save($base_section);
+                $sectionModel->save($baseDoneSection);
             }
         }
 
@@ -105,7 +105,15 @@ class Section extends BaseController
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
 
+        //Không cho xoá nếu đó là base section
+
         $sectionModel = new ModelsSection();
+        $section = $sectionModel->find($sectionID);
+        if (0 != $section['base_section'])
+        {
+            return $this->handleResponse(['errors' => 'Không thể xoá base section'], 400);
+        }
+        
         try {
             $sectionModel->delete($sectionID);
         } catch (Exception $e) {

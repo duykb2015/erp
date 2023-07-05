@@ -139,9 +139,9 @@ class Project extends BaseController
 
         $projectUser = $projectUserModel->select('user_id')->where('project_id', $projectID)->find();
         $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
-        
+
         $userID = session()->get('user_id');
-        
+
         if ($project['owner'] != $userID) {
             if (!in_array($userID, $projectUserID)) {
                 $data['backLink']   = '/project';
@@ -409,6 +409,9 @@ class Project extends BaseController
 
         $cache = Services::cache();
         $old_avatar = $cache->get('old-project-avatar');
+        if (!$old_avatar) {
+            return $this->handleResponse();
+        }
         session()->set('avatar', $old_avatar);
 
         $projectModel = new ModelsProject();

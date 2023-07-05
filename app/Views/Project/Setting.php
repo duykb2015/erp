@@ -51,15 +51,35 @@
                     <div class="row justify-content-center d-flex">
                         <div class="col-lg-12">
                             <!-- Authentication card start -->
-                            <form class="md-float-material form-material needs-validation" method="POST" action="" novalidate>
-                                <div class="auth-box card">
-                                    <div class="card-header">
-                                        <div class="row justify-content-center">
-                                            <div class="col-12">
-                                                <h5 class="card-header-text sub-title d-flex">Thông tin cơ bản</h5>
+                            <div class="auth-box card">
+                                <div class="card-header">
+                                    <div class="row justify-content-center">
+                                        <div class="col-12">
+                                            <h5 class="card-header-text sub-title d-inline">Cài đặt dự án</h5>
+                                            <button type="button" class="btn btn-danger f-right rounded card-header-text sub-title d-flex" data-bs-toggle="modal" data-bs-target="#deleteProject">Xoá dự án</button>
+                                            <div class="modal fade mt-5" id="deleteProject" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+                                                <!-- modal-xl -->
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Xoá dự án</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <label for="password">Nhập mật khẩu của bạn để xác nhận xoá dự án!</label>
+                                                            <input type="password" name="password" id="user-password" class="form-control rounded my-1" value="" placeholder="Nhập mật khẩu của bạn...">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" id="delete-project-button" onclick="doDeleteProject(<?= $project['id'] ?>)" class="btn btn-primary rounded waves-effect waves-light float-end">Xác nhận</button>
+                                                            <button type="button" onclick="" class="btn btn-secondary rounded waves-effect waves-light float-end" data-bs-dismiss="modal">Huỷ</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <form class="md-float-material form-material needs-validation" method="POST" action="" novalidate>
                                     <div class="card-block">
                                         <div class="row m-b-20">
                                             <div class="col-12">
@@ -108,6 +128,7 @@
                                                 <?php endif ?>
                                             </div>
                                         </div>
+
                                         <div class="row justify-content-center">
                                             <div class="col-2">
                                                 <div class="card border">
@@ -178,15 +199,14 @@
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row justify-content-center">
                                         <div class="col-4 mb-3">
-                                            <a href="<?= base_url('project/') . $project['id'] . '/setting' ?>" id="edit-cancel" class=" rounded btn btn-default waves-effect float-end">Cancel</a>
-                                            <button class="btn btn-primary rounded waves-effect waves-light m-r-20 float-end">Save</button>
+                                            <a href="<?= base_url('project/') . $project['id'] . '/setting' ?>" id="edit-cancel" class=" rounded btn btn-default waves-effect float-end">Huỷ</a>
+                                            <button class="btn btn-primary rounded waves-effect waves-light m-r-20 float-end">Lưu</button>
                                         </div>
                                     </div>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -205,7 +225,48 @@
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js"></script>
 
 <script>
-    var alreadyClick = false
+    function doDeleteProject(id) {
+        let userPassword = document.getElementById('user-password')
+        let btnDeleteProject = document.getElementById('delete-project-button')
+        btnDeleteProject.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        var requestOptions = {
+            method: 'POST',
+            redirect: 'follow',
+            data: data
+        }
+        fetch('<?= base_url('project/' . $project['id'] . '/image/cancel') ?>', requestOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Có lỗi xảy ra, vui lòng thử lại sau!')
+                }
+                return response.json()
+            }).then(result => {
+                if (0 == result.length) {
+                    $.growl.notice({
+                        message: "Xoá thành công"
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = '<?= base_url('project') ?>'
+                    }, 1000)
+                    return
+                }
+
+            }).catch((error) => {
+                $.growl.error({
+                    message: error,
+                    location: 'tr',
+                    size: 'large'
+                });
+                deleteSectionAlreadyActive = false
+                btnDeleteProject.innerHTML = 'Xác nhận'
+            })
+    }
+
+    // Kiểm  tra lại hàm xoá này. viết logic xoá bên backend
+
+
+    var saveAvatarAlreadyClick = false
 
     function saveAvatar() {
 
@@ -213,10 +274,10 @@
             return
         }
 
-        if (alreadyClick) {
+        if (saveAvatarAlreadyClick) {
             return
         }
-        alreadyClick = true
+        saveAvatarAlreadyClick = true
 
         saveButton = document.getElementById('save-image')
         saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
@@ -353,7 +414,7 @@
             enctype: 'multipart/form-data',
             synchron: true,
             beforeSend: function() {
-                alreadyClick = true
+                saveAvatarAlreadyClick = true
 
                 saveButton = document.getElementById('save-image')
                 saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
@@ -370,7 +431,7 @@
                     $("<div class=\"jFiler-item-others text-success\"><i class=\"icon-jfi-check-circle\"></i> Thành công</div>").hide().appendTo(parent).fadeIn("slow");
                 });
 
-                alreadyClick = false
+                saveAvatarAlreadyClick = false
                 saveButton = document.getElementById('save-image')
                 saveButton.innerHTML = 'Lưu'
             },
@@ -379,7 +440,7 @@
                 el.find(".jFiler-jProgressBar").fadeOut("slow", function() {
                     $("<div class=\"jFiler-item-others text-error\"><i class=\"icon-jfi-minus-circle\"></i> Thất bại</div>").hide().appendTo(parent).fadeIn("slow");
                 });
-                alreadyClick = false
+                saveAvatarAlreadyClick = false
                 saveButton = document.getElementById('save-image')
                 saveButton.innerHTML = 'Lưu'
             },

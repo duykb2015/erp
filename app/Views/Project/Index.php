@@ -674,7 +674,9 @@
         };
 
         fetch('<?= base_url('section/delete') ?>', requestOptions)
-            .then(response => response.json())
+            .then(response => {
+                return response.json()
+            })
             .then(result => {
                 if (0 == result.length) {
                     $.growl.notice({
@@ -689,13 +691,22 @@
 
                 setTimeout(() => {
                     $.growl.error({
-                        message: 'Section đang chứa công việc, không thể xoá!',
+                        message: result.errors,
                         location: 'tr',
                         size: 'large'
                     });
                     deleteSectionAlreadyActive = false
                     btnDelete.innerHTML = 'Xoá'
-                }, 1000)
+                }, 500)
+                
+            }).catch((error) => {
+                $.growl.error({
+                    message: error,
+                    location: 'tr',
+                    size: 'large'
+                });
+                deleteSectionAlreadyActive = false
+                btnDelete.innerHTML = 'Xoá'
             })
     }
 </script>
