@@ -2,14 +2,19 @@
 
 namespace App\Controllers;
 
+use App\Models\Attachment;
+use App\Models\Comment;
 use App\Models\Project as ModelsProject;
 use App\Models\ProjectUser;
+use App\Models\RelationAttachment;
 use App\Models\Section as ModelsSection;
 use App\Models\Task as ModelsTask;
 use App\Models\User;
 use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
 use Config\Services;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class Project extends BaseController
 {
@@ -266,6 +271,104 @@ class Project extends BaseController
         return $this->handleResponse($result);
     }
 
+    public function delete()
+    {
+        $validation = service('validation');
+        $validation->setRules(
+            [
+                'project'   => 'required|integer|is_not_unique[project.id]',
+                'password' => 'required|string|min_length[1]|max_length[255]',
+            ],
+            customValidationErrorMessage()
+        );
+
+        if (!$validation->run($this->request->getPost())) {
+            return $this->handleResponse(['errors' => $validation->getErrors()], 400);
+        }
+
+        $projectID = $this->request->getPost('project');
+        $userModel = new User();
+
+        $user = $userModel->find(session()->get('user_id'));
+        $md5Password = md5((string)$this->request->getPost('password'));
+
+        if ($user['password'] !== $md5Password) {
+            return $this->handleResponse(['errors' => 'Mật khẩu không chính xác'], 400);
+        }
+
+
+        $projectUserModel = new ProjectUser();
+        $projectModel     = new ModelsProject();
+        $sectionModel     = new ModelsSection();
+        $taskModel        = new ModelsTask();
+        $commentModel     = new Comment();
+        $attachmentModel  = new Attachment();
+        $relationAttachmentModel  = new RelationAttachment();
+
+        try {
+
+            $projectUsers = $projectUserModel->select('id')->where('project_id', $projectID)->find();
+            $projectUserIds = collect($projectUsers)->pluck('id')->toArray();
+            //Delete member
+            $projectUserModel->delete($projectUserIds);
+
+            $sections   = $sectionModel->select('id')->where('project_id', $projectID)->find();
+            $sectionIds = collect($sections)->pluck('id')->toArray();
+
+            $tasks = $taskModel->select('id')->whereIn('section_id', $sectionIds)->find();
+            $taskIds = collect($tasks)->pluck('id')->toArray();
+            if (!empty($taskIds)) {
+
+                $attachmentTasks = $attachmentModel->select([
+                    'attachment.id as attachment_id',
+                    'attachment.name',
+                    'relation_attachment.id as relation_attachment_id'
+                ])->join('relation_attachment', 'relation_attachment.attachment_id = attachment.id')
+                    ->join('task', 'task.id = relation_attachment.relation_id')
+                    ->where('relation_attachment.relation_type', 'task')
+                    ->whereIn('relation_attachment.relation_id', $taskIds)->find();
+
+                $attachmentTaskIds         = collect($attachmentTasks)->pluck('attachment_id')->toArray();
+                $relationAttachmentTaskIds = collect($attachmentTasks)->pluck('relation_attachment_id')->toArray();
+                if (!empty($attachmentTaskIds)) {
+                    $relationAttachmentModel->delete($relationAttachmentTaskIds);
+                    $attachmentModel->delete($attachmentTaskIds);
+                }
+
+                $comments = $commentModel->select('id')->whereIn('task_id', $taskIds)->find();
+                $commentIds = collect($comments)->pluck('id')->toArray();
+                if (empty($commentIds)) {
+                    return $this->handleResponse([]);
+                }
+
+                $attachmentComments = $attachmentModel->select([
+                    'attachment.id as attachment_id',
+                    'attachment.name',
+                    'relation_attachment.id as relation_attachment_id'
+                ])->join('relation_attachment', 'relation_attachment.attachment_id = attachment.id')
+                    ->join('comment', 'comment.id = relation_attachment.relation_id')
+                    ->where('relation_attachment.relation_type', 'comment')
+                    ->whereIn('relation_attachment.relation_id', $commentIds)->find();
+                
+                $attachmentCommentIds         = collect($attachmentComments)->pluck('attachment_id')->toArray();
+                $relationAttachmentCommentIds = collect($attachmentComments)->pluck('relation_attachment_id')->toArray();
+                if (!empty($attachmentCommentIds)) {
+                    $relationAttachmentModel->delete($relationAttachmentCommentIds);
+                    $attachmentModel->delete($attachmentCommentIds);
+                }
+                $commentModel->delete($commentIds);
+                $taskModel->delete($taskIds);
+            }
+
+            $sectionModel->delete($sectionIds);
+            $projectModel->delete($projectID);
+            return $this->handleResponse([]);
+
+        } catch (Exception $e) {
+            return $this->handleResponse(['errors' => $e->getMessage()], 500);
+        }
+    }
+
     public function addUser()
     {
         $validation = service('validation');
@@ -288,7 +391,6 @@ class Project extends BaseController
         $data = [
             'user_id' => $userID,
             'project_id' => $projectID,
-            'role' => 'member'
         ];
 
         $projectUser = $projectUserModel->where($data)->find();
@@ -297,6 +399,7 @@ class Project extends BaseController
             return redirectWithMessage(base_url('project/') . $projectID . '/user', 'Người dùng đã tham gia dự án');
         }
 
+        $data['role'] = 'member';
         $projectUserModel->insert($data);
 
         return redirectWithMessage(base_url('project/') . $projectID . '/user', 'success', 'success', FALSE);

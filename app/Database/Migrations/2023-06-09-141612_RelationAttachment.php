@@ -22,13 +22,13 @@ class Relation extends Migration
                 'type'           => 'INT',
                 'null'           => FALSE,
             ],
-            'attachment_id' => [
-                'type'           => 'INT',
+            'relation_type' => [
+                'type'           => 'VARCHAR',
+                'constraint'     => 50,
                 'null'           => FALSE,
             ],
-            'type' => [
-                'type'           => 'ENUM',
-                'constraint'     => ['task', 'comment'],
+            'attachment_id' => [
+                'type'           => 'INT',
                 'null'           => FALSE,
             ],
         ]);
@@ -40,11 +40,11 @@ class Relation extends Migration
             'CHARACTER SET' => 'utf8',
             'COLLATE' => 'utf8_general_ci'
         ];
-        $this->forge->createTable('attachment_comment', TRUE, $attributes);
+        $this->forge->createTable('relation_attachment', TRUE, $attributes);
     }
 
     public function down()
     {
-        $this->forge->dropTable('attachment_comment', TRUE);
+        $this->forge->dropTable('relation_attachment', TRUE);
     }
 }

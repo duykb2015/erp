@@ -24,13 +24,13 @@ class User extends Seeder
 
         for ($i = 0; $i < 20; $i++) {
             $data = [
-                'username' => $faker->userName(),
-                'password' => md5('1112'),
-                'email' => $faker->email(),
-                'photo' => $this->makeImage(strtoUpper('A')),
+                'username'  => $faker->userName(),
+                'password'  => md5('1112'),
+                'email'     => $faker->email(),
+                'photo'     => $this->makeImage(strtoUpper('A')),
                 'firstname' => $faker->firstName(),
                 'lastname'  => $faker->lastName(),
-                'type' => 'user'
+                'type'      => 'user'
             ];
             $user->insert($data);
         }

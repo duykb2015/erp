@@ -67,10 +67,10 @@
                                                         </div>
                                                         <div class="modal-body">
                                                             <label for="password">Nhập mật khẩu của bạn để xác nhận xoá dự án!</label>
-                                                            <input type="password" name="password" id="user-password" class="form-control rounded my-1" value="" placeholder="Nhập mật khẩu của bạn...">
+                                                            <input type="password" name="password" id="user-password" class="form-control rounded my-1" value="" placeholder="Nhập mật khẩu của bạn..." required>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" id="delete-project-button" onclick="doDeleteProject(<?= $project['id'] ?>)" class="btn btn-primary rounded waves-effect waves-light float-end">Xác nhận</button>
+                                                            <button type="button" id="delete-project-button" onclick="doDeleteProject(event, <?= $project['id'] ?>)" class="btn btn-primary rounded waves-effect waves-light float-end">Xác nhận</button>
                                                             <button type="button" onclick="" class="btn btn-secondary rounded waves-effect waves-light float-end" data-bs-dismiss="modal">Huỷ</button>
                                                         </div>
                                                     </div>
@@ -225,20 +225,39 @@
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js"></script>
 
 <script>
-    function doDeleteProject(id) {
+    var btnDoDeleteProjectAlreadyClick = false
+
+    function doDeleteProject(event, id) {
+        event.preventDefault()
+
         let userPassword = document.getElementById('user-password')
+        if (userPassword.value == '') {
+            $.growl.error({
+                message: 'Mật khẩu không được bỏ trống',
+                location: 'tr',
+                size: 'large'
+            });
+            return
+        }
+
+        if (btnDoDeleteProjectAlreadyClick) {
+            btnDoDeleteProjectAlreadyClick = false
+        }
+        btnDoDeleteProjectAlreadyClick = true
+
         let btnDeleteProject = document.getElementById('delete-project-button')
         btnDeleteProject.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('password', userPassword.value)
+        data.append('project', id)
         var requestOptions = {
             method: 'POST',
+            body: data,
             redirect: 'follow',
-            data: data
         }
-        fetch('<?= base_url('project/' . $project['id'] . '/image/cancel') ?>', requestOptions)
+        fetch('<?= base_url('project/delete/' . $project['id']) ?>', requestOptions)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Có lỗi xảy ra, vui lòng thử lại sau!')
-                }
                 return response.json()
             }).then(result => {
                 if (0 == result.length) {
@@ -252,13 +271,21 @@
                     return
                 }
 
+                $.growl.error({
+                    message: result.errors,
+                    location: 'tr',
+                    size: 'large'
+                });
+                btnDoDeleteProjectAlreadyClick = false
+                btnDeleteProject.innerHTML = 'Xác nhận'
+
             }).catch((error) => {
                 $.growl.error({
                     message: error,
                     location: 'tr',
                     size: 'large'
                 });
-                deleteSectionAlreadyActive = false
+                btnDoDeleteProjectAlreadyClick = false
                 btnDeleteProject.innerHTML = 'Xác nhận'
             })
     }

@@ -55,6 +55,7 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Project::list');
     $routes->post('create', 'Project::create');
+    $routes->post('delete/(:num)', 'Project::delete');
     $routes->post('find/user', 'Project::findUser');
     $routes->post('(:num)/image/upload', 'Project::upload');
     $routes->post('(:num)/image/cancel', 'Project::cancelUpload');

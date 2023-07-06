@@ -58,9 +58,9 @@ class Task extends Migration
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addUniqueKey('task_key');
-        $this->forge->addForeignKey('section_id', 'section', 'id', '', '', 'fk_t_s_i_s_i');
-        $this->forge->addForeignKey('assignee', 'user', 'id', '', '', 'fk_t_a_u_i');
-        $this->forge->addForeignKey('created_by', 'user', 'id', '', '', 'fk_t_c_b_u_i');
+        $this->forge->addForeignKey('section_id', 'section', 'id', '', 'delete', 'fk_t_s_i_s_i');
+        $this->forge->addForeignKey('assignee', 'user', 'id', '', 'delete', 'fk_t_a_u_i');
+        $this->forge->addForeignKey('created_by', 'user', 'id', '', 'delete', 'fk_t_c_b_u_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',

@@ -15,7 +15,8 @@ class Attactment extends Migration
                 'auto_increment' => TRUE
             ],
             'name' => [
-                'type'           => 'INT',
+                'type'           => 'VARCHAR',
+                'constraint'     => 255,
                 'null'           => FALSE,
             ],
             'type' => [
