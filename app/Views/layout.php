@@ -221,9 +221,6 @@
             };
             fetch('<?= base_url('project/create') ?>', requestOptions)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Máy chủ đang bảo trì, vui lòng thử lại sau!')
-                    }
                     return response.json();
                 })
                 .then(result => {

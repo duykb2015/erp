@@ -156,7 +156,7 @@
                                                                                 <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                     <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                     <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                        <!-- <a class="dropdown-item waves-light waves-effect" href="<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>"><i class="icofont icofont-eye-alt"></i>Xem</a> -->
+                                                                                        <a class="dropdown-item waves-light waves-effect" data-bs-toggle="modal" data-bs-target="#changeTaskStatus"><i class="icofont icofont-listine-dots"></i>Chuyển trạng thái</a>
                                                                                         <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
                                                                                     </div>
                                                                                 </div>
@@ -196,6 +196,37 @@
     </div>
 </div>
 
+<!-- Create new project Modal -->
+<div class="modal fade mt-5" id="changeTaskStatus" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- modal-xl -->
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Chuyển trạng thái công việc</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
+                    <select id="change-section" class="form-control">
+                        <?php if (!empty($sections)) : ?>
+                            <?php foreach ($sections as $section) : ?>
+                                <option value="<?= $section['id'] ?>"><?= $section['title'] ?></option>
+                            <?php endforeach ?>
+                        <?php endif ?>
+                    </select>
+                </div>
+                <div class="float-end mb-1">
+                    <button type="submit" id="btn-update-task-status" onclick="changeTaskStatus(<?= isset($task['id']) ? $task['id'] : '' ?>)" class="btn btn-primary rounded">
+                        Chuyển
+                    </button>
+                    <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade mt-5" id="createNewTask" tabindex="-1" aria-labelledby="" aria-hidden="true">
     <!-- modal-xl -->
     <div class="modal-dialog modal-dialog-scrollable modal-xl">
@@ -221,16 +252,35 @@
                             <option value="<?= session()->get('user_id') ?>">Cho tôi</option>
                             <?php if (!empty($assignees)) : ?>
                                 <?php foreach ($assignees as $assignee) : ?>
-                                    <option value="<?= $assignee['id'] ?>"><?= $assignee['name'] ?></option>
+                                    <option value="<?= $assignee['user_id'] ?>"><?= $assignee['name'] ?></option>
                                 <?php endforeach ?>
                             <?php endif ?>
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label for="task_descriptions" class="col-form-label">Chọn mức độ ưu tiên</label>
+                        <select id="task_priority" class="form-control">
+                            <?php foreach (TASK_PRIORITY as $key => $priority) : ?>
+                                <option value="<?= $key ?>"><?= $priority ?></option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="task_start_date" class="col-form-label">Chọn ngày bắt đầu</label>
+                                <input type="date" id="task_start_date" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label for="task_due_date" class="col-form-label">Chọn ngày kết thúc</label>
+                                <input type="date" id="task_due_date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label for="task_descriptions" class="col-form-label">Mô tả cho dự án</label>
                         <textarea id="task_descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"></textarea>
                     </div>
-
                     <div class="mb-3">
                         <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
                         <br>
@@ -285,7 +335,7 @@
             items: ['Link', 'Unlink']
         }, {
             name: 'insert',
-            items: ['Image', 'Table']
+            items: ['Table']
         }],
         removeDialogTabs: 'image:advanced;link:advanced',
     })
@@ -325,6 +375,82 @@
 </script>
 
 <script>
+    var isChangeTaskStatusAlreadyClick = false
+    var btnChangeTaskStatus
+
+    function changeTaskStatus(taskID) {
+        if (isChangeTaskStatusAlreadyClick) return
+        isChangeTaskStatusAlreadyClick = true
+
+        btnChangeTaskStatus = document.getElementById('btn-update-task-status')
+        btnChangeTaskStatus.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('task_id', taskID)
+        data.append('section_id', document.getElementById('change-section').value)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/change-status') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    if (result.errors.task_id) {
+                        error = result.errors.section.replace('section', 'Trạng thái công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isChangeTaskStatusAlreadyClick = false
+                            btnChangeTaskStatus.innerHTML = 'Chuyển'
+                        }, 1000)
+
+                        return
+                    }
+
+                    if (result.errors.section_id) {
+                        error = result.errors.assignee.replace('assignee', 'Người được giao')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isChangeTaskStatusAlreadyClick = false
+                            btnChangeTaskStatus.innerHTML = 'Chuyển'
+                        }, 1000)
+
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: "Cập nhật trạng thái thành công"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1000)
+
+                return
+            }).catch(error => {
+                $.growl.error({
+                    message: error
+                });
+                isChangeTaskStatusAlreadyClick = false
+                btnChangeTaskStatus.innerHTML = 'Chuyển'
+            })
+    }
+
+
     // var files
     var btnCreateTask = null
     var isCreateNewTaskAlreadyClick = false
@@ -334,15 +460,24 @@
         if (isCreateNewTaskAlreadyClick) return
         isCreateNewTaskAlreadyClick = true
 
+        taskName = document.getElementById('task_name')
+        if (taskName.value == '') {
+            isCreateNewTaskAlreadyClick = false
+            return
+        }
+
         btnCreateTask = document.getElementById('btn-create-task')
         btnCreateTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         const data = new FormData()
-        data.append('task_name', document.getElementById('task_name').value)
-        data.append('choose_section', document.getElementById('choose_section').value)
+        data.append('name', taskName.value)
+        data.append('section', document.getElementById('choose_section').value)
         data.append('assignee', document.getElementById('assignee').value)
-        data.append('task_descriptions', task_descriptions.getData())
-        data.append('project_id', projectId.value)
+        data.append('priority', document.getElementById('task_priority').value)
+        data.append('start_date', document.getElementById('task_start_date').value)
+        data.append('due_date', document.getElementById('task_due_date').value)
+        data.append('descriptions', task_descriptions.getData())
+        data.append('project_id', projectID)
 
         var requestOptions = {
             method: 'POST',
@@ -352,49 +487,79 @@
 
         fetch('<?= base_url('task/create') ?>', requestOptions)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Server đang bảo trì, vui lòng thử lại sau!')
-                }
                 return response.json()
             })
             .then(result => {
                 if (result.errors) {
+
+                    if (result.errors.section) {
+                        error = result.errors.section.replace('section', 'Trạng thái công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateNewTaskAlreadyClick = false
+                            btnCreateTask.innerHTML = 'Tạo'
+                        }, 1000)
+
+                        return
+                    }
+
+                    if (result.errors.assignee) {
+                        error = result.errors.assignee.replace('assignee', 'Người được giao')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateNewTaskAlreadyClick = false
+                            btnCreateTask.innerHTML = 'Tạo'
+                        }, 1000)
+
+                        return
+                    }
+
+                    if (result.errors.name) {
+                        error = result.errors.task_name.replace('name', 'Tên công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateNewTaskAlreadyClick = false
+                            btnCreateTask.innerHTML = 'Tạo'
+                        }, 1000)
+
+                        return
+                    }
+                }
+
+                if (result.errors_datetime) {
+                    console.log(result.errors_datetime)
+                    $.growl.error({
+                        message: result.errors_datetime,
+                        location: 'tr',
+                        size: 'large'
+                    });
                     setTimeout(() => {
-                        if (result.errors.choose_section) {
-                            result.errors.choose_section = result.errors.choose_section.replace('choose_section', 'Section')
-                            $.growl.error({
-                                message: result.errors.choose_section,
-                                location: 'tr',
-                                size: 'large'
-                            });
-                        }
-                        if (result.errors.assignee) {
-                            result.errors.assignee = result.errors.assignee.replace('assignee', 'Người được giao')
-                            $.growl.error({
-                                message: result.errors.assignee,
-                                location: 'tr',
-                                size: 'large'
-                            });
-                        }
-                        if (result.errors.task_name) {
-                            result.errors.task_name = result.errors.task_name.replace('task_name', 'Tên công việc')
-                            $.growl.error({
-                                message: result.errors.task_name,
-                                location: 'tr',
-                                size: 'large'
-                            });
-                        }
                         isCreateNewTaskAlreadyClick = false
                         btnCreateTask.innerHTML = 'Tạo'
                     }, 1000)
+
                     return
                 }
 
                 $.growl.notice({
-                    message: "Tạo mới dự án thành công"
+                    message: "Tạo mới công việc thành công"
                 });
 
                 setTimeout(() => {
+                    isCreateNewTaskAlreadyClick = false
+                    btnCreateTask.innerHTML = 'Tạo'
                     window.location.href = `<?= base_url('project') ?>/${projectID}/task/${result.task_id}`
                 }, 1000)
 
@@ -698,7 +863,7 @@
                     deleteSectionAlreadyActive = false
                     btnDelete.innerHTML = 'Xoá'
                 }, 500)
-                
+
             }).catch((error) => {
                 $.growl.error({
                     message: error,

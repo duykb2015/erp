@@ -158,7 +158,9 @@
                                                         <div class="dropdown-secondary dropdown d-inline-block" id="context-menu">
                                                             <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                             <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                <a class="dropdown-item waves-light waves-effect" id="btn-delete-member" onclick="deleteTask()"><i class="icofont icofont-ui-delete p-r-5"></i>Xoá khỏi dự án</a>
+                                                                <?php if ($member['user_id'] != $project['owner']) : ?>
+                                                                    <a class="dropdown-item waves-light waves-effect" id="btn-delete-member" onclick="deleteTask()"><i class="icofont icofont-ui-delete p-r-5"></i>Xoá khỏi dự án</a>
+                                                                <?php endif ?>
                                                                 <!-- <a class="dropdown-item waves-light waves-effect" href="1"><i class="icofont icofont-eye-alt p-r-5"></i>Rời khỏi dự án</a> -->
                                                             </div>
                                                         </div>

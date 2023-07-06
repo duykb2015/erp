@@ -14,7 +14,6 @@ use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
 use Config\Services;
 use Exception;
-use Illuminate\Support\Facades\DB;
 
 class Project extends BaseController
 {
@@ -142,7 +141,7 @@ class Project extends BaseController
             return view('Error/NotFound', $data);
         }
 
-        $projectUser = $projectUserModel->select('user_id')->where('project_id', $projectID)->find();
+        $projectUser   = $projectUserModel->select('user_id')->where('project_id', $projectID)->find();
         $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
 
         $userID = session()->get('user_id');
@@ -158,15 +157,24 @@ class Project extends BaseController
 
         switch (ucfirst($view)) {
             case 'Index':
+                $taskModel    = new ModelsTask();
                 $sectionModel = new ModelsSection();
-                $taskModel = new ModelsTask();
-
                 $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
 
                 foreach ($sections as $key => $section) {
                     $sections[$key]['tasks'] = $taskModel->where('task.section_id', $section['id'])->findAll();
                 }
                 $data['sections'] = collect($sections)->sortBy('position')->toArray();
+
+                $assignees = $projectUserModel->select([
+                    'user.id as user_id',
+                    'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+                ])->join('user', 'user.id = project_user.user_id')
+                    ->where('project_user.project_id', $projectID)
+                    ->where('project_user.user_id !=', session()->get('user_id'))
+                    ->find();
+                $data['assignees'] = $assignees;
+
                 break;
 
             case 'Setting':
@@ -202,7 +210,7 @@ class Project extends BaseController
         $validation->setRules(
             [
                 'project_name'         => 'required|string|min_length[5]|max_length[255]|is_unique[project.name]',
-                'project_key'          => 'required|string|min_length[1]|max_length[10]',
+                'project_key'          => 'required|string|min_length[1]|max_length[10]|is_unique[project.key]',
                 'project_descriptions' => 'string|max_length[512]',
             ],
             customValidationErrorMessage()
@@ -250,7 +258,7 @@ class Project extends BaseController
             ],
             [
                 'project_id' => $projectID,
-                'title' => 'Đang tiến hành',
+                'title' => 'Đang thực hiện',
                 'position' => 1,
                 'base_section' => 2
             ],
@@ -349,7 +357,7 @@ class Project extends BaseController
                     ->join('comment', 'comment.id = relation_attachment.relation_id')
                     ->where('relation_attachment.relation_type', 'comment')
                     ->whereIn('relation_attachment.relation_id', $commentIds)->find();
-                
+
                 $attachmentCommentIds         = collect($attachmentComments)->pluck('attachment_id')->toArray();
                 $relationAttachmentCommentIds = collect($attachmentComments)->pluck('relation_attachment_id')->toArray();
                 if (!empty($attachmentCommentIds)) {
@@ -363,7 +371,6 @@ class Project extends BaseController
             $sectionModel->delete($sectionIds);
             $projectModel->delete($projectID);
             return $this->handleResponse([]);
-
         } catch (Exception $e) {
             return $this->handleResponse(['errors' => $e->getMessage()], 500);
         }
@@ -419,27 +426,54 @@ class Project extends BaseController
     {
         $segment = $this->request->getUri()->getSegments();
         array_shift($segment); //remove segment 0 (project), we don't need it
-        $projectID = $segment[0];
-        $projectModel  = new ModelsProject();
-        $project = $projectModel->find($projectID);
-        if (!$project) {
+        $projectID    = $segment[0];
+
+        $projectModel = new ModelsProject();
+        $project      = $projectModel->find($projectID);
+        if (empty($project)) {
             $data['backLink']   = '/project//';
             return view('Error/NotFound', $data);
         }
 
         $taskModel = new ModelsTask();
-        $task = $taskModel->find($segment[2]);
-        if (!$task) {
+        $task      = $taskModel->find($segment[2]);
+        if (empty($task)) {
             $data['backLink']   = '/project//' . $projectID;
             return view('Error/NotFound', $data);
         }
 
-        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('d/m/Y') : NULL;
-        $task['due_at'] = $task['due_at'] ? Carbon::createFromDate($task['due_at'])->format('d/m/Y') : NULL;
+        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('Y-m-d') : NULL;
+        $task['due_at']   = $task['due_at']   ? Carbon::createFromDate($task['due_at'])->format('Y-m-d')   : NULL;
+        
+        $assigneeID         = $task['assignee'];
+        $task['assigneeID'] = $assigneeID; 
 
-        $data['project'] =  $project;
-        $data['task'] =  $task;
-        $data['title'] = 'Chi tiết công việc';
+        // Get current assignee name
+        $userModel = new User();
+        if ($assigneeID) { 
+            $task['assignee'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
+                ->find($assigneeID)['username'];
+        }
+
+        // Get all assignees
+        $projectUserModel = new ProjectUser();
+        $assignees = $projectUserModel->select([
+            'user.id as user_id',
+            'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+        ])->join('user', 'user.id = project_user.user_id')
+            ->where('project_user.project_id', $projectID)
+            ->where('project_user.user_id !=', session()->get('user_id'))
+            ->find();
+        $data['assignees'] = $assignees;
+
+        // Get all sections
+        $sectionModel = new ModelsSection();
+        $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
+
+        $data['project']  = $project;
+        $data['task']     = $task;
+        $data['sections'] = $sections;
+        $data['title']    = 'Chi tiết công việc';
         return view('Task/Detail', $data);
     }
 

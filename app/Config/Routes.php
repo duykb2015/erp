@@ -81,7 +81,10 @@ $routes->group('section', ['filter' => 'login'], function ($routes) {
 
 $routes->group('task', ['filter' => 'login'], function ($routes) {
     $routes->post('create', 'Task::create');
+    $routes->post('update', 'Task::update');
     $routes->post('delete', 'Task::delete');
+
+    $routes->post('change-status', 'Task::changeStatus');
 });
 
 $routes->group('upload', ['filter' => 'login'], function ($routes) {
