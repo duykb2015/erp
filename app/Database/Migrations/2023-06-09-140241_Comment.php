@@ -31,6 +31,7 @@ class Comment extends Migration
                 'constraint'     => 20,
                 'null'           => FALSE,
             ],
+            'created_at DATETIME NOT NULL DEFAULT current_timestamp',
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('task_id', 'task', 'id', '', '', 'fk_c_t_i_t_i');

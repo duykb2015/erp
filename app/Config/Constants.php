@@ -126,7 +126,10 @@ define('BASE_SECTION', [
 
 define('LEADER', 'leader');
 define('MEMBER', 'member');
-define('PROJECT_ROLE',[
+define('PROJECT_ROLE', [
     LEADER => 'Trưởng nhóm',
     MEMBER => 'Thành viên'
-] );
+]);
+
+define('SYSTEM_COMMENT_TYPE', 'system');
+define('USER_COMMENT_TYPE', 'comment');

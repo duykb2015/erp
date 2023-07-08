@@ -3,15 +3,105 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\Comment;
 use App\Models\Project;
+use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
+use App\Models\Section as ModelsSection;
+use App\Models\User;
 use Carbon\Carbon;
+use CodeIgniter\I18n\Time;
 
 class Task extends BaseController
 {
     public function index()
     {
-        //
+        $segment = $this->request->getUri()->getSegments();
+        array_shift($segment); //remove segment 0 (project), we don't need it
+        $projectID    = $segment[0];
+
+        $projectModel = new Project();
+        $project      = $projectModel->find($projectID);
+        if (empty($project)) {
+            $data['backLink']   = '/project//';
+            return view('Error/NotFound', $data);
+        }
+
+        $taskModel = new ModelsTask();
+        $task      = $taskModel->find($segment[2]);
+        if (empty($task)) {
+            $data['backLink']   = '/project//' . $projectID;
+            return view('Error/NotFound', $data);
+        }
+
+        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('Y-m-d') : NULL;
+        $task['due_at']   = $task['due_at']   ? Carbon::createFromDate($task['due_at'])->format('Y-m-d')   : NULL;
+
+        $assigneeID         = $task['assignee'];
+        $task['assigneeID'] = $assigneeID;
+
+        // Get current assignee name
+        $userModel = new User();
+        if ($assigneeID) {
+            $task['assignee'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
+                ->find($assigneeID)['username'];
+        }
+
+        // Get all assignees
+        $projectUserModel = new ProjectUser();
+        $assignees = $projectUserModel->select([
+            'user.id as user_id',
+            'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+        ])->join('user', 'user.id = project_user.user_id')
+            ->where('project_user.project_id', $projectID)
+            ->where('project_user.user_id !=', session()->get('user_id'))
+            ->find();
+        $data['assignees'] = $assignees;
+
+        // Get all sections
+        $sectionModel = new ModelsSection();
+        $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
+
+        $commentModel = new Comment();
+
+        $activities = $commentModel->select(['text', 'created_at'])
+            ->where('task_id', $segment[2])
+            ->where('type', SYSTEM_COMMENT_TYPE)
+            ->orderBy('created_at', 'DESC')
+            ->find();
+
+        foreach ($activities as $key => $activity) {
+            $time                           = new Time($activity['created_at']);
+            $activities[$key]['created_at'] = $time->humanize();
+        }
+
+        $comments = $commentModel
+            ->select([
+                'comment.id',
+                'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+                'user.photo',
+                'created_by',
+                'text',
+                'created_at'
+            ])
+            ->join('user', 'user.id = comment.created_by')
+            ->where('task_id', $segment[2])
+            ->where('comment.type', USER_COMMENT_TYPE)
+            ->orderBy('created_at', 'DESC')
+            ->find();
+
+        foreach ($comments as $key => $comment) {
+            $time                           = new Time($comment['created_at']);
+            $comments[$key]['created_at'] = $time->humanize();
+        }
+
+        $data['project']    = $project;
+        $data['task']       = $task;
+        $data['sections']   = $sections;
+        $data['activities'] = $activities;
+        $data['comments']   = $comments;
+        $data['title']      = 'Chi tiết công việc';
+        return view('Task/Detail', $data);
     }
 
     public function create()
@@ -94,13 +184,15 @@ class Task extends BaseController
             $key = $key[1];
         }
 
+        $userID = session()->get('user_id');
+
         $data = [
             'task_key'      => $project['key'] . '-' . ($key + 1),
             'section_id'    => $taskRawData['section'],
             'title'         => $taskRawData['name'],
             'descriptions'  => $taskRawData['descriptions'],
             'priority'      => $taskRawData['priority'],
-            'created_by'    => session()->get('user_id'),
+            'created_by'    => $userID,
         ];
 
         if ($taskRawData['assignee']) {
@@ -116,6 +208,18 @@ class Task extends BaseController
         }
 
         $taskID = $taskModel->insert($data);
+
+        unset($data);
+
+        $commentModel = new Comment();
+        $data = [
+            'task_id' => $taskID,
+            'created_by' => $userID,
+            'text' => '<b>' . session()->get('name') . '</b> đã tạo mới công việc.',
+            'type' => SYSTEM_COMMENT_TYPE
+        ];
+
+        $commentModel = $commentModel->insert($data);
 
         return $this->handleResponse(['task_id' => $taskID]);
     }

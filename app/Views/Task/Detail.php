@@ -21,8 +21,12 @@
         float: none;
     }
 
-    #editorContainer {
+    .editorContainer {
         width: 50.5vw;
+    }
+
+    .editorContainer-2 {
+        width: 48vw;
     }
 </style>
 <?= $this->endSection() ?>
@@ -151,16 +155,16 @@
                                         <div class="tab-pane active" id="comment" role="tabpanel">
                                             <div class="md-float-material d-flex">
                                                 <div class="col-md-12 btn-add-task">
-                                                    <form action="#" method="post" class="d-flex">
+                                                    <form action="#" class="d-flex">
                                                         <input type="text" id="comment-decorator" onclick="showCommentEditor()" class="form-control" placeholder="Thêm bình luận ...">
                                                         <div id="form-comment" class="hidden">
                                                             <div class="row">
-                                                                <div class="col-12 m-b-20" id="editorContainer">
+                                                                <div class="col-12 m-b-20 editorContainer">
                                                                     <textarea name="task_comment" class="form-control" id="task-comment"></textarea>
                                                                 </div>
                                                                 <div class="col-12 ">
                                                                     <button type="button" class="btn btn-secondary f-right rounded" onclick="clearComment()">Huỷ</button>
-                                                                    <button class="btn btn-primary f-right rounded mx-2">Bình luận</button>
+                                                                    <button class="btn btn-primary f-right rounded mx-2" id="btn-save-comment" onclick="createComment(event, <?= $task['id'] ?>)">Bình luận</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -174,16 +178,28 @@
                                                         <li class="media d-flex">
                                                             <div class="media-left">
                                                                 <a href="#">
-                                                                    <img class="media-object img-radius comment-img" src="https://colorlib.com/polygon/adminty/files/assets/images/avatar-4.jpg" alt="Generic placeholder image">
+                                                                    <img class="media-object img-radius comment-img" src="<?= base_url('/imgs/') . $comment['photo'] ?>" alt="Generic placeholder image">
                                                                 </a>
                                                             </div>
-                                                            <div class="media-body">
-                                                                <h6 class="media-heading txt-primary"><?= $comment['user_name'] ?><span class="f-12 text-muted m-l-5"><?= $comment['updated_at'] ?></span></h6>
-                                                                <p><?= $comment['user'] ?></p>
+                                                            <div class="media-body w-100">
+                                                                <h6 class="media-heading txt-primary"><?= $comment['name'] ?><span class="f-12 text-muted m-l-5"><?= $comment['created_at'] ?></span></h6>
+                                                                <div id="comment-text-<?= $comment['id'] ?>"><?= $comment['text'] ?></div>
 
-                                                                <?php if ($currentUser == $comment['user_id']) : ?>
-                                                                    <div class="m-t-10 m-b-25">
-                                                                        <span><a href="#!" class="m-r-10 f-12">Edit</a></span><span><a href="#!" class="m-r-10 f-12">Delete</a> </span>
+                                                                <div id="form-edit-comment-<?= $comment['id'] ?>" class="hidden">
+                                                                    <div class="row">
+                                                                        <div class="col-12 m-b-20 editorContainer-2">
+                                                                            <textarea id="edit-comment-editor-<?= $comment['id'] ?>" class="hidden" cols="30" rows="10"><?= $comment['text'] ?></textarea>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <button type="button" class="btn btn-secondary f-right rounded" onclick="clearEditComment(<?= $comment['id'] ?>)">Huỷ</button>
+                                                                            <button class="btn btn-primary f-right rounded mx-2" id="btn-edit-comment-<?= $comment['id'] ?>" onclick="saveEditComment(<?= $comment['id'] ?>)">Lưu</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <?php if ($currentUser == $comment['created_by']) : ?>
+                                                                    <div class="m-t-10 m-b-25 edit-and-delete">
+                                                                        <span><a class="m-r-10 f-12 text-decoration-none" onclick="showEditCommentEditor(<?= $comment['id'] ?>)">Sửa</a></span><span><a class="m-r-10 f-12 text-decoration-none" id="btn-delete-comment" onclick="deleteComment(<?= $comment['id'] ?>)">Xoá</a> </span>
                                                                     </div>
                                                                 <?php endif ?>
 
@@ -203,14 +219,16 @@
                                                 <div class="row">
                                                     <h6 class="sub-title m-t-30 m-b-15">Danh sách hoạt động</h6>
                                                     <ul class="media-list revision-blc">
-                                                        <?php if (!empty($activites)) : ?>
-                                                            <li class="media d-flex m-b-15">
-                                                                <div class="p-l-15 p-r-20 d-inline-block v-middle"><a href="#" class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icon-ghost f-18 v-middle"></i></a></div>
-                                                                <div class="d-inline-block">
-                                                                    Drop the IE <a href="#">specific hacks</a> for temporal inputs
-                                                                    <div class="media-annotation">4 minutes ago</div>
-                                                                </div>
-                                                            </li>
+                                                        <?php if (!empty($activities)) : ?>
+                                                            <?php foreach ($activities as $activity) : ?>
+                                                                <li class="media d-flex m-t-5 m-b-15">
+                                                                    <div class="p-l-15 p-r-20 d-inline-block v-middle"><a class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icon-ghost f-18 v-middle"></i></a></div>
+                                                                    <div class="d-inline-block">
+                                                                        <?= $activity['text'] ?>
+                                                                        <div class="media-annotation"><?= $activity['created_at'] ?></div>
+                                                                    </div>
+                                                                </li>
+                                                            <?php endforeach ?>
                                                         <?php else : ?>
                                                             <li>
                                                                 <div class="d-inline-block">
@@ -300,7 +318,7 @@
                                     </div>
                                 </div>
                             <?php endif ?>
-                            <div class="card border">
+                            <!-- <div class="card border">
                                 <div class="card-header">
                                     <h5 class="card-header-text"><i class="icofont icofont-wheel m-r-10"></i> Cài đặt</h5>
                                 </div>
@@ -341,7 +359,7 @@
                                         <?php endif ?>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- <div class="card">
                                 <div class="card-header">
@@ -380,7 +398,7 @@
     </div>
 </div>
 
-<!-- Create new project Modal -->
+<!-- Create new update task modal -->
 <div class="modal modal-xl fade mt-5" id="updateTaskInformation" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <!-- modal-xl -->
     <div class="modal-dialog">
@@ -435,7 +453,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="task_descriptions" class="col-form-label">Mô tả cho dự án</label>
-                        <textarea id="task_descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"><?= $task['descriptions'] ?></textarea>
+                        <textarea id="task_descriptions" class="form-control rounded" maxlength="512" rows="5"><?= $task['descriptions'] ?></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
@@ -491,7 +509,7 @@
             items: ['Link', 'Unlink']
         }, {
             name: 'insert',
-            items: ['Image', 'Table']
+            items: ['Table'] //'Image', 
         }],
         removeDialogTabs: 'image:advanced;link:advanced',
     })
@@ -499,6 +517,298 @@
 
 <script>
     // window.addEventListener('beforeunload', function(){})
+
+    var commentDecorator = document.getElementById('comment-decorator')
+    var formEditor = document.getElementById('form-comment')
+    var commentEditor = null
+
+    function clearComment() {
+        document.getElementById('task-comment').value = ''
+        commentEditor.setData('')
+        formEditor.style.display = 'none'
+        commentDecorator.hidden = false
+    }
+
+    function showCommentEditor() {
+        commentDecorator.hidden = true
+        formEditor.style.display = 'flex'
+
+        if (commentEditor != null) {
+            return
+        }
+        commentEditor = CKEDITOR.replace('task-comment', {
+            width: '100%',
+            height: 150,
+            toolbar: [{
+                name: 'clipboard',
+                items: ['Undo', 'Redo']
+            }, {
+                name: 'styles',
+                items: ['Styles', 'Format']
+            }, {
+                name: 'basicstyles',
+                items: ['Bold', 'Italic', 'Strike', '-', 'RemoveFormat']
+            }, {
+                name: 'paragraph',
+                items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote']
+            }, {
+                name: 'links',
+                items: ['Link', 'Unlink']
+            }, {
+                name: 'insert',
+                items: ['Table'] //'Image', 
+            }],
+            removeDialogTabs: 'image:advanced;link:advanced',
+        })
+    }
+
+    var isCreateCommentAlreadyClick = false
+    var btnSaveComment = document.getElementById('btn-save-comment')
+
+    function createComment(event, taskID) {
+        event.preventDefault()
+        if (isCreateCommentAlreadyClick) return
+        isCreateCommentAlreadyClick = true
+
+        btnSaveComment.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('task_id', taskID)
+        data.append('comment', commentEditor.getData())
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+        fetch('<?= base_url('comment/create') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    if (result.errors.task_id) {
+                        error = result.errors.task_id.replace('task_id', 'Mã công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateCommentAlreadyClick = false
+                            btnSaveComment.innerHTML = 'Bình luận'
+                        }, 1000)
+
+                        return
+                    }
+                    if (result.errors.comment) {
+                        error = result.errors.comment.replace('comment', 'Bình luận')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateCommentAlreadyClick = false
+                            btnSaveComment.innerHTML = 'Bình luận'
+                        }, 1000)
+
+                        return
+                    }
+                }
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1000)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau'
+                });
+                isCreateCommentAlreadyClick = false
+                btnSaveComment.innerHTML = 'Bình luận'
+            })
+    }
+
+    var editAndDelete = document.getElementsByClassName('edit-and-delete')
+
+    function clearEditComment(commentID) {
+        var commentEditText = document.getElementById(`comment-text-${commentID}`)
+        var editSection = document.getElementById(`form-edit-comment-${commentID}`)
+        commentEditText.hidden = false
+        editSection.style.display = 'none'
+
+        for (let i = 0; i < editAndDelete.length; i++) {
+            editAndDelete[i].hidden = false
+        }
+    }
+
+    var commentEditEditor = null
+
+    function showEditCommentEditor(commentID) {
+
+        for (let i = 0; i < editAndDelete.length; i++) {
+            editAndDelete[i].hidden = true
+        }
+
+        var editSection = document.getElementById(`form-edit-comment-${commentID}`)
+        var commentEditText = document.getElementById(`comment-text-${commentID}`)
+        var textAreaEditComment = document.getElementById(`edit-comment-editor-${commentID}`)
+
+        commentEditText.hidden = true
+        editSection.style.display = 'flex'
+
+        if (commentEditEditor != null) {
+            return
+        }
+
+        commentEditEditor = CKEDITOR.replace(`edit-comment-editor-${commentID}`, {
+            width: '100%',
+            height: 150,
+            toolbar: [{
+                name: 'clipboard',
+                items: ['Undo', 'Redo']
+            }, {
+                name: 'styles',
+                items: ['Styles', 'Format']
+            }, {
+                name: 'basicstyles',
+                items: ['Bold', 'Italic', 'Strike', '-', 'RemoveFormat']
+            }, {
+                name: 'paragraph',
+                items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote']
+            }, {
+                name: 'links',
+                items: ['Link', 'Unlink']
+            }, {
+                name: 'insert',
+                items: ['Table'] //'Image', 
+            }],
+            removeDialogTabs: 'image:advanced;link:advanced',
+        })
+
+        commentEditEditor.setData(textAreaEditComment.value)
+    }
+
+    var isSaveEditCommentAlreadyClick = false
+    var btnSaveEditComment
+
+    function saveEditComment(commentID) {
+        if (isSaveEditCommentAlreadyClick) return
+        isSaveEditCommentAlreadyClick = true
+        btnSaveEditComment = document.getElementById(`btn-edit-comment-${commentID}`)
+        btnSaveEditComment.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('comment_id', commentID)
+        data.append('text', commentEditEditor.getData())
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+        fetch('<?= base_url('comment/update') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    if (result.errors.comment) {
+                        error = result.errors.comment.replace('comment', 'Bình luận')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isSaveEditCommentAlreadyClick = false
+                            btnSaveEditComment.innerHTML = 'Lưu'
+                        }, 1000)
+
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: 'Đã lưu bình luận',
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1000)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau'
+                });
+                isSaveEditCommentAlreadyClick = false
+                btnSaveEditComment.innerHTML = 'Lưu'
+            })
+    }
+
+    var isDeleteCommentAlreadyClick = false
+    var btnDeleteComment = document.getElementById('btn-delete-comment')
+
+    function deleteComment(commentID) {
+        if (isDeleteCommentAlreadyClick) return
+        isDeleteCommentAlreadyClick = true
+
+        if (!confirm('Bạn có chắc là muốn xoá bình luận này?')) {
+            isDeleteCommentAlreadyClick = false
+            return
+        }
+
+        btnDeleteComment.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('comment_id', commentID)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+        fetch('<?= base_url('comment/delete') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+
+                    if (result.errors.comment_id) {
+                        error = result.errors.comment.replace('comment_id', 'Mã bình luận')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isDeleteCommentAlreadyClick = false
+                            btnDeleteComment.innerHTML = 'Xoá'
+                        }, 1000)
+
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: 'Đã xoá bình luận',
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1000)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau'
+                });
+                isDeleteCommentAlreadyClick = false
+                btnDeleteComment.innerHTML = 'Xoá'
+            })
+    }
 
     var isUpdateTaskAlreadyClick = false
 
@@ -598,7 +908,7 @@
 
                     return
                 }
-                
+
                 $.growl.notice({
                     message: "Lưu thông tin thành công công việc"
                 });
@@ -711,50 +1021,6 @@
             size: 'small'
         });
     });
-
-    var commentDecorator = document.getElementById('comment-decorator')
-    var formEditor = document.getElementById('form-comment')
-    var ckEditor = null
-
-    function clearComment() {
-        document.getElementById('task-comment').value = ''
-        ckEditor.setData('')
-        formEditor.style.display = 'none'
-        commentDecorator.hidden = false
-    }
-
-    function showCommentEditor() {
-        commentDecorator.hidden = true
-        formEditor.style.display = 'flex'
-
-        if (ckEditor != null) {
-            return
-        }
-        ckEditor = CKEDITOR.replace('task-comment', {
-            width: '100%',
-            height: 150,
-            toolbar: [{
-                name: 'clipboard',
-                items: ['Undo', 'Redo']
-            }, {
-                name: 'styles',
-                items: ['Styles', 'Format']
-            }, {
-                name: 'basicstyles',
-                items: ['Bold', 'Italic', 'Strike', '-', 'RemoveFormat']
-            }, {
-                name: 'paragraph',
-                items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote']
-            }, {
-                name: 'links',
-                items: ['Link', 'Unlink']
-            }, {
-                name: 'insert',
-                items: ['Image', 'Table'] //'Image', 
-            }],
-            removeDialogTabs: 'image:advanced;link:advanced',
-        })
-    }
 </script>
 
 <?= $this->endSection() ?>

@@ -422,61 +422,6 @@ class Project extends BaseController
         return $this->handleResponse(json_encode($user));
     }
 
-    public function task()
-    {
-        $segment = $this->request->getUri()->getSegments();
-        array_shift($segment); //remove segment 0 (project), we don't need it
-        $projectID    = $segment[0];
-
-        $projectModel = new ModelsProject();
-        $project      = $projectModel->find($projectID);
-        if (empty($project)) {
-            $data['backLink']   = '/project//';
-            return view('Error/NotFound', $data);
-        }
-
-        $taskModel = new ModelsTask();
-        $task      = $taskModel->find($segment[2]);
-        if (empty($task)) {
-            $data['backLink']   = '/project//' . $projectID;
-            return view('Error/NotFound', $data);
-        }
-
-        $task['start_at'] = $task['start_at'] ? Carbon::createFromDate($task['start_at'])->format('Y-m-d') : NULL;
-        $task['due_at']   = $task['due_at']   ? Carbon::createFromDate($task['due_at'])->format('Y-m-d')   : NULL;
-        
-        $assigneeID         = $task['assignee'];
-        $task['assigneeID'] = $assigneeID; 
-
-        // Get current assignee name
-        $userModel = new User();
-        if ($assigneeID) { 
-            $task['assignee'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
-                ->find($assigneeID)['username'];
-        }
-
-        // Get all assignees
-        $projectUserModel = new ProjectUser();
-        $assignees = $projectUserModel->select([
-            'user.id as user_id',
-            'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
-        ])->join('user', 'user.id = project_user.user_id')
-            ->where('project_user.project_id', $projectID)
-            ->where('project_user.user_id !=', session()->get('user_id'))
-            ->find();
-        $data['assignees'] = $assignees;
-
-        // Get all sections
-        $sectionModel = new ModelsSection();
-        $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
-
-        $data['project']  = $project;
-        $data['task']     = $task;
-        $data['sections'] = $sections;
-        $data['title']    = 'Chi tiết công việc';
-        return view('Task/Detail', $data);
-    }
-
     public function setting()
     {
         $data['title']   = 'Cài đặt';

@@ -61,7 +61,7 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->post('(:num)/image/cancel', 'Project::cancelUpload');
     $routes->post('(:num)/image/remove', 'User::remove');
 
-    $routes->get('(:num)/task/(:num)', 'Project::task');
+    $routes->get('(:num)/task/(:num)', 'Task::index');
 
     $routes->group('(:any)', function ($routes) {
         $routes->get('/', 'Project::detail');
@@ -70,6 +70,12 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
         $routes->get('setting', 'Project::setting');
         $routes->post('setting', 'Project::saveSetting');
     });
+});
+
+$routes->group('comment', ['filter' => 'login'], function ($routes) {
+    $routes->post('create', 'Comment::create');
+    $routes->post('update', 'Comment::update');
+    $routes->post('delete', 'Comment::delete');
 });
 
 $routes->group('section', ['filter' => 'login'], function ($routes) {
