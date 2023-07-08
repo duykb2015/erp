@@ -153,13 +153,23 @@
                                                                             <div class="sortable-moves border box">
                                                                                 <p class="task-name hover-pointer overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
 
-                                                                                <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
-                                                                                    <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                                                    <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                        <a class="dropdown-item waves-light waves-effect" data-bs-toggle="modal" data-bs-target="#changeTaskStatus"><i class="icofont icofont-listine-dots"></i>Chuyển trạng thái</a>
-                                                                                        <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-ui-delete"></i>Xoá</a>
+                                                                                <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee'])) : ?>
+                                                                                    <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
+                                                                                        <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                            <?php foreach ($sections as $subSection) : ?>
+                                                                                                <a class="dropdown-item waves-light waves-effect">
+                                                                                                    <i class="icofont icofont-listine-dots"></i>
+                                                                                                    <?= $subSection['title'] ?>
+                                                                                                </a>
+                                                                                            <?php endforeach ?>
+                                                                                        </div>
                                                                                     </div>
-                                                                                </div>
+                                                                                <?php endif ?>
+
+                                                                                <?php if (session()->get('user_id') == $task['created_by']) : ?>
+                                                                                    <button class="btn btn-sm btn-danger waves-light f-right" type="button" onclick=""><i class="icofont icofont-bin"></i></button>
+                                                                                <?php endif ?>
                                                                             </div>
                                                                         <?php endforeach ?>
                                                                     <?php else : ?>
@@ -190,37 +200,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Create new project Modal -->
-<div class="modal fade mt-5" id="changeTaskStatus" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <!-- modal-xl -->
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Chuyển trạng thái công việc</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
-                    <select id="change-section" class="form-control">
-                        <?php if (!empty($sections)) : ?>
-                            <?php foreach ($sections as $section) : ?>
-                                <option value="<?= $section['id'] ?>"><?= $section['title'] ?></option>
-                            <?php endforeach ?>
-                        <?php endif ?>
-                    </select>
-                </div>
-                <div class="float-end mb-1">
-                    <button type="submit" id="btn-update-task-status" onclick="changeTaskStatus(<?= isset($task['id']) ? $task['id'] : '' ?>)" class="btn btn-primary rounded">
-                        Chuyển
-                    </button>
-                    <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
                 </div>
             </div>
         </div>

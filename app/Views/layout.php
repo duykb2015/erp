@@ -203,6 +203,8 @@
                 projectKey.value == '' ||
                 projectName.value.length < 5 ||
                 projectDescriptions.value.length > 512) {
+                    
+                createProjectAlreadyClick = false
                 return
             }
 
