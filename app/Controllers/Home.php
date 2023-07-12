@@ -14,7 +14,7 @@ class Home extends BaseController
         $projects     = $projectModel->select([
                 'project.id',
                 'project.name',
-                'project.key',
+                'project.prefix',
                 'project.descriptions',
                 'project.photo',
                 'project.created_at',
@@ -38,10 +38,10 @@ class Home extends BaseController
                 'project.id as project_id',
                 'project.name as project_name',
                 'project.photo as project_photo',
-                'section.title as section_name',
-                'section.position',
-            ])->join('section', 'section.id = task.section_id')
-            ->join('project', 'project.id = section.project_id')
+                'task_status.title as status_title',
+                'task_status.position',
+            ])->join('task_status', 'task_status.id = task.task_status_id')
+            ->join('project', 'project.id = task_status.project_id')
             ->where('assignee', session()->get('user_id'))->find();
 
         $createdBy = $taskModel->select([
@@ -51,14 +51,14 @@ class Home extends BaseController
                 'project.id as project_id',
                 'project.name as project_name',
                 'project.photo as project_photo',
-                'section.title as section_name',
-                'section.position',
-            ])->join('section', 'section.id = task.section_id')
-            ->join('project', 'project.id = section.project_id')
+                'task_status.title as status_title',
+                'task_status.position',
+            ])->join('task_status', 'task_status.id = task.task_status_id')
+            ->join('project', 'project.id = task_status.project_id')
             ->where('created_by', session()->get('user_id'))->find();
 
         $recentTasks = collect(array_merge($assignee, $createdBy))->unique();
-        $recentTasks = $recentTasks->sortBy('position')->groupBy('section_name');
+        $recentTasks = $recentTasks->sortBy('position')->groupBy('status_title');
         $data['projects']    = $projects;
         $data['recentTasks'] = $recentTasks;
         $data['title']       = 'Không gian làm việc';

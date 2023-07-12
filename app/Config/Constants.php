@@ -133,3 +133,15 @@ define('PROJECT_ROLE', [
 
 define('SYSTEM_COMMENT_TYPE', 'system');
 define('USER_COMMENT_TYPE', 'comment');
+
+define('INITIALIZE', 'initialize');
+define('ACTIVE', 'active');
+define('CLOSE', 'close');
+define('DELETED', 'deleted');
+
+define('PROJECT_STATUS', [
+    INITIALIZE => 'Khởi tạo',
+    ACTIVE => 'Đang hoạt động',
+    CLOSE => 'Đóng',
+    DELETED => 'Đã xoá'
+]);

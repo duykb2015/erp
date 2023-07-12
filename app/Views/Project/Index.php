@@ -128,28 +128,28 @@
                             <div class="card border d-flex">
                                 <div class="card-block scroll-x">
                                     <div class="row flex-nowrap" id="draggablePanelList">
-                                        <?php if (!empty($sections)) : ?>
-                                            <?php foreach ($sections as $section) : ?>
+                                        <?php if (!empty($taskStatus)) : ?>
+                                            <?php foreach ($taskStatus as $status) : ?>
                                                 <div class="col-3">
                                                     <div class="card border">
                                                         <div class="card-header">
-                                                            <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="showSectionEditButton(<?= $section['id'] ?>)" onmouseleave="hideSectionEditButton(<?= $section['id'] ?>)">
-                                                                <span class="d-flex badge-custom-<?= $section['base_section'] ?>" id="section-title-<?= $section['id'] ?>">
-                                                                    <?= $section['title'] ?>
+                                                            <h5 class="card-header-text sub-title d-flex text-wrap overflow-auto" onmouseenter="showSectionEditButton(<?= $status['id'] ?>)" onmouseleave="hideSectionEditButton(<?= $status['id'] ?>)">
+                                                                <span class="d-flex badge-custom-<?= $status['base_status'] ?>" id="section-title-<?= $status['id'] ?>">
+                                                                    <?= $status['title'] ?>
                                                                 </span>
-                                                                <i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $section['id'] ?>" onclick="showEditSection(<?= $section['id'] ?>)"></i>
+                                                                <i class="icofont icofont-pencil-alt-5 hidden" id="edit-section-<?= $status['id'] ?>" onclick="showEditSection(<?= $status['id'] ?>)"></i>
                                                             </h5>
-                                                            <div class="input-group hidden" id="input-group-section-<?= $section['id'] ?>" onfocusout="inputGroupSectionOut(<?= $section['id'] ?>)">
-                                                                <input type="text" class="form-control" id="section-name-num-<?= $section['id'] ?>" value="<?= $section['title'] ?>">
-                                                                <button type="button" id="save-edit-section-<?= $section['id'] ?>" class="btn btn-primary" onclick="saveNewSection(<?= $section['id'] ?>)">Lưu</button>
-                                                                <button type="button" id="delete-section-<?= $section['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $section['id'] ?>)">Xoá</button>
+                                                            <div class="input-group hidden" id="input-group-section-<?= $status['id'] ?>" onfocusout="inputGroupSectionOut(<?= $status['id'] ?>)">
+                                                                <input type="text" class="form-control" id="section-name-num-<?= $status['id'] ?>" value="<?= $status['title'] ?>">
+                                                                <button type="button" id="save-edit-section-<?= $status['id'] ?>" class="btn btn-primary" onclick="saveNewSection(<?= $status['id'] ?>)">Lưu</button>
+                                                                <button type="button" id="delete-section-<?= $status['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $status['id'] ?>)">Xoá</button>
                                                             </div>
                                                         </div>
                                                         <div class="card-block p-b-0">
                                                             <div class="row">
                                                                 <div class="col-md-12 section-container" id="draggableMultiple">
-                                                                    <?php if (!empty($section['tasks'])) : ?>
-                                                                        <?php foreach ($section['tasks'] as $task) : ?>
+                                                                    <?php if (!empty($status['tasks'])) : ?>
+                                                                        <?php foreach ($status['tasks'] as $task) : ?>
                                                                             <div class="sortable-moves border box">
                                                                                 <p class="task-name hover-pointer overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
 
@@ -157,10 +157,10 @@
                                                                                     <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                         <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                         <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                            <?php foreach ($sections as $subSection) : ?>
-                                                                                                <a class="dropdown-item waves-light waves-effect <?= $task['section_id'] == $subSection['id'] ? 'active' : '' ?>" <?= $task['section_id'] == $subSection['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subSection['id'] ?>)">
+                                                                                            <?php foreach ($taskStatus as $subStatus) : ?>
+                                                                                                <a class="dropdown-item waves-light waves-effect <?= $task['section_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['section_id'] == $subStatus['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subStatus['id'] ?>)">
                                                                                                     <i class="icofont icofont-listine-dots"></i>
-                                                                                                    <?= $subSection['title'] ?>
+                                                                                                    <?= $subStatus['title'] ?>
                                                                                                 </a>
                                                                                             <?php endforeach ?>
                                                                                         </div>
@@ -219,8 +219,8 @@
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
                         <select id="choose_section" class="form-control" disabled>
-                            <?php if (!empty($sections)) : ?>
-                                <option value="<?= $sections[0]['id'] ?>"><?= $sections[0]['title'] ?></option>
+                            <?php if (!empty($taskStatus)) : ?>
+                                <option value="<?= $taskStatus[0]['id'] ?>"><?= $taskStatus[0]['title'] ?></option>
                             <?php endif ?>
                         </select>
                     </div>
@@ -357,7 +357,7 @@
     var isChangeTaskStatusAlreadyClick = false
     var btnChangeTaskStatus
 
-    function changeTaskStatus(taskID) {
+    function changeTaskStatus(taskID, statusID) {
         if (isChangeTaskStatusAlreadyClick) return
         isChangeTaskStatusAlreadyClick = true
 
@@ -515,7 +515,7 @@
 
         const data = new FormData()
         data.append('name', taskName.value)
-        data.append('section', document.getElementById('choose_section').value)
+        data.append('task_status', document.getElementById('choose_section').value)
         data.append('assignee', document.getElementById('assignee').value)
         data.append('priority', document.getElementById('task_priority').value)
         data.append('start_date', document.getElementById('task_start_date').value)
@@ -621,7 +621,6 @@
 <script>
     var sectionName = document.getElementById('section-name')
     var submitButton = document.getElementById('submit-button')
-    var createSectionAlreadyActive = false
 
     sectionName.addEventListener("focusout", () => {
         if (sectionName.value == '') {
@@ -644,18 +643,18 @@
         }
     }
 
+    var createSectionAlreadyActive = false
+
     function createSection(event) {
         event.preventDefault()
 
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
-        if (createSectionAlreadyActive) {
-            return
-        }
+        if (createSectionAlreadyActive) return
         createSectionAlreadyActive = true
 
         const data = new FormData()
-        data.append('section_name', sectionName.value)
+        data.append('task_status_name', sectionName.value)
         data.append('project_id', projectId.value)
 
         var requestOptions = {
@@ -664,42 +663,54 @@
             redirect: 'follow'
         };
 
-        fetch('<?= base_url('section/create') ?>', requestOptions)
+        fetch('<?= base_url('task-status/create') ?>', requestOptions)
             .then(response => response.json())
             .then(result => {
-                if (0 == result.length) {
-                    $.growl.notice({
-                        message: "Tạo mới thành công"
-                    });
-
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 1500)
-                    return
-                }
-
                 if (result.errors) {
                     setTimeout(() => {
-                        if (result.errors.project_id) {
-                            result.errors.project_id = result.errors.project_id.replace('project_id', 'Mã dự án')
+
+                        errProjectID = result.errors.project_id
+                        if (errProjectID) {
+                            errProjectID = errProjectID.replace('project_id', 'Mã dự án')
                             $.growl.error({
-                                message: result.errors.project_name,
+                                message: errProjectID,
                                 location: 'tr',
                                 size: 'large'
                             });
                         }
-                        if (result.errors.section_name) {
-                            result.errors.section_name = result.errors.section_name.replace('section_name', 'Tên Section')
+
+                        errStatusName = result.errors.task_status_name
+                        if (errStatusName) {
+                            errStatusName = errStatusName.replace('task_status_name', 'Tên trạng thái')
                             $.growl.error({
-                                message: result.errors.section_name,
+                                message: errStatusName,
                                 location: 'tr',
                                 size: 'large'
                             });
                         }
                         createSectionAlreadyActive = false
                         submitButton.innerHTML = '<i class="icofont icofont-plus"></i>'
-                    }, 1000)
+                    }, 500)
                 }
+
+                $.growl.notice({
+                    message: "Tạo mới thành công"
+                });
+
+                setTimeout(() => {
+                    createSectionAlreadyActive = false
+                    submitButton.innerHTML = '<i class="icofont icofont-plus"></i>'
+                    window.location.reload()
+                }, 500)
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: "Có lỗi xảy ra, vui lòng thử lại sau!",
+                    location: 'tr',
+                    size: 'large'
+                });
+                createSectionAlreadyActive = false
+                submitButton.innerHTML = '<i class="icofont icofont-plus"></i>'
             })
     }
 
@@ -770,7 +781,7 @@
             redirect: 'follow'
         };
 
-        fetch('<?= base_url('section/update') ?>', requestOptions)
+        fetch('<?= base_url('task-status/update') ?>', requestOptions)
             .then(response => response.json())
             .then(result => {
                 if (0 == result.length) {
@@ -834,7 +845,7 @@
             redirect: 'follow'
         };
 
-        fetch('<?= base_url('section/delete') ?>', requestOptions)
+        fetch('<?= base_url('task-status/delete') ?>', requestOptions)
             .then(response => {
                 return response.json()
             })

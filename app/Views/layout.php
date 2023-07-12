@@ -153,18 +153,18 @@
                         <div class="mb-3">
                             <div class="row">
                                 <div class="col-6">
-                                    <label for="task_start_date" class="col-form-label">Chọn ngày bắt đầu</label>
-                                    <input type="date" id="task_start_date" class="form-control">
+                                    <label for="project_start_date" class="col-form-label">Chọn ngày bắt đầu</label>
+                                    <input type="date" id="project_start_date" class="form-control rounded">
                                 </div>
                                 <div class="col-6">
-                                    <label for="task_due_date" class="col-form-label">Chọn ngày kết thúc</label>
-                                    <input type="date" id="task_due_date" class="form-control">
+                                    <label for="project_due_date" class="col-form-label">Chọn ngày kết thúc</label>
+                                    <input type="date" id="project_due_date" class="form-control rounded">
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="task_descriptions" class="col-form-label">Trạng thái dự án</label>
-                            <select id="task_priority" class="form-control" disabled>
+                            <label for="project_status" class="col-form-label">Trạng thái dự án</label>
+                            <select id="project_status" class="form-control rounded" disabled>
                                 <option value="initialize">Khởi tạo</option>
                             </select>
                         </div>
@@ -209,97 +209,14 @@
     <?= $this->renderSection('js') ?>
 
     <script>
-        var createProjectAlreadyClick = false
-
-        function createProject(event) {
-            if (createProjectAlreadyClick) {
-                return
-            }
-            createProjectAlreadyClick = true
-
-            if (projectName.value == '' ||
-                projectKey.value == '' ||
-                projectName.value.length < 5 ||
-                projectDescriptions.value.length > 512) {
-
-                createProjectAlreadyClick = false
-                return
-            }
-
-            createButton = document.getElementById('loading-on-click')
-            createButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-
-            const data = new FormData();
-            data.append('project_name', projectName.value);
-            data.append('project_key', projectKey.value)
-            data.append('project_descriptions', projectDescriptions.value)
-
-            var requestOptions = {
-                method: 'POST',
-                body: data,
-                redirect: 'follow'
-            };
-            fetch('<?= base_url('project/create') ?>', requestOptions)
-                .then(response => {
-                    return response.json();
-                })
-                .then(result => {
-                    if (result.errors) {
-                        setTimeout(() => {
-                            if (result.errors.project_name) {
-                                result.errors.project_name = result.errors.project_name.replace('project_name', 'Tên dự án')
-                                $.growl.error({
-                                    message: result.errors.project_name,
-                                    location: 'tr',
-                                    size: 'large'
-                                });
-                            }
-                            if (result.errors.project_key) {
-                                result.errors.project_key = result.errors.project_key.replace('project_key', 'Tiền tố')
-                                $.growl.error({
-                                    message: result.errors.project_key,
-                                    location: 'tr',
-                                    size: 'large'
-                                });
-                            }
-                            if (result.errors.project_descriptions) {
-                                result.errors.project_descriptions = result.errors.project_descriptions.replace('project_descriptions', 'Mô tả dự án')
-                                $.growl.error({
-                                    message: result.errors.project_descriptions,
-                                    location: 'tr',
-                                    size: 'large'
-                                });
-                            }
-
-                            createProjectAlreadyClick = false
-                            createButton.innerHTML = 'Tạo'
-                        }, 1000)
-                        return
-                    }
-
-                    $.growl.notice({
-                        message: "Tạo mới dự án thành công"
-                    });
-
-                    setTimeout(() => {
-                        window.location.href = `<?= base_url('project') ?>/${result.project_id}`
-                    }, 1000)
-
-                    return
-                }).catch((error) => {
-                    $.growl.error({
-                        message: error
-                    });
-                    createProjectAlreadyClick = false
-                    createButton.innerHTML = 'Tạo'
-                })
-        }
-
         // ===========================>
-        const createNewProjectModal = document.getElementById('createNewProject')
-        const projectName = document.getElementById('project_name')
-        const projectKey = document.getElementById('project_key')
-        const projectDescriptions = document.getElementById('project_descriptions')
+        var createNewProjectModal = document.getElementById('createNewProject')
+        var projectName = document.getElementById('project_name')
+        var projectKey = document.getElementById('project_key')
+        var projectDescriptions = document.getElementById('project_descriptions')
+        var projectDueDate = document.getElementById('project_due_date')
+        var projectStartDate = document.getElementById('project_start_date')
+        var projectStatus = document.getElementById('project_status')
 
         let flag = false
 
@@ -322,6 +239,146 @@
             }
         })
         // <===========================
+
+        var createProjectAlreadyClick = false
+
+        function createProject(event) {
+            if (createProjectAlreadyClick) {
+                return
+            }
+            createProjectAlreadyClick = true
+
+            if (projectName.value == '' ||
+                projectKey.value == '' ||
+                projectName.value.length < 5 ||
+                projectDescriptions.value.length > 512) {
+
+                createProjectAlreadyClick = false
+                return
+            }
+
+            createButton = document.getElementById('loading-on-click')
+            createButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+            const data = new FormData();
+            data.append('project_name', projectName.value);
+            data.append('project_prefix', projectKey.value)
+            data.append('project_descriptions', projectDescriptions.value)
+            data.append('project_due_date', projectDueDate.value);
+            data.append('project_start_date', projectStartDate.value)
+            data.append('project_status', projectStatus.value)
+
+            var requestOptions = {
+                method: 'POST',
+                body: data,
+                redirect: 'follow'
+            };
+            fetch('<?= base_url('project/create') ?>', requestOptions)
+                .then(response => {
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.errors) {
+                        setTimeout(() => {
+                            errName = result.errors.project_name
+                            if (errName) {
+                                errName = errName.replace('project_name', 'Tên dự án')
+                                $.growl.error({
+                                    message: errName,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+
+                            errPrefix = result.errors.project_prefix
+                            if (errPrefix) {
+                                errPrefix = errPrefix.replace('project_prefix', 'Tiền tố')
+                                $.growl.error({
+                                    message: errPrefix,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+
+                            errDescription = result.errors.project_descriptions
+                            if (errDescription) {
+                                errDescription = errDescription.replace('project_descriptions', 'Mô tả dự án')
+                                $.growl.error({
+                                    message: errDescription,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+
+                            errStatus = result.errors.project_status
+                            if (errDescription) {
+                                errDescription = errDescription.replace('project_status', 'Trạng thái dự án')
+                                $.growl.error({
+                                    message: errDescription,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+
+                            errStartDate = result.errors.project_start_date
+                            if (errDescription) {
+                                errDescription = errDescription.replace('project_start_date', 'Ngày bắt đầu')
+                                $.growl.error({
+                                    message: errDescription,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+
+                            errEndDate = result.errors.project_end_date
+                            if (errDescription) {
+                                errDescription = errDescription.replace('project_end_date', 'Ngày kết thúc')
+                                $.growl.error({
+                                    message: errDescription,
+                                    location: 'tr',
+                                    size: 'large'
+                                });
+                            }
+
+                            createProjectAlreadyClick = false
+                            createButton.innerHTML = 'Tạo'
+                        }, 500)
+                        return
+                    }
+
+                    errDateTime = result.errors_datetime
+                    if (errDateTime) {
+                        $.growl.error({
+                            message: errDateTime,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        createProjectAlreadyClick = false
+                        createButton.innerHTML = 'Tạo'
+
+                        return
+                    }
+
+                    $.growl.notice({
+                        message: "Tạo mới dự án thành công"
+                    });
+
+                    setTimeout(() => {
+                        createProjectAlreadyClick = false
+                        createButton.innerHTML = 'Tạo'
+                        window.location.href = `<?= base_url('project') ?>/${result.project_id}`
+                    }, 500)
+
+                    return
+                }).catch((error) => {
+                    $.growl.error({
+                        message: error
+                    });
+                    createProjectAlreadyClick = false
+                    createButton.innerHTML = 'Tạo'
+                })
+        }
 
         // ===========================>
         function removeDiacritics(str) {

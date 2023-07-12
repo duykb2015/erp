@@ -78,7 +78,7 @@ $routes->group('comment', ['filter' => 'login'], function ($routes) {
     $routes->post('delete', 'Comment::delete');
 });
 
-$routes->group('section', ['filter' => 'login'], function ($routes) {
+$routes->group('task-status', ['filter' => 'login'], function ($routes) {
     $routes->get('create', 'TaskStatus::create');
     $routes->post('create', 'TaskStatus::create');
     $routes->post('update', 'TaskStatus::update');

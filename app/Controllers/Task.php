@@ -60,7 +60,7 @@ class Task extends BaseController
 
         // Get all sections
         $sectionModel = new ModelsSection();
-        $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
+        $sections = $sectionModel->where('task_status.project_id', $projectID)->findAll();
 
         $commentModel = new Comment();
 
@@ -112,7 +112,7 @@ class Task extends BaseController
         $rule = [
             'project_id'    => 'required|integer|is_not_unique[project.id]',
             'name'          => 'required|string|min_length[5]|max_length[512]',
-            'section'       => 'required|integer|is_not_unique[section.id]',
+            'task_status'   => 'required|integer|is_not_unique[task_status.id]',
             'priority'      => 'in_list[' . implode(',', array_keys(TASK_PRIORITY)) . ']',
             'descriptions'  => 'string',
         ];
@@ -170,8 +170,8 @@ class Task extends BaseController
 
         $taskModel = new ModelsTask();
 
-        $taskKey = $taskModel->select('task_key')->join('section', 'section.id = task.section_id')
-            ->join('project', 'project.id = section.project_id')
+        $taskKey = $taskModel->select('task_key')->join('task_status', 'task_status.id = task.section_id')
+            ->join('project', 'project.id = task_status.project_id')
             ->where('project.id', $taskRawData['project_id'])
             ->orderBy('task_key', 'DESC')
             ->limit(1)
@@ -233,7 +233,7 @@ class Task extends BaseController
             'task_id'       => 'is_not_unique[task.id]',
             'project_id'    => 'required|integer|is_not_unique[project.id]',
             'name'          => 'required|string|min_length[5]|max_length[512]',
-            'section'       => 'required|integer|is_not_unique[section.id]',
+            'section'       => 'required|integer|is_not_unique[task_status.id]',
             'priority'      => 'in_list[' . implode(',', array_keys(TASK_PRIORITY)) . ']',
             'descriptions'  => 'string',
         ];
@@ -320,7 +320,7 @@ class Task extends BaseController
 
         $rule = [
             'task_id'       => 'is_not_unique[task.id]',
-            'section_id'       => 'is_not_unique[section.id]',
+            'section_id'       => 'is_not_unique[task_status.id]',
         ];
         $validation->setRules(
             $rule,

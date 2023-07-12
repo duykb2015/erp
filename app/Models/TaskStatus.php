@@ -4,10 +4,10 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class Section extends Model
+class TaskStatus extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'section';
+    protected $table            = 'task_status';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

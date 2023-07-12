@@ -3,54 +3,55 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\Section as ModelsSection;
 use App\Models\Task;
+use App\Models\TaskStatus as ModelsTaskStatus;
 use Exception;
 
 class TaskStatus extends BaseController
 {
     public function create()
     {
-        $projectId = $this->request->getPost('project_id');
-        $section = $this->request->getPost('section_name');
+        $taskStatusData = $this->request->getPost();
 
         $validation = service('validation');
         $validation->setRules(
             [
                 'project_id'   => 'required|integer|is_not_unique[project.id]',
-                'section_name' => 'required|string|min_length[1]|max_length[255]',
+                'task_status_name' => 'required|string|min_length[1]|max_length[255]',
             ]
         );
 
-        if (!$validation->run($this->request->getPost())) {
+        if (!$validation->run($taskStatusData)) {
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
 
-        $sectionModel = new ModelsSection();
-        $sections     = $sectionModel->select(['id', 'base_section', 'position'])->where('project_id', $projectId)->findAll();
-        $sections     = collect($sections);
-        $baseDoneSection = $sections->where('base_section', '=', 3)->first();
-        $count = count($sections);
+        $taskStatusModel = new ModelsTaskStatus();
+        $taskStatus     = $taskStatusModel->select(['id', 'base_status', 'position'])
+            ->where('project_id', $taskStatusData['project_id'])
+            ->findAll();
+        $taskStatus     = collect($taskStatus);
+
+        $baseStatus3 = $taskStatus->where('base_status', '=', 3)->first();
+        $lastStatus = $taskStatus->last();
 
         $data = [
-            'project_id' => $projectId,
-            'title' => $section,
+            'project_id' => $taskStatusData['project_id'],
+            'title' => $taskStatusData['task_status_name'],
             // The case where the section finish has been moved to a non-last position, ignore and do nothing.
-            'position' => $count
         ];
         // In case the section finish is in the last position, we will swap them to make their state clear.
         // (if it's finished, it should be last)
-        if (NULL != $baseDoneSection) {
-            if (($count - 1) == $baseDoneSection['position']) {
-                $data['position'] = $baseDoneSection['position'];
-                $baseDoneSection['position'] = $count;
+        if ($lastStatus['position'] == $baseStatus3['position']) {
+            $data['position'] = $baseStatus3['position'];
+            $baseStatus3['position'] = $lastStatus['id'] + 1;
 
-                $sectionModel->save($baseDoneSection);
-            }
+            $taskStatusModel->save($baseStatus3);
+        } else {
+            $data['position'] = $lastStatus['id'] + 1;
         }
 
         try {
-            $sectionModel->insert($data);
+            $taskStatusModel->insert($data);
         } catch (Exception $e) {
             return $this->handleResponse(['errors' => $e->getMessage()], 500);
         }
@@ -66,8 +67,8 @@ class TaskStatus extends BaseController
         $validation = service('validation');
         $validation->setRules(
             [
-                'section_id'   => 'required|integer|is_not_unique[section.id]',
-                'section_name' => 'required|string|min_length[1]|max_length[255]|is_unique[section.title]',
+                'section_id'   => 'required|integer|is_not_unique[task_status.id]',
+                'section_name' => 'required|string|min_length[1]|max_length[255]|is_unique[task_status.title]',
             ]
         );
 
@@ -98,7 +99,7 @@ class TaskStatus extends BaseController
         $validation = service('validation');
         $validation->setRules(
             [
-                'section_id'   => 'required|integer|is_not_unique[section.id]',
+                'section_id'   => 'required|integer|is_not_unique[task_status.id]',
             ]
         );
 

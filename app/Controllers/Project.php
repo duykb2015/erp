@@ -7,8 +7,8 @@ use App\Models\Comment;
 use App\Models\Project as ModelsProject;
 use App\Models\ProjectUser;
 use App\Models\RelationAttachment;
-use App\Models\Section as ModelsSection;
 use App\Models\Task as ModelsTask;
+use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
@@ -93,7 +93,7 @@ class Project extends BaseController
         $projects = $projectModel->select([
             'project.id',
             'project.name',
-            'project.key',
+            'project.prefix',
             'project.descriptions',
             'project.photo',
             'project.created_at',
@@ -170,13 +170,13 @@ class Project extends BaseController
         $taskModel = new ModelsTask();
         switch (ucfirst($view)) {
             case 'Index':
-                $sectionModel = new ModelsSection();
-                $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
+                $taskStatusModel = new TaskStatus();
+                $taskStatus = $taskStatusModel->where('task_status.project_id', $projectID)->findAll();
 
-                foreach ($sections as $key => $section) {
-                    $sections[$key]['tasks'] = $taskModel->where('task.section_id', $section['id'])->findAll();
+                foreach ($taskStatus as $key => $status) {
+                    $taskStatus[$key]['tasks'] = $taskModel->where('task.task_status_id', $status['id'])->findAll();
                 }
-                $data['sections'] = collect($sections)->sortBy('position')->toArray();
+                $data['taskStatus'] = collect($taskStatus)->sortBy('position')->toArray();
 
                 $assignees = $projectUserModel->select([
                     'user.id as user_id',
@@ -203,8 +203,8 @@ class Project extends BaseController
                 $data['members'] = $members;
 
                 $taskCount = $taskModel->select('COUNT(task.id) as number_of_task')
-                    ->join('section', 'section.id = task.section_id')
-                    ->join('project', 'project.id = section.project_id')
+                    ->join('section', 'task_status.id = task.section_id')
+                    ->join('project', 'project.id = task_status.project_id')
                     ->where('project.id', $projectID)
                     ->first();
                 dd($taskCount);
@@ -230,35 +230,76 @@ class Project extends BaseController
 
     public function create()
     {
+        $projectData = $this->request->getPost();
         $validation = service('validation');
         $validation->setRules(
             [
                 'project_name'         => 'required|string|min_length[5]|max_length[255]|is_unique[project.name]',
-                'project_key'          => 'required|string|min_length[1]|max_length[10]|is_unique[project.key]',
+                'project_prefix'          => 'required|string|min_length[1]|max_length[10]|is_unique[project.prefix]',
                 'project_descriptions' => 'string|max_length[512]',
+                "project_status"       => 'in_list[' . implode(',', array_keys(PROJECT_STATUS)) . ']',
             ],
             customValidationErrorMessage()
         );
 
-        if (!$validation->run($this->request->getPost())) {
+        if ($projectData['project_start_date']) {
+            $rule['project_start_date']  = 'valid_date';
+        }
+
+        if ($projectData['project_due_date']) {
+            $rule['project_due_date']  = 'valid_date';
+        }
+
+        if (!$validation->run($projectData)) {
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
 
-        $projectName         = $this->request->getPost('project_name');
-        $projectKey          = $this->request->getPost('project_key');
-        $projectDescriptions = $this->request->getPost('project_descriptions');
+        $startDate = NULL;
+        $dueDate   = NULL;
 
+        $dateStartPoint = Carbon::now()->subYear();
+        $dateEndPoint = Carbon::createFromDate(2100, 01, 01);
+
+        if ($projectData['project_start_date']) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $projectData['project_start_date'])->startOfDay();
+
+            if ($startDate->lt($dateStartPoint) || $startDate->gt($dateEndPoint)) {
+                return $this->handleResponse(['errors_datetime' => 'Vui lòng chọn một ngày bắt đầu hợp lệ'], 400);
+            }
+        }
+
+        if ($projectData['project_due_date']) {
+            $dueDate = Carbon::createFromFormat('Y-m-d', $projectData['project_due_date'])->endOfDay();
+
+            if ($dueDate->gt($dateEndPoint)) {
+                return $this->handleResponse(['errors_datetime' => 'Vui lòng chọn một kết thúc hợp lệ'], 400);
+            }
+        }
+
+        if ($startDate && $dueDate) {
+            if ($dueDate->lt($startDate) || $dueDate->lt(Carbon::now())) {
+                return $this->handleResponse(['errors_datetime' => 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu'], 400);
+            }
+        }
 
         $owner = session()->get('user_id');
-        $img   = makeImage(strtoUpper($projectName[0]));
+        $img   = makeImage(strtoUpper($projectData['project_name'][0]));
 
         $data = [
-            'name'         => $projectName,
-            'key'          => $projectKey,
-            'descriptions' => $projectDescriptions,
+            'name'         => $projectData['project_name'],
+            'prefix'       => $projectData['project_prefix'],
+            'descriptions' => $projectData['project_descriptions'],
             'owner'        => $owner,
-            'photo'        => $img
+            'photo'        => $img,
+            'status'       => $projectData['project_status']
         ];
+        if ($startDate) {
+            $data['start_at'] = $startDate->format('Y-m-d H:i:s');
+        }
+
+        if ($dueDate) {
+            $data['due_at'] = $dueDate->format('Y-m-d H:i:s');
+        }
 
         $projectModel = new ModelsProject();
         $projectID    = $projectModel->insert($data);
@@ -278,25 +319,25 @@ class Project extends BaseController
                 'project_id' => $projectID,
                 'title' => 'Khởi tạo',
                 'position' => 0,
-                'base_section' => 1
+                'base_status' => 1
             ],
             [
                 'project_id' => $projectID,
                 'title' => 'Đang thực hiện',
                 'position' => 1,
-                'base_section' => 2
+                'base_status' => 2
             ],
             [
                 'project_id' => $projectID,
                 'title' => 'Hoàn thành',
                 'position' => 2,
-                'base_section' => 3
+                'base_status' => 3
             ],
         ]);
 
-        $sectionModel = new ModelsSection();
-        $data->each(function ($item) use ($sectionModel) {
-            $sectionModel->insert($item);
+        $taskStatusModel = new TaskStatus();
+        $data->each(function ($item) use ($taskStatusModel) {
+            $taskStatusModel->insert($item);
         });
 
         $result = ['project_id' => $projectID];
