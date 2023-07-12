@@ -4,9 +4,10 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\Section as ModelsSection;
+use App\Models\Task;
 use Exception;
 
-class Section extends BaseController
+class TaskStatus extends BaseController
 {
     public function create()
     {
@@ -66,7 +67,7 @@ class Section extends BaseController
         $validation->setRules(
             [
                 'section_id'   => 'required|integer|is_not_unique[section.id]',
-                'section_name' => 'required|string|min_length[1]|max_length[255]',
+                'section_name' => 'required|string|min_length[1]|max_length[255]|is_unique[section.title]',
             ]
         );
 
@@ -109,11 +110,17 @@ class Section extends BaseController
 
         $sectionModel = new ModelsSection();
         $section = $sectionModel->find($sectionID);
-        if (0 != $section['base_section'])
-        {
+        if (0 != $section['base_section']) {
             return $this->handleResponse(['errors' => 'Không thể xoá base section'], 400);
         }
-        
+
+        $taskModel = new Task();
+        $tasks = $taskModel->where('section_id', $sectionID)->find();
+
+        if (!empty($tasks)) {
+            return $this->handleResponse(['errors' => 'Trạng thái đang chứa công việc, không thể xoá!'], 400);
+        }
+
         try {
             $sectionModel->delete($sectionID);
         } catch (Exception $e) {

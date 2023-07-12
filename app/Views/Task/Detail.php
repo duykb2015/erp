@@ -90,7 +90,7 @@
                                                 <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                 <div class="dropdown-menu" aria-labelledby="dropdown35" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                     <a class="dropdown-item waves-light waves-effect" data-bs-toggle="modal" data-bs-target="#updateTaskInformation"><i class="icofont icofont-edit-alt m-r-10"></i>Chỉnh sửa</a>
-                                                    <a class="dropdown-item waves-light waves-effect"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
+                                                    <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>, <?= $project['id'] ?>)"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -924,6 +924,72 @@
                 });
                 isUpdateTaskAlreadyClick = false
                 btnCreateTask.innerHTML = 'Lưu'
+            })
+    }
+
+    var isDeleteTaskAlreadyClick = false
+    var btnDeleteTask
+
+    function deleteTask(taskID, projectID) {
+        if (isDeleteTaskAlreadyClick) return
+        isDeleteTaskAlreadyClick = true
+
+        if (!confirm('Bạn có chắc là muốn xoá công việc này?')) {
+            isDeleteTaskAlreadyClick = false
+            return
+        }
+
+        btnDeleteTask = document.getElementById(`btn-delete-task-${taskID}`)
+        btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('task_id', taskID)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/delete') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+
+                    if (result.errors.task_id) {
+                        error = result.errors.section.replace('task_id', 'Mã công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isDeleteTaskAlreadyClick = false
+                            btnDeleteTask.innerHTML = '<i class="icofont icofont-close m-r-10"></i>Xoá'
+                        }, 1000)
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: "Xoá công việc thành công"
+                });
+
+                setTimeout(() => {
+                    isDeleteTaskAlreadyClick = false
+                    btnDeleteTask.innerHTML = '<i class="icofont icofont-close m-r-10"></i>Xoá'
+                    window.location.href = `<?= base_url('project') ?>/${projectID}`
+                }, 1000)
+
+                return
+            }).catch(error => {
+                $.growl.error({
+                    message: error
+                });
+                isDeleteTaskAlreadyClick = false
+                btnDeleteTask.innerHTML = '<i class="icofont icofont-close m-r-10"></i>Xoá'
             })
     }
 

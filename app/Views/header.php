@@ -57,12 +57,12 @@
                         </ul>
                     </div>
                 </li>
-                <?php if (url_is('/')) : ?>
-                    <!-- <li class="header-notification">
+                <?php if (url_is('/') || url_is('/project')) : ?>
+                    <li class="header-notification">
                         <div class="hover px-2">
                             <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewProject">Tạo mới dự án</button>
                         </div>
-                    </li> -->
+                    </li>
                 <?php endif ?>
 
                 <?php if (url_is('project/' . (isset($project['id']) ? $project['id'] : 0))) : ?>

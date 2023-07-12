@@ -79,10 +79,10 @@ $routes->group('comment', ['filter' => 'login'], function ($routes) {
 });
 
 $routes->group('section', ['filter' => 'login'], function ($routes) {
-    $routes->get('create', 'Section::create');
-    $routes->post('create', 'Section::create');
-    $routes->post('update', 'Section::update');
-    $routes->post('delete', 'Section::delete');
+    $routes->get('create', 'TaskStatus::create');
+    $routes->post('create', 'TaskStatus::create');
+    $routes->post('update', 'TaskStatus::update');
+    $routes->post('delete', 'TaskStatus::delete');
 });
 
 $routes->group('task', ['filter' => 'login'], function ($routes) {

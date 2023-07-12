@@ -150,6 +150,24 @@
                             <label for="message-text" class="col-form-label">Mô tả cho dự án</label>
                             <textarea name="project_descriptions" class="form-control rounded" id="project_descriptions" maxlength="512" rows="5"></textarea>
                         </div>
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="task_start_date" class="col-form-label">Chọn ngày bắt đầu</label>
+                                    <input type="date" id="task_start_date" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                    <label for="task_due_date" class="col-form-label">Chọn ngày kết thúc</label>
+                                    <input type="date" id="task_due_date" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="task_descriptions" class="col-form-label">Trạng thái dự án</label>
+                            <select id="task_priority" class="form-control" disabled>
+                                <option value="initialize">Khởi tạo</option>
+                            </select>
+                        </div>
 
                         <div class="float-end">
                             <button type="submit" id="loading-on-click" onclick="createProject(event)" class="btn btn-primary rounded">
@@ -203,7 +221,7 @@
                 projectKey.value == '' ||
                 projectName.value.length < 5 ||
                 projectDescriptions.value.length > 512) {
-                    
+
                 createProjectAlreadyClick = false
                 return
             }

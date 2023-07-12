@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class Section extends Migration
+class TaskStatus extends Migration
 {
     public function up()
     {
@@ -28,7 +28,7 @@ class Section extends Migration
                 'null'           => FALSE,
                 'default'        => 0
             ],
-            'base_section' => [
+            'base_status' => [
                 'type'           => 'TINYINT',
                 'default'        => 0
             ],
@@ -40,11 +40,11 @@ class Section extends Migration
             'CHARACTER SET' => 'utf8',
             'COLLATE' => 'utf8_general_ci'
         ];
-        $this->forge->createTable('section', TRUE, $attributes);
+        $this->forge->createTable('task_status', TRUE, $attributes);
     }
 
     public function down()
     {
-        $this->forge->dropTable('section', TRUE);
+        $this->forge->dropTable('task_status', TRUE);
     }
 }

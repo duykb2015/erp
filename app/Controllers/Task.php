@@ -344,9 +344,26 @@ class Task extends BaseController
     {
         $taskID = $this->request->getPost('task_id');
 
-        //comment
+        $validation = service('validation');
+
+        $rule = [
+            'task_id' => 'is_not_unique[task.id]',
+        ];
+        $validation->setRules(
+            $rule,
+            customValidationErrorMessage()
+        );
+
+        if (!$validation->run($this->request->getPost())) {
+            return $this->handleResponse(['errors' => $validation->getErrors()], 400);
+        }
 
         //attachment
+
+        $commentModel = new Comment();
+        $comments     = $commentModel->select('id')->where('task_id', $taskID)->find();
+
+        $commentModel->delete(collect($comments)->pluck('id')->toArray());
 
         $taskModel = new ModelsTask();
         $taskModel->delete($taskID);

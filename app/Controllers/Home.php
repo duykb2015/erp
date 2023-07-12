@@ -11,7 +11,19 @@ class Home extends BaseController
     public function index()
     {
         $projectModel = new Project();
-        $projects     = $projectModel->where('owner', session()->get('user_id'))->orderBy('id', 'DESC')->findAll(4);
+        $projects     = $projectModel->select([
+                'project.id',
+                'project.name',
+                'project.key',
+                'project.descriptions',
+                'project.photo',
+                'project.created_at',
+                'project.updated_at',
+            ])
+            ->join('project_user', 'project_user.project_id = project.id')
+            ->where('project_user.user_id', session()->get('user_id'))
+            ->orderBy('project.id', 'DESC')
+            ->findAll(4);
         foreach ($projects as $key => $project) {
             $time                         = new Time($project['updated_at']);
             $projects[$key]['updated_at'] = $time->humanize();

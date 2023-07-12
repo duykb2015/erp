@@ -90,7 +90,19 @@ class Project extends BaseController
                 break;
         }
 
-        $projects = $projectModel->where('owner', session()->get('user_id'))->paginate($limit);
+        $projects = $projectModel->select([
+            'project.id',
+            'project.name',
+            'project.key',
+            'project.descriptions',
+            'project.photo',
+            'project.created_at',
+            'project.updated_at',
+        ])
+            ->join('project_user', 'project_user.project_id = project.id')
+            ->where('project_user.user_id', session()->get('user_id'))
+            // ->withDeleted()
+            ->paginate($limit);
         foreach ($projects as $key => $project) {
             $time                         = new Time($project['updated_at']);
             $projects[$key]['updated_at'] = $time->humanize();
@@ -155,9 +167,9 @@ class Project extends BaseController
 
         $view ??= 'Index';
 
+        $taskModel = new ModelsTask();
         switch (ucfirst($view)) {
             case 'Index':
-                $taskModel    = new ModelsTask();
                 $sectionModel = new ModelsSection();
                 $sections = $sectionModel->where('section.project_id', $projectID)->findAll();
 
@@ -190,6 +202,13 @@ class Project extends BaseController
                     ->find();
                 $data['members'] = $members;
 
+                $taskCount = $taskModel->select('COUNT(task.id) as number_of_task')
+                    ->join('section', 'section.id = task.section_id')
+                    ->join('project', 'project.id = section.project_id')
+                    ->where('project.id', $projectID)
+                    ->first();
+                dd($taskCount);
+
                 break;
 
             default:
@@ -197,6 +216,11 @@ class Project extends BaseController
                 return view('Error/NotFound', $data);
         }
 
+        // $purgeDelete = true;
+        // // if project containt task, cannot delete
+        // if (!empty($taskCount) && 0 != $taskCount) {
+        //     $purgeDelete = false;
+        // }
 
         $data['project'] = $project;
         $data['title']   = $project['name'];
@@ -284,8 +308,9 @@ class Project extends BaseController
         $validation = service('validation');
         $validation->setRules(
             [
-                'project'   => 'required|integer|is_not_unique[project.id]',
+                'project'  => 'required|integer|is_not_unique[project.id]',
                 'password' => 'required|string|min_length[1]|max_length[255]',
+                'purge_delete' => 'bool'
             ],
             customValidationErrorMessage()
         );
@@ -304,9 +329,15 @@ class Project extends BaseController
             return $this->handleResponse(['errors' => 'Mật khẩu không chính xác'], 400);
         }
 
+        $projectModel     = new ModelsProject();
+
+        if (!$this->request->getPost('purge_delete')) {
+            // Close project
+            $projectModel->delete($projectID);
+            return $this->handleResponse([]);
+        }
 
         $projectUserModel = new ProjectUser();
-        $projectModel     = new ModelsProject();
         $sectionModel     = new ModelsSection();
         $taskModel        = new ModelsTask();
         $commentModel     = new Comment();

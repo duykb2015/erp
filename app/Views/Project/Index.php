@@ -158,7 +158,7 @@
                                                                                         <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                         <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                             <?php foreach ($sections as $subSection) : ?>
-                                                                                                <a class="dropdown-item waves-light waves-effect">
+                                                                                                <a class="dropdown-item waves-light waves-effect <?= $task['section_id'] == $subSection['id'] ? 'active' : '' ?>" <?= $task['section_id'] == $subSection['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subSection['id'] ?>)">
                                                                                                     <i class="icofont icofont-listine-dots"></i>
                                                                                                     <?= $subSection['title'] ?>
                                                                                                 </a>
@@ -168,7 +168,7 @@
                                                                                 <?php endif ?>
 
                                                                                 <?php if (session()->get('user_id') == $task['created_by']) : ?>
-                                                                                    <button class="btn btn-sm btn-danger waves-light f-right" type="button" onclick=""><i class="icofont icofont-bin"></i></button>
+                                                                                    <button class="btn btn-sm btn-danger waves-light f-right" id="btn-delete-task-<?= $task['id'] ?>" type="button" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-bin"></i></button>
                                                                                 <?php endif ?>
                                                                             </div>
                                                                         <?php endforeach ?>
@@ -429,6 +429,71 @@
             })
     }
 
+    var isDeleteTaskAlreadyClick = false
+    var btnDeleteTask
+
+    function deleteTask(taskID) {
+        if (isDeleteTaskAlreadyClick) return
+        isDeleteTaskAlreadyClick = true
+
+        if (!confirm('Bạn có chắc là muốn xoá công việc này?')) {
+            isDeleteTaskAlreadyClick = false
+            return
+        }
+
+        btnDeleteTask = document.getElementById(`btn-delete-task-${taskID}`)
+        btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('task_id', taskID)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/delete') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+
+                    if (result.errors.task_id) {
+                        error = result.errors.section.replace('task_id', 'Mã công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isDeleteTaskAlreadyClick = false
+                            btnDeleteTask.innerHTML = '<i class="icofont icofont-bin"></i>'
+                        }, 1000)
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: "Xoá công việc thành công"
+                });
+
+                setTimeout(() => {
+                    isDeleteTaskAlreadyClick = false
+                    btnDeleteTask.innerHTML = '<i class="icofont icofont-bin"></i>'
+                    window.location.reload()
+                }, 1000)
+
+                return
+            }).catch(error => {
+                $.growl.error({
+                    message: error
+                });
+                isDeleteTaskAlreadyClick = false
+                btnDeleteTask.innerHTML = '<i class="icofont icofont-bin"></i>'
+            })
+    }
 
     // var files
     var btnCreateTask = null
@@ -550,54 +615,6 @@
                 isCreateNewTaskAlreadyClick = false
                 btnCreateTask.innerHTML = 'Tạo'
             })
-    }
-
-    var menuContext
-    var isDeleteTaskAlreadyClick = false
-
-    function deleteTask(id) {
-        menuContext = document.getElementById(`dropdown-${id}`)
-        if (isDeleteTaskAlreadyClick) return
-        isDeleteTaskAlreadyClick = true
-
-        // btnDeleteTask = document.getElementById(`btn-delete-task-${id}`)
-        // btnDeleteTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-        menuContext.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-
-        isConfirm = confirm('Bạn có chắc là muốn xoá công việc này?')
-
-        if (!isConfirm) {
-            return
-        }
-
-        const data = new FormData()
-        data.append('task_id', id)
-
-        var requestOptions = {
-            method: 'POST',
-            body: data,
-            redirect: 'follow'
-        };
-
-        fetch('<?= base_url('task/delete') ?>', requestOptions)
-            .then(response => response.json())
-            .then(result => {
-                setTimeout(function() {
-                    $.growl.notice({
-                        message: "Xoá thành công"
-                    });
-                    window.location.reload()
-                }, 1500)
-            }).catch(error => {
-                $.growl.error({
-                    message: error,
-                    location: 'tr',
-                    size: 'large'
-                });
-                // btnDeleteTask.innerHTML = '<i class="icofont icofont-ui-delete"></i>Xoá'
-                menuContext.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
-            });
-
     }
 </script>
 

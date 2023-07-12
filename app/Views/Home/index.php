@@ -72,7 +72,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card user-activity-card border">
-                        <?php if (!empty($recentTasks)) : ?>
+                        <?php if (!$recentTasks->isEmpty()) : ?>
                             <div class="card-header">
                                 <h5 class="card-header-text">Công việc đang thực hiện</h5>
                             </div>
@@ -102,7 +102,7 @@
                             </div>
                         <?php else : ?>
                             <div class="card-header rounded text-center">
-                                <h5 class="card-header-text ">Hiện tại bạn không có công việc nào!</h5>
+                                <h5 class="card-header-text ">Tốt lắm, mọi công việc đều đã hoàn thành!</h5>
                             </div>
                         <?php endif ?>
                     </div>

@@ -19,7 +19,7 @@ class Project extends Migration
                 'constraint'     => 255,
                 'null'           => FALSE,
             ],
-            'key' => [
+            'prefix' => [
                 'type'           => 'VARCHAR',
                 'constraint'     => 30,
                 'null'           => FALSE,
@@ -39,8 +39,22 @@ class Project extends Migration
                 'constraint'     => 255,
                 'null'           => TRUE,
             ],
+            'due_at' => [
+                'type'           => 'TIMESTAMP',
+                'null'           => TRUE,
+            ],
+            'start_at' => [
+                'type'           => 'TIMESTAMP',
+                'null'           => TRUE,
+            ],
+            'status' => [
+                'type'           => 'TINYINT',
+                'constraint'     => 1,
+                'null'           => TRUE,
+            ],
             'created_at DATETIME NOT NULL DEFAULT current_timestamp',
-            'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp'
+            'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp',
+            'deleted_at TIMESTAMP NULL',
         ]);
         $this->forge->addPrimaryKey('id');
         $attributes = [
