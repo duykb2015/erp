@@ -31,7 +31,7 @@
                     <nav class="navbar navbar-light m-b-30 p-10 ">
                         <form class="form-material w-100" action="" id="filter" method="GET">
                             <div class="row">
-                                <div class="col-3 pb-2">
+                                <div class="col-2 pb-2">
                                     <label class="p-1" for="dim"><i class="icofont icofont-filter"></i> Thời gian</label>
                                     <select class="form-control rounded" name="dim" onchange="submitForm()">
                                         <optgroup label="Lọc theo">
@@ -46,7 +46,7 @@
                                         </optgroup>
                                     </select>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-2">
                                     <label class="p-1" for="sort"><i class="icofont icofont-sort-alt"></i> Sắp xếp</label>
                                     <select class="form-control rounded" name="sort" onchange="submitForm()">
                                         <optgroup label="Sắp xếp theo">
@@ -56,6 +56,15 @@
                                             <option <?= !empty($sort) && 'latest' == $sort ? 'selected' : ''  ?> value="latest">Mới nhất</option>
                                             <option <?= !empty($sort) && 'oldest' == $sort ? 'selected' : ''  ?> value="oldest">Cũ nhất</option>
                                         </optgroup>
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <label class="p-1" for="status"><i class="icofont icofont-social-stack-exchange"></i> Trạng thái dự án</label>
+                                    <select class="form-control rounded" name="status" onchange="submitForm()">
+                                        <option <?= !empty($status) && 'all'  == $status ? 'selected' : ''  ?> value="all">Toàn bộ</option>
+                                        <option <?= !empty($status) && ACTIVE  == $status ? 'selected' : ''  ?> value="<?= ACTIVE ?>"><?= PROJECT_STATUS[ACTIVE] ?></option>
+                                        <option <?= !empty($status) && INITIALIZE  == $status ? 'selected' : ''  ?> value="<?= INITIALIZE ?>"><?= PROJECT_STATUS[INITIALIZE] ?></option>
+                                        <option <?= !empty($status) && CLOSE  == $status ? 'selected' : ''  ?> value="<?= CLOSE ?>"><?= PROJECT_STATUS[CLOSE] ?></option>
                                     </select>
                                 </div>
                                 <div class="col-3 pb-2">
@@ -92,9 +101,39 @@
                                                 </div>
                                             </div>
                                             <div class="col">
-                                                <h6 class="m-b-5"><a href="<?= base_url('project') . '/' . $project['id'] ?>" class="text-decoration-none">[<?= $project['key'] ?>] <?= $project['name'] ?></a></h6>
+                                                <?php if (CLOSE == $project['status']) : ?>
+                                                    <h6 class="m-b-5" style="text-decoration: line-through;"><b>[<?= $project['prefix'] ?>] <?= $project['name'] ?></b></h6>
+                                                <?php else : ?>
+                                                    <h6 class="m-b-5"><b><a href="<?= base_url('project') . '/' . $project['id'] ?>" class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></b></h6>
+                                                <?php endif ?>
                                                 <p class="text-muted m-b-0"><?= !empty($project['descriptions']) ? $project['descriptions'] : 'Dự án này chưa có mô tả.' ?></p>
                                                 <p class="text-muted m-b-0"><i class="feather icon-clock m-r-10"></i>Cập nhật: <?= $project['updated_at'] ?>.</p>
+                                            </div>
+                                            <div class="col-3">
+                                                <p class="m-b-0"><b>Thành viên:</b> <?= $project['totalUser'] ?></p>
+                                                <p class="m-b-0"><b>Công việc:</b> <?= $project['totalTask'] ?></p>
+                                                <p class="m-b-0"><b>Trạng thái:</b> <?= PROJECT_STATUS[$project['status']] ?></p>
+                                            </div>
+                                            <div class="col-1">
+                                                <?php if (CLOSE == $project['status'] && session()->get('user_id') == $project['owner']) : ?>
+                                                    <div class="dropdown-secondary dropdown d-inline-block f-right">
+                                                        <button class="btn btn-sm btn-primary waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                            <a class="dropdown-item waves-light waves-effect" onclick="restoreProject(<?= $project['id'] ?>)"><i class="icofont icofont-redo"></i> Mở dự án</a>
+                                                        </div>
+                                                    </div>
+                                                <?php endif ?>
+                                                <?php if (CLOSE != $project['status'] && session()->get('user_id') == $project['owner']) : ?>
+                                                    <div class="dropdown-secondary dropdown d-inline-block f-right">
+                                                        <button class="btn btn-sm btn-primary waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                            <?php if (INITIALIZE == $project['status']) : ?>
+                                                                <a class="dropdown-item waves-light waves-effect" onclick="activateProject(<?= $project['id'] ?>)"><i class="icofont icofont-caret-right "></i> Kích hoạt dự án</a>
+                                                            <?php endif ?>
+                                                            <a class="dropdown-item waves-light waves-effect" onclick="closeProject(<?= $project['id'] ?>)"><i class="icofont icofont-close-line"></i> Đóng dự án</a>
+                                                        </div>
+                                                    </div>
+                                                <?php endif ?>
                                             </div>
                                         </div>
                                     </div>
@@ -140,5 +179,161 @@
             timer = setTimeout(callback, ms)
         }
     })()
+
+    function restoreProject(id) {
+        const data = new FormData()
+        data.append('project_id', id)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch(`project/${id}/re-open`, requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    error = result.errors.project_id
+                    if (error) {
+                        error = error.replace('section', 'Dự án')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                    }
+
+                    setTimeout(() => {
+                        // isChangeTaskStatusAlreadyClick = false
+                        // dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                    }, 500)
+
+                    return
+                }
+
+                $.growl.notice({
+                    message: "Đã mở dự án!"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 500)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!'
+                });
+                // isChangeTaskStatusAlreadyClick = false
+                // dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+            })
+    }
+
+    function activateProject(id) {
+        const data = new FormData()
+        data.append('project_id', id)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch(`project/${id}/activate`, requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    error = result.errors.project_id
+                    if (error) {
+                        error = error.replace('section', 'Dự án')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                    }
+
+                    setTimeout(() => {
+                        // isChangeTaskStatusAlreadyClick = false
+                        // dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                    }, 500)
+
+                    return
+                }
+
+                $.growl.notice({
+                    message: "Đã kích hoạt dự án!"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 500)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!'
+                });
+                // isChangeTaskStatusAlreadyClick = false
+                // dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+            })
+    }
+
+    function closeProject(id) {
+        const data = new FormData()
+        data.append('project_id', id)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch(`project/${id}/close`, requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    error = result.errors.project_id
+                    if (error) {
+                        error = error.replace('section', 'Dự án')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                    }
+
+                    setTimeout(() => {
+                        // isChangeTaskStatusAlreadyClick = false
+                        // dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                    }, 500)
+
+                    return
+                }
+
+                $.growl.notice({
+                    message: "Đã đóng dự án!"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 500)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!'
+                });
+                // isChangeTaskStatusAlreadyClick = false
+                // dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+            })
+    }
 </script>
 <?= $this->endSection() ?>

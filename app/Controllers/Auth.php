@@ -55,8 +55,8 @@ class Auth extends BaseController
 			return redirectWithMessage(site_url('auth/login'), WRONG_LOGIN_INFORMATION_MESSAGE);
 		}
 
-		$displayName = $user['firstname'] . ' ' .  $user['lastname'] === ' ' 
-			? $user['username'] 
+		$displayName = $user['firstname'] . ' ' .  $user['lastname'] === ' '
+			? $user['username']
 			: $user['firstname'] . ' ' .  $user['lastname'];
 
 		$sessionData = [
@@ -98,7 +98,7 @@ class Auth extends BaseController
 			'firstname' => $this->request->getPost('firstname'),
 			'lastname'  => $this->request->getPost('lastname'),
 			'photo'		=> makeImage(strtoUpper($this->request->getPost('username')[0])),
-			'type' 		=> 'user'
+			'type' 		=> USER
 		];
 
 		$userModel = new User();
@@ -106,7 +106,6 @@ class Auth extends BaseController
 
 		return redirectWithMessage(site_url('auth/register'), 'success', 'success', FALSE);
 	}
-
 
 	/**
 	 * Used to logout the user.

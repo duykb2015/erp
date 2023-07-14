@@ -57,6 +57,34 @@
                         </ul>
                     </div>
                 </li>
+                <?php if (ADMIN == session()->get('type')) : ?>
+                    <li class="header-notification">
+                        <div class="dropdown-primary dropdown">
+                            <div class="dropdown-toggle <?= url_is('/user-management*') ? 'nav-active' : '' ?>" data-toggle="dropdown">
+                                <div class="hover px-2">
+                                    <span>Thành viên</span>
+                                    <i class="feather icon-chevron-down"></i>
+                                </div>
+                            </div>
+                            <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                <li class="nav-item dropdown" onclick="redirect_url('/user-management')">
+                                    <div class="media">
+                                        <a class="text-decoration-none d-flex">
+                                            Danh sách thành viên
+                                        </a>
+                                    </div>
+                                </li>
+                                <!-- <li class="nav-item dropdown" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">
+                                <div class="media">
+                                    <a class="text-decoration-none d-flex">
+                                        Tạo dự án mới
+                                    </a>
+                                </div>
+                            </li> -->
+                            </ul>
+                        </div>
+                    </li>
+                <?php endif ?>
                 <?php if (url_is('/') || url_is('/project')) : ?>
                     <li class="header-notification">
                         <div class="hover px-2">

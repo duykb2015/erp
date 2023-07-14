@@ -47,6 +47,8 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'User::index');
 
     $routes->post('/', 'User::update');
+    $routes->post('grant-mod-role', 'User::grantModRole');
+    $routes->post('revoke-mod-role', 'User::revokeModRole');
     $routes->post('image/upload', 'User::upload');
     $routes->post('image/cancel', 'User::cancelUpload');
     $routes->post('image/remove', 'User::remove');
@@ -54,22 +56,38 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 
 $routes->group('project', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Project::list');
+    $routes->post('change-role-leader', 'Project::changeRoleLeader');
+    $routes->post('change-role-member', 'Project::changeRoleMember');
+
+    $routes->post('remove-user', 'Project::removeUser');
+
+    $routes->post('(:num)/activate', 'Project::activate');
+    $routes->post('(:num)/re-open', 'Project::reOpen');
+    $routes->post('(:num)/close', 'Project::close');
+
     $routes->post('create', 'Project::create');
     $routes->post('delete/(:num)', 'Project::delete');
     $routes->post('find/user', 'Project::findUser');
+
     $routes->post('(:num)/image/upload', 'Project::upload');
     $routes->post('(:num)/image/cancel', 'Project::cancelUpload');
-    $routes->post('(:num)/image/remove', 'User::remove');
 
     $routes->get('(:num)/task/(:num)', 'Task::index');
 
     $routes->group('(:any)', function ($routes) {
         $routes->get('/', 'Project::detail');
-        $routes->get('user', 'Project::user');
+        // $routes->get('user', 'Project::user');
         $routes->post('user', 'Project::addUser');
-        $routes->get('setting', 'Project::setting');
+        // $routes->get('setting', 'Project::setting');
         $routes->post('setting', 'Project::saveSetting');
+        $routes->post('statistic', 'Project::statistic');
     });
+});
+
+$routes->group('user-management', ['filter' => 'login'], function ($routes) {
+    $routes->get('/', 'User::listUser');
+    $routes->post('update', 'Comment::update');
+    $routes->post('delete', 'Comment::delete');
 });
 
 $routes->group('comment', ['filter' => 'login'], function ($routes) {

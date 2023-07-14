@@ -14,23 +14,27 @@ class User extends Seeder
             'username' => 'admin',
             'password' => md5('1112'),
             'email' => 'example@gmail.com',
-            'photo' => $this->makeImage(strtoUpper('A')),
-            'type' => 'admin'
+            'photo' => $this->makeImage(strtoUpper('D')),
+            'firstname' => 'Lãng',
+            'lastname' => 'Duy',
+            'type' => '1'
         ];
         $user = new ModelsUser();
         $user->insert($data);
 
         $faker = Faker::create('Asia/Ho_Chi_Minh');
 
+        $char = 'ABCDEFGHIJKLMNOPQRSTXZWUV';
+
         for ($i = 0; $i < 20; $i++) {
             $data = [
                 'username'  => $faker->userName(),
                 'password'  => md5('1112'),
                 'email'     => $faker->email(),
-                'photo'     => $this->makeImage(strtoUpper('A')),
+                'photo'     => $this->makeImage(strtoUpper($char[random_int(0, 24)])),
                 'firstname' => $faker->firstName(),
                 'lastname'  => $faker->lastName(),
-                'type'      => 'user'
+                'type'      => '0'
             ];
             $user->insert($data);
         }

@@ -141,8 +141,8 @@
                                                             </h5>
                                                             <div class="input-group hidden" id="input-group-section-<?= $status['id'] ?>" onfocusout="inputGroupSectionOut(<?= $status['id'] ?>)">
                                                                 <input type="text" class="form-control" id="section-name-num-<?= $status['id'] ?>" value="<?= $status['title'] ?>">
-                                                                <button type="button" id="save-edit-section-<?= $status['id'] ?>" class="btn btn-primary" onclick="saveNewSection(<?= $status['id'] ?>)">Lưu</button>
-                                                                <button type="button" id="delete-section-<?= $status['id'] ?>" class="btn btn-danger" onclick="deleteSection(<?= $status['id'] ?>)">Xoá</button>
+                                                                <button type="button" id="save-edit-section-<?= $status['id'] ?>" class="btn btn-primary" onclick="editTaskStatusName(<?= $status['id'] ?>)">Lưu</button>
+                                                                <button type="button" id="delete-section-<?= $status['id'] ?>" class="btn btn-danger" onclick="deleteTaskStatus(<?= $status['id'] ?>)">Xoá</button>
                                                             </div>
                                                         </div>
                                                         <div class="card-block p-b-0">
@@ -155,10 +155,10 @@
 
                                                                                 <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee'])) : ?>
                                                                                     <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
-                                                                                        <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                        <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                         <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                             <?php foreach ($taskStatus as $subStatus) : ?>
-                                                                                                <a class="dropdown-item waves-light waves-effect <?= $task['section_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['section_id'] == $subStatus['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subStatus['id'] ?>)">
+                                                                                                <a class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subStatus['id'] ?>)">
                                                                                                     <i class="icofont icofont-listine-dots"></i>
                                                                                                     <?= $subStatus['title'] ?>
                                                                                                 </a>
@@ -182,6 +182,7 @@
                                                 </div>
                                             <?php endforeach ?>
                                         <?php endif ?>
+                                        <?php if (MEMBER != session()->get('role')) ?> 
                                         <div class="col-3">
                                             <div class="card border">
                                                 <div class="card-block">
@@ -355,18 +356,18 @@
 
 <script>
     var isChangeTaskStatusAlreadyClick = false
-    var btnChangeTaskStatus
+    var dropDownChangeStatus
 
     function changeTaskStatus(taskID, statusID) {
         if (isChangeTaskStatusAlreadyClick) return
         isChangeTaskStatusAlreadyClick = true
 
-        btnChangeTaskStatus = document.getElementById('btn-update-task-status')
-        btnChangeTaskStatus.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-
         const data = new FormData()
         data.append('task_id', taskID)
-        data.append('section_id', document.getElementById('change-section').value)
+        data.append('status_id', statusID)
+
+        dropDownChangeStatus = document.getElementById(`dropdown-${taskID}`)
+        dropDownChangeStatus.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         var requestOptions = {
             method: 'POST',
@@ -380,8 +381,9 @@
             })
             .then(result => {
                 if (result.errors) {
-                    if (result.errors.task_id) {
-                        error = result.errors.section.replace('section', 'Trạng thái công việc')
+                    errTaskID = result.errors.task_id
+                    if (errTaskID) {
+                        errTaskID = errTaskID.replace('section', 'Công việc')
                         $.growl.error({
                             message: error,
                             location: 'tr',
@@ -389,14 +391,15 @@
                         });
                         setTimeout(() => {
                             isChangeTaskStatusAlreadyClick = false
-                            btnChangeTaskStatus.innerHTML = 'Chuyển'
-                        }, 1000)
+                            dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                        }, 500)
 
                         return
                     }
 
-                    if (result.errors.section_id) {
-                        error = result.errors.assignee.replace('assignee', 'Người được giao')
+                    errStatusID = result.errors.status_id
+                    if (errStatusID) {
+                        errStatusID = errStatusID.replace('status_id', 'Trạng thái')
                         $.growl.error({
                             message: error,
                             location: 'tr',
@@ -404,8 +407,8 @@
                         });
                         setTimeout(() => {
                             isChangeTaskStatusAlreadyClick = false
-                            btnChangeTaskStatus.innerHTML = 'Chuyển'
-                        }, 1000)
+                            dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                        }, 500)
 
                         return
                     }
@@ -417,15 +420,15 @@
 
                 setTimeout(() => {
                     window.location.reload()
-                }, 1000)
+                }, 500)
 
                 return
-            }).catch(error => {
+            }).catch(() => {
                 $.growl.error({
-                    message: error
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!'
                 });
                 isChangeTaskStatusAlreadyClick = false
-                btnChangeTaskStatus.innerHTML = 'Chuyển'
+                dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
             })
     }
 
@@ -470,7 +473,7 @@
                         setTimeout(() => {
                             isDeleteTaskAlreadyClick = false
                             btnDeleteTask.innerHTML = '<i class="icofont icofont-bin"></i>'
-                        }, 1000)
+                        }, 500)
                         return
                     }
                 }
@@ -483,7 +486,7 @@
                     isDeleteTaskAlreadyClick = false
                     btnDeleteTask.innerHTML = '<i class="icofont icofont-bin"></i>'
                     window.location.reload()
-                }, 1000)
+                }, 500)
 
                 return
             }).catch(error => {
@@ -546,7 +549,7 @@
                         setTimeout(() => {
                             isCreateNewTaskAlreadyClick = false
                             btnCreateTask.innerHTML = 'Tạo'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -561,7 +564,7 @@
                         setTimeout(() => {
                             isCreateNewTaskAlreadyClick = false
                             btnCreateTask.innerHTML = 'Tạo'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -576,7 +579,7 @@
                         setTimeout(() => {
                             isCreateNewTaskAlreadyClick = false
                             btnCreateTask.innerHTML = 'Tạo'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -592,7 +595,7 @@
                     setTimeout(() => {
                         isCreateNewTaskAlreadyClick = false
                         btnCreateTask.innerHTML = 'Tạo'
-                    }, 1000)
+                    }, 500)
 
                     return
                 }
@@ -604,8 +607,9 @@
                 setTimeout(() => {
                     isCreateNewTaskAlreadyClick = false
                     btnCreateTask.innerHTML = 'Tạo'
-                    window.location.href = `<?= base_url('project') ?>/${projectID}/task/${result.task_id}`
-                }, 1000)
+                    // window.location.href = `<?= base_url('project') ?>/${projectID}/task/${result.task_id}`
+                    window.location.reload()
+                }, 500)
 
                 return
             }).catch(error => {
@@ -760,20 +764,21 @@
         attempt++
     }
 
-    var saveNewNameAlreadyActive = false
+    var editTaskStatusNameAlreadyActive = false
+    var btnEditTaskStatusName
 
-    function saveNewSection(id) {
-        if (saveNewNameAlreadyActive) {
+    function editTaskStatusName(id) {
+        if (editTaskStatusNameAlreadyActive) {
             return
         }
-        saveNewNameAlreadyActive = true
-        inputSectionName = document.getElementById(`section-name-num-${id}`)
-        btnSaveSection = document.getElementById(`save-edit-section-${id}`)
-        btnSaveSection.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        editTaskStatusNameAlreadyActive = true
+        inputTaskStatusName = document.getElementById(`section-name-num-${id}`)
+        btnEditTaskStatusName = document.getElementById(`save-edit-section-${id}`)
+        btnEditTaskStatusName.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         const data = new FormData()
-        data.append('section_id', id)
-        data.append('section_name', inputSectionName.value)
+        data.append('task_status_id', id)
+        data.append('task_status_name', inputTaskStatusName.value)
 
         var requestOptions = {
             method: 'POST',
@@ -784,49 +789,60 @@
         fetch('<?= base_url('task-status/update') ?>', requestOptions)
             .then(response => response.json())
             .then(result => {
-                if (0 == result.length) {
-                    $.growl.notice({
-                        message: "Cập nhật thành công"
-                    });
-
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 1500)
-                    return
-                }
 
                 if (result.errors) {
                     setTimeout(() => {
-                        if (result.errors.section_id) {
-                            result.errors.section_id = result.errors.section_id.replace('section_id', 'Mã Section')
+                        errTaskStatusID = result.errors.task_status_id
+                        if (errTaskStatusID) {
+                            errTaskStatusID = errTaskStatusID.replace('task_status_id', 'Mã Section')
                             $.growl.error({
-                                message: result.errors.project_name,
+                                message: errTaskStatusID,
                                 location: 'tr',
                                 size: 'large'
                             });
                         }
-                        if (result.errors.section_name) {
-                            result.errors.section_name = result.errors.section_name.replace('section_name', 'Tên Section')
+
+                        errTaskStatusName = result.errors.task_status_name
+                        if (errTaskStatusName) {
+                            errTaskStatusName = errTaskStatusName.replace('section_name', 'Tên Section')
                             $.growl.error({
-                                message: result.errors.section_name,
+                                message: errTaskStatusName,
                                 location: 'tr',
                                 size: 'large'
                             });
                         }
-                        saveNewNameAlreadyActive = false
-                        btnSaveSection.innerHTML = 'Lưu'
-                    }, 1000)
+                        editTaskStatusNameAlreadyActive = false
+                        btnEditTaskStatusName.innerHTML = 'Lưu'
+                    }, 500)
+
+                    return
                 }
+
+                $.growl.notice({
+                    message: "Cập nhật thành công"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 500)
+            }).catch(() => {
+                $.growl.notice({
+                    message: "Có lỗi xảy ra, vui lòng thử lại sau!",
+                    location: 'tr',
+                    size: 'large'
+                });
+                editTaskStatusNameAlreadyActive = false
+                btnEditTaskStatusName.innerHTML = 'Lưu'
             })
     }
 
-    var deleteSectionAlreadyActive = false
+    var deleteTaskStatusAlreadyActive = false
 
-    function deleteSection(id) {
-        if (deleteSectionAlreadyActive) {
+    function deleteTaskStatus(id) {
+        if (deleteTaskStatusAlreadyActive) {
             return
         }
-        deleteSectionAlreadyActive = true
+        deleteTaskStatusAlreadyActive = true
 
         attempt = 1
         isConfirm = confirm('Bạn có chắc muốn xoá đi section này?')
@@ -837,7 +853,7 @@
         btnDelete.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         const data = new FormData()
-        data.append('section_id', id)
+        data.append('task_status_id', id)
 
         var requestOptions = {
             method: 'POST',
@@ -850,34 +866,35 @@
                 return response.json()
             })
             .then(result => {
-                if (0 == result.length) {
-                    $.growl.notice({
-                        message: "Xoá thành công"
-                    });
-
+                if (result.errors) {
                     setTimeout(() => {
-                        window.location.reload()
-                    }, 1000)
+                        $.growl.error({
+                            message: result.errors,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        deleteTaskStatusAlreadyActive = false
+                        btnDelete.innerHTML = 'Xoá'
+
+                    }, 500)
                     return
                 }
 
+                $.growl.notice({
+                    message: "Xoá thành công"
+                });
+
                 setTimeout(() => {
-                    $.growl.error({
-                        message: result.errors,
-                        location: 'tr',
-                        size: 'large'
-                    });
-                    deleteSectionAlreadyActive = false
-                    btnDelete.innerHTML = 'Xoá'
+                    window.location.reload()
                 }, 500)
 
-            }).catch((error) => {
+            }).catch(() => {
                 $.growl.error({
-                    message: error,
+                    message: "Có lỗi xảy ra, vui lòng thử lại sau!",
                     location: 'tr',
                     size: 'large'
                 });
-                deleteSectionAlreadyActive = false
+                deleteTaskStatusAlreadyActive = false
                 btnDelete.innerHTML = 'Xoá'
             })
     }

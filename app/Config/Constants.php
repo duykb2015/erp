@@ -126,7 +126,9 @@ define('BASE_SECTION', [
 
 define('LEADER', 'leader');
 define('MEMBER', 'member');
+define('OWNER', 'owner');
 define('PROJECT_ROLE', [
+    OWNER => 'Chủ sở hữu',
     LEADER => 'Trưởng nhóm',
     MEMBER => 'Thành viên'
 ]);
@@ -144,4 +146,14 @@ define('PROJECT_STATUS', [
     ACTIVE => 'Đang hoạt động',
     CLOSE => 'Đóng',
     DELETED => 'Đã xoá'
+]);
+
+define('ADMIN', 'admin');
+define('MODERATOR', 'moderator');
+define('USER', 'user');
+
+define('USER_TYPE', [
+    ADMIN => 'Admin',
+    MODERATOR => 'Quản trị viên',
+    USER => 'Người dùng'
 ]);

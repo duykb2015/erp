@@ -164,7 +164,7 @@
                                                                 </div>
                                                                 <div class="col-12 ">
                                                                     <button type="button" class="btn btn-secondary f-right rounded" onclick="clearComment()">Huỷ</button>
-                                                                    <button class="btn btn-primary f-right rounded mx-2" id="btn-save-comment" onclick="createComment(event, <?= $task['id'] ?>)">Bình luận</button>
+                                                                    <button class="btn btn-primary f-right rounded mx-2" type="button" id="btn-save-comment" onclick="createComment(<?= $task['id'] ?>)">Bình luận</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -288,7 +288,7 @@
                                             </tr>
                                             <tr>
                                                 <td><i class="icofont icofont-washing-machine"></i> Trạng thái:</td>
-                                                <td class="text-right">Đang thực hiện</td>
+                                                <td class="text-right"><?= $task['status'] ?></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -411,10 +411,10 @@
                     </div>
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
-                        <select id="choose_section" class="form-control">
-                            <?php if (!empty($sections)) : ?>
-                                <?php foreach ($sections as $section) : ?>
-                                    <option value="<?= $section['id'] ?>" <?= $task['section_id'] == $section['id'] ? 'selected' : '' ?>><?= $section['title'] ?></option>
+                        <select id="task_status" class="form-control">
+                            <?php if (!empty($taskStatus)) : ?>
+                                <?php foreach ($taskStatus as $status) : ?>
+                                    <option value="<?= $status['id'] ?>" <?= $task['task_status_id'] == $status['id'] ? 'selected' : '' ?>><?= $status['title'] ?></option>
                                 <?php endforeach ?>
                             <?php endif ?>
                         </select>
@@ -563,13 +563,14 @@
     }
 
     var isCreateCommentAlreadyClick = false
-    var btnSaveComment = document.getElementById('btn-save-comment')
+    var btnSaveComment
 
-    function createComment(event, taskID) {
-        event.preventDefault()
+    function createComments(taskID) {
+        console.log(123);
         if (isCreateCommentAlreadyClick) return
         isCreateCommentAlreadyClick = true
 
+        btnSaveComment = document.getElementById('btn-save-comment')
         btnSaveComment.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         const data = new FormData()
@@ -596,7 +597,7 @@
                         setTimeout(() => {
                             isCreateCommentAlreadyClick = false
                             btnSaveComment.innerHTML = 'Bình luận'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -610,14 +611,14 @@
                         setTimeout(() => {
                             isCreateCommentAlreadyClick = false
                             btnSaveComment.innerHTML = 'Bình luận'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
                 }
 
                 setTimeout(() => {
-                    window.location.reload()
+                    // window.location.reload()
                 }, 1000)
 
                 return
@@ -828,7 +829,7 @@
         const data = new FormData()
         data.append('task_id', <?= $task['id'] ?>)
         data.append('name', taskName.value)
-        data.append('section', document.getElementById('choose_section').value)
+        data.append('task_status', document.getElementById('task_status').value)
         data.append('assignee', document.getElementById('assignee').value)
         data.append('priority', document.getElementById('task_priority').value)
         data.append('start_date', document.getElementById('task_start_date').value)
@@ -859,7 +860,7 @@
                         setTimeout(() => {
                             isUpdateTaskAlreadyClick = false
                             btnCreateTask.innerHTML = 'Lưu'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -874,7 +875,7 @@
                         setTimeout(() => {
                             isUpdateTaskAlreadyClick = false
                             btnCreateTask.innerHTML = 'Lưu'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -889,7 +890,7 @@
                         setTimeout(() => {
                             isUpdateTaskAlreadyClick = false
                             btnCreateTask.innerHTML = 'Lưu'
-                        }, 1000)
+                        }, 500)
 
                         return
                     }
@@ -904,7 +905,7 @@
                     setTimeout(() => {
                         isUpdateTaskAlreadyClick = false
                         btnCreateTask.innerHTML = 'Lưu'
-                    }, 1000)
+                    }, 500)
 
                     return
                 }
@@ -915,7 +916,7 @@
 
                 setTimeout(() => {
                     window.location.reload()
-                }, 1000)
+                }, 500)
 
                 return
             }).catch(error => {

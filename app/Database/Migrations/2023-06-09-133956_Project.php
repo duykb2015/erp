@@ -48,8 +48,8 @@ class Project extends Migration
                 'null'           => TRUE,
             ],
             'status' => [
-                'type'           => 'TINYINT',
-                'constraint'     => 1,
+                'type'           => 'VARCHAR',
+                'constraint'     => 25,
                 'null'           => TRUE,
             ],
             'created_at DATETIME NOT NULL DEFAULT current_timestamp',

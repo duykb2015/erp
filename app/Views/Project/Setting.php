@@ -56,7 +56,11 @@
                                     <div class="row justify-content-center">
                                         <div class="col-12">
                                             <h5 class="card-header-text sub-title d-inline">Cài đặt dự án</h5>
-                                            <button type="button" class="btn btn-danger f-right rounded card-header-text sub-title d-flex" data-bs-toggle="modal" data-bs-target="#deleteProject">Xoá dự án</button>
+                                            <?php if ('initialize' == $project['status']) : ?>
+                                                <button type="button" class="btn btn-danger f-right rounded card-header-text sub-title d-flex" data-bs-toggle="modal" data-bs-target="#deleteProject">Xoá dự án</button>
+                                            <?php else : ?>
+                                                <button type="button" class="btn btn-primary f-right rounded card-header-text sub-title d-flex" id="close-project" onclick="closeProject(<?= $project['id'] ?>)">Đóng dự án</button>
+                                            <?php endif ?>
                                             <div class="modal fade mt-5" id="deleteProject" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
                                                 <!-- modal-xl -->
                                                 <div class="modal-dialog">
@@ -154,19 +158,43 @@
                                             <div class="col-4">
                                                 <div class="form-group form-primary">
                                                     <label class="p-1" for="prefix">Tiền tố <span class="text-danger">*</span></label>
-                                                    <input type="text" value="<?= $project['key'] ?>" class="form-control rounded" placeholder="Email" disabled title="Tiền tố không thể sửa.">
+                                                    <input type="text" value="<?= $project['prefix'] ?>" class="form-control rounded" placeholder="Email" disabled title="Tiền tố không thể sửa.">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row justify-content-center">
                                             <div class="col-4">
                                                 <div class="form-group form-primary">
-                                                    <label class="p-1" for="lastname">Chủ sở hữu</label>
-                                                    <select name="owner" class="form-control rounded">
-                                                        <?php foreach ($members as $member) : ?>
-                                                            <option value="<?= $member['user_id'] ?>" <?= $member['user_id'] == $project['owner'] ? 'selected' : '' ?>><?= $member['username'] ?> <?= $member['user_id'] == $project['owner'] ? '(Chủ sở hữu)' : '' ?></option>
+                                                    <label class="p-1" for="owner">Chủ sở hữu</label>
+                                                    <input type="text" value="<?= $owner['username'] ?>" class="form-control rounded" placeholder="Chủ sở hữu" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label class="p-1" for="lastname">Trạng thái dự án</label>
+                                                    <select name="status" class="form-control rounded">
+                                                        <?php foreach (PROJECT_STATUS as $key => $status) : ?>
+                                                            <option value="<?= $key ?>" <?= $project['status'] == $key ? 'selected' : '' ?>><?= $status ?></option>
                                                         <?php endforeach ?>
                                                     </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label for="project_start_date" class="col-form-label">Ngày bắt đầu dự án</label>
+                                                    <input type="date" name="start_at" value="<?= $project['start_at'] ?>" class="form-control rounded">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-4">
+                                                <div class="form-group form-primary">
+                                                    <label for="project_due_date" class="col-form-label">Ngày kết thúc dự án</label>
+                                                    <input type="date" name="due_at" value="<?= $project['due_at'] ?>" class="form-control rounded">
                                                 </div>
                                             </div>
                                         </div>
@@ -279,9 +307,9 @@
                 btnDoDeleteProjectAlreadyClick = false
                 btnDeleteProject.innerHTML = 'Xác nhận'
 
-            }).catch((error) => {
+            }).catch(() => {
                 $.growl.error({
-                    message: error,
+                    message: "Có lỗi xảy ra, vui lòng thử lại sau!",
                     location: 'tr',
                     size: 'large'
                 });
@@ -291,6 +319,66 @@
     }
 
     // Kiểm  tra lại hàm xoá này. viết logic xoá bên backend
+
+    var closeProjectAlreadyClick = false
+    var btnCloseProject
+
+    function closeProject(id) {
+
+        if (closeProjectAlreadyClick) return
+        closeProjectAlreadyClick = true
+
+        if (!confirm('Bạn có chắc là muốn đóng dự án này?')) {
+            closeProjectAlreadyClick = false
+            return
+        }
+
+        btnCloseProject = document.getElementById('close-project')
+        btnCloseProject.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('project_id', id)
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow',
+        }
+        fetch('<?= base_url('project/' . $project['id'] . '/close') ?>', requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                if (result.errors) {
+                    errProjectID = result.errors.project_id
+                    if (errProjectID) {
+                        $.growl.error({
+                            message: errProjectID,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        closeProjectAlreadyClick = false
+                        btnCloseProject.innerHTML = 'Đóng dự án'
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: "Đóng thành công"
+                });
+
+                setTimeout(() => {
+                    window.location.href = '<?= base_url('project') ?>'
+                }, 300)
+
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!',
+                    location: 'tr',
+                    size: 'large'
+                });
+                closeProjectAlreadyClick = false
+                btnCloseProject.innerHTML = 'Đóng dự án'
+            })
+    }
 
 
     var saveAvatarAlreadyClick = false

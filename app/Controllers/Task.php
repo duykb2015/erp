@@ -7,7 +7,7 @@ use App\Models\Comment;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
-use App\Models\Section as ModelsSection;
+use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
@@ -58,9 +58,11 @@ class Task extends BaseController
             ->find();
         $data['assignees'] = $assignees;
 
-        // Get all sections
-        $sectionModel = new ModelsSection();
-        $sections = $sectionModel->where('task_status.project_id', $projectID)->findAll();
+        // Get all task status
+        $taskStatusModel = new TaskStatus();
+        $taskStatus = $taskStatusModel->where('task_status.project_id', $projectID)
+            ->orderBy('position', 'ASC')
+            ->findAll();
 
         $commentModel = new Comment();
 
@@ -95,9 +97,11 @@ class Task extends BaseController
             $comments[$key]['created_at'] = $time->humanize();
         }
 
+        $task['status'] = (new TaskStatus)->select('title as status')->where('id', $task['task_status_id'])->first()['status'];
+
         $data['project']    = $project;
         $data['task']       = $task;
-        $data['sections']   = $sections;
+        $data['taskStatus'] = $taskStatus;
         $data['activities'] = $activities;
         $data['comments']   = $comments;
         $data['title']      = 'Chi tiết công việc';
@@ -166,11 +170,11 @@ class Task extends BaseController
         }
 
         $projectModel = new Project();
-        $project = $projectModel->select('key')->where('id', $taskRawData['project_id'])->first();
+        $project = $projectModel->select('prefix')->where('id', $taskRawData['project_id'])->first();
 
         $taskModel = new ModelsTask();
 
-        $taskKey = $taskModel->select('task_key')->join('task_status', 'task_status.id = task.section_id')
+        $taskKey = $taskModel->select('task_key')->join('task_status', 'task_status.id = task.task_status_id')
             ->join('project', 'project.id = task_status.project_id')
             ->where('project.id', $taskRawData['project_id'])
             ->orderBy('task_key', 'DESC')
@@ -187,8 +191,8 @@ class Task extends BaseController
         $userID = session()->get('user_id');
 
         $data = [
-            'task_key'      => $project['key'] . '-' . ($key + 1),
-            'section_id'    => $taskRawData['section'],
+            'task_key'      => $project['prefix'] . '-' . ($key + 1),
+            'task_status_id' => $taskRawData['task_status'],
             'title'         => $taskRawData['name'],
             'descriptions'  => $taskRawData['descriptions'],
             'priority'      => $taskRawData['priority'],
@@ -233,7 +237,7 @@ class Task extends BaseController
             'task_id'       => 'is_not_unique[task.id]',
             'project_id'    => 'required|integer|is_not_unique[project.id]',
             'name'          => 'required|string|min_length[5]|max_length[512]',
-            'section'       => 'required|integer|is_not_unique[task_status.id]',
+            'task_status'       => 'required|integer|is_not_unique[task_status.id]',
             'priority'      => 'in_list[' . implode(',', array_keys(TASK_PRIORITY)) . ']',
             'descriptions'  => 'string',
         ];
@@ -290,7 +294,7 @@ class Task extends BaseController
 
         $data = [
             'id'            => $taskRawData['task_id'],
-            'section_id'    => $taskRawData['section'],
+            'task_status_id' => $taskRawData['task_status'],
             'title'         => $taskRawData['name'],
             'descriptions'  => $taskRawData['descriptions'],
             'priority'      => $taskRawData['priority'],
@@ -311,6 +315,18 @@ class Task extends BaseController
 
         $taskModel->save($data);
 
+        unset($data);
+
+        $commentModel = new Comment();
+        $data = [
+            'task_id' => $taskRawData['task_id'],
+            'created_by' => session()->get('user_id'),
+            'text' => '<b>' . session()->get('name') . '</b> đã chỉnh sửa công việc.',
+            'type' => SYSTEM_COMMENT_TYPE
+        ];
+
+        $commentModel = $commentModel->insert($data);
+
         return $this->handleResponse();
     }
 
@@ -320,7 +336,7 @@ class Task extends BaseController
 
         $rule = [
             'task_id'       => 'is_not_unique[task.id]',
-            'section_id'       => 'is_not_unique[task_status.id]',
+            'status_id'       => 'is_not_unique[task_status.id]',
         ];
         $validation->setRules(
             $rule,
@@ -332,10 +348,10 @@ class Task extends BaseController
         }
 
         $taskID = $this->request->getPost('task_id');
-        $sectionID = $this->request->getPost('section_id');
+        $sectionID = $this->request->getPost('status_id');
 
         $taskModel = new ModelsTask();
-        $taskModel->update($taskID, ['section_id' => $sectionID]);
+        $taskModel->update($taskID, ['task_status_id' => $sectionID]);
 
         return $this->handleResponse();
     }

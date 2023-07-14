@@ -61,30 +61,29 @@ class TaskStatus extends BaseController
 
     public function update()
     {
-        $sectionID = $this->request->getPost('section_id');
-        $section = $this->request->getPost('section_name');
+        $taskStatusData = $this->request->getPost();
 
         $validation = service('validation');
         $validation->setRules(
             [
-                'section_id'   => 'required|integer|is_not_unique[task_status.id]',
-                'section_name' => 'required|string|min_length[1]|max_length[255]|is_unique[task_status.title]',
+                'task_status_id'   => 'required|integer|is_not_unique[task_status.id]',
+                'task_status_name' => 'required|string|min_length[1]|max_length[255]|is_unique[task_status.title]',
             ]
         );
 
-        if (!$validation->run($this->request->getPost())) {
+        if (!$validation->run($taskStatusData)) {
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
 
-        $sectionModel = new ModelsSection();
+        $taskStatusModel = new ModelsTaskStatus();
 
         $data = [
-            'id' => $sectionID,
-            'title' => $section,
+            'id' => $taskStatusData['task_status_id'],
+            'title' => $taskStatusData['task_status_name'],
         ];
 
         try {
-            $sectionModel->save($data);
+            $taskStatusModel->save($data);
         } catch (Exception $e) {
             return $this->handleResponse(['errors' => $e->getMessage()], 500);
         }
@@ -94,36 +93,34 @@ class TaskStatus extends BaseController
 
     public function delete()
     {
-        $sectionID = $this->request->getPost('section_id');
-
         $validation = service('validation');
         $validation->setRules(
             [
-                'section_id'   => 'required|integer|is_not_unique[task_status.id]',
+                'task_status_id'   => 'required|integer|is_not_unique[task_status.id]',
             ]
         );
 
         if (!$validation->run($this->request->getPost())) {
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
+        $taskStatusID = $this->request->getPost('task_status_id');
 
-        //Không cho xoá nếu đó là base section
-
-        $sectionModel = new ModelsSection();
-        $section = $sectionModel->find($sectionID);
-        if (0 != $section['base_section']) {
+        $taskStatusModel = new ModelsTaskStatus();
+        $taskStatus = $taskStatusModel->find($taskStatusID);
+        if (0 != $taskStatus['base_status']) {
+            //Không cho xoá nếu đó là base section
             return $this->handleResponse(['errors' => 'Không thể xoá base section'], 400);
         }
 
         $taskModel = new Task();
-        $tasks = $taskModel->where('section_id', $sectionID)->find();
+        $tasks = $taskModel->where('task_status_id', $taskStatusID)->find();
 
         if (!empty($tasks)) {
             return $this->handleResponse(['errors' => 'Trạng thái đang chứa công việc, không thể xoá!'], 400);
         }
 
         try {
-            $sectionModel->delete($sectionID);
+            $taskStatusModel->delete($taskStatusID);
         } catch (Exception $e) {
             return $this->handleResponse(['errors' => $e->getMessage()], 400);
         }

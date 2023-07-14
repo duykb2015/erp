@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\User as ModelsUser;
 use CodeIgniter\Config\Services;
 use Exception;
+use Tests\Support\Models\UserModel;
 
 class User extends BaseController
 {
@@ -22,7 +23,7 @@ class User extends BaseController
 
     public function update()
     {
-       
+
         $validation = service('validation');
         $validation->setRules(
             [
@@ -64,8 +65,7 @@ class User extends BaseController
         try {
             $userModel->save($user);
             $displayName = $user['username'];
-            if ($user['firstname'] && $user['lastname'])
-            {
+            if ($user['firstname'] && $user['lastname']) {
                 $displayName = $user['firstname'] . ' ' .  $user['lastname'];
             }
             session()->set('name', $displayName);
@@ -122,6 +122,64 @@ class User extends BaseController
     {
         // $fileName = $this->request->getPost('file_name');
         // @unlink(UPLOAD_PATH . $fileName);
+        return $this->handleResponse();
+    }
+
+    public function listUser()
+    {
+        if (ADMIN != session()->get('type')) {
+            return redirect()->to('/');
+        }
+
+        $userModel = new ModelsUser();
+        $users = $userModel->paginate(10);
+
+        $data['pager'] = $userModel->pager;
+
+        $data['users'] = $users;
+        $data['title'] = 'Danh sách thành viên';
+        return view('User/ListUser', $data);
+    }
+
+    public function grantModRole()
+    {
+        $validation = service('validation');
+        $validation->setRules(
+            [
+                'user_id' => 'required|string|is_not_unique[user.id]',
+            ],
+            customValidationErrorMessage()
+        );
+
+        if (!$validation->run($this->request->getPost())) {
+            return redirectWithMessage(site_url('auth/register'), $validation->getErrors());
+        }
+
+        $userModel = new ModelsUser();
+
+        $userModel->update($this->request->getPost('user_id'), ['type' => MODERATOR]);
+
+        return $this->handleResponse();
+    }
+
+    public function revokeModRole()
+    {
+        $validation = service('validation');
+        $validation->setRules(
+            [
+                'user_id' => 'required|string|is_not_unique[user.id]',
+            ],
+            customValidationErrorMessage()
+        );
+
+        if (!$validation->run($this->request->getPost())) {
+            return redirectWithMessage(site_url('auth/register'), $validation->getErrors());
+        }
+
+        $userModel = new ModelsUser();
+
+        $userModel->update($this->request->getPost('user_id'), ['type' => USER]);
+
         return $this->handleResponse();
     }
 }
