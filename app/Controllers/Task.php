@@ -77,6 +77,9 @@ class Task extends BaseController
             $activities[$key]['created_at'] = $time->humanize();
         }
 
+        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $projectID)->find();
+        $userRole = collect($projectUser)->where('user_id', session()->get('user_id'))->first()['role'];
+
         $comments = $commentModel
             ->select([
                 'comment.id',
@@ -90,7 +93,7 @@ class Task extends BaseController
             ->where('task_id', $segment[2])
             ->where('comment.type', USER_COMMENT_TYPE)
             ->orderBy('created_at', 'DESC')
-            ->find();
+            ->paginate(10);
 
         foreach ($comments as $key => $comment) {
             $time                           = new Time($comment['created_at']);
@@ -99,6 +102,8 @@ class Task extends BaseController
 
         $task['status'] = (new TaskStatus)->select('title as status')->where('id', $task['task_status_id'])->first()['status'];
 
+        $data['pager'] = $commentModel->pager;
+        $data['userRole'] = $userRole;
         $data['project']    = $project;
         $data['task']       = $task;
         $data['taskStatus'] = $taskStatus;
@@ -298,7 +303,6 @@ class Task extends BaseController
             'title'         => $taskRawData['name'],
             'descriptions'  => $taskRawData['descriptions'],
             'priority'      => $taskRawData['priority'],
-            'created_by'    => session()->get('user_id'),
         ];
 
         if ($startDate) {

@@ -136,7 +136,7 @@
                                                     <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
                                                     <label for="add_new_member" class="p-b-10">Hoặc tạo mới người dùng và thêm vào dự án!</label>
                                                     <br>
-                                                    <button class="btn btn-primary rounded custom-height">Tạo</button>
+                                                    <button class="btn btn-primary rounded custom-height" data-bs-toggle="modal" data-bs-target="#createUserAndAddToProject">Tạo</button>
                                                 </div>
                                             </div>
                                         <?php endif ?>
@@ -183,7 +183,7 @@
                                                                 </div>
                                                             </div>
                                                         <?php else : ?>
-                                                            <?php if (session()->get('user_id') == $member['user_id']) : ?>
+                                                            <?php if (session()->get('user_id') == $member['user_id'] && session()->get('user_id') != $project['owner']) : ?>
                                                                 <div class="dropdown-secondary dropdown d-inline-block" id="context-menu">
                                                                     <button class="btn btn-sm btn-primary waves-light" type="button" id="owner-power-<?= $member['project_user_id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                     <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
@@ -198,10 +198,69 @@
                                         <?php endif ?>
                                     </ul>
                                 </div>
+                                <div class="mb-3">
+                                    <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade mt-5" id="createUserAndAddToProject" tabindex="-1" aria-labelledby="" aria-hidden="true">
+    <!-- modal-xl -->
+    <div class="modal-dialog modal-dialog-scrollable modal-l">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form class="md-float-material form-material needs-validation" onsubmit="createUserAndAddToProject(event)" method="POST" novalidate>
+                    <input type="hidden" id="project_id1" value="<?= $project['id'] ?>">
+                    <div class="auth-box card">
+                        <div class="card-block">
+                            <div class="row m-b-20">
+                                <div class="col-md-12">
+                                    <h3 class="text-center">Tạo người dùng và thêm vào dự án</h3>
+                                </div>
+                            </div>
+                            <div class="form-group form-primary">
+                                <label class="p-1" for="username">Tài khoản <span class="text-danger">*</span></label>
+                                <input type="text" id="username1" value="<?= set_value('username') ?>" class="form-control rounded" placeholder="Tài khoản" minlength="3" required>
+                            </div>
+                            <div class="form-group form-primary">
+                                <label class="p-1" for="email">Email <span class="text-danger">*</span></label>
+                                <input type="email" id="email1" value="<?= set_value('email') ?>" class="form-control rounded" placeholder="Email" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập một địa chỉ email hợp lệ.
+                                </div>
+                            </div>
+                            <div class="form-group form-primary">
+                                <label class="p-1" for="password">Mật khẩu <span class="text-danger">*</span></label>
+                                <input type="password" id="password1" class="form-control rounded" placeholder="Mật khẩu" minlength="4" required>
+                                <div class="invalid-feedback">
+                                    Mật khẩu tối thiểu 4 kí tự.
+                                </div>
+                            </div>
+                            <div class="form-group form-primary">
+                                <label class="p-1" for="re_password">Nhập lại mật khẩu <span class="text-danger">*</span></label>
+                                <input type="password" id="re_password1" class="form-control rounded" placeholder="Nhập lại mật khẩu" minlength="4" required>
+                            </div>
+                            <div class="form-group form-primary">
+                                <label class="p-1" for="firstname">Họ</label>
+                                <input type="text" id="firstname1" value="<?= set_value('firstname') ?>" class="form-control rounded" placeholder="Họ">
+                            </div>
+                            <div class="form-group form-primary">
+                                <label class="p-1" for="lastname">Tên</label>
+                                <input type="text" id="lastname1" value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" id="btn-create-12" class="btn btn-primary btn-md btn-block waves-effect waves-light text-center rounded mt-3">Tạo</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -218,6 +277,163 @@
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\js\jquery.quicksearch.js"></script>
 <!-- Custom js -->
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\advance-elements\select2-custom.js"></script>
+<script>
+    (() => {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    var createUserAndAddToProjectAlreadyClick = false
+    var btnCreateUser
+
+    function createUserAndAddToProject(event) {
+        event.preventDefault()
+
+        if (createUserAndAddToProjectAlreadyClick) return
+        createUserAndAddToProjectAlreadyClick = true
+
+        btnCreateUser = document.getElementById('btn-create-12')
+        btnCreateUser.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        let username = document.getElementById('username1')
+        let email = document.getElementById('email1')
+        let password = document.getElementById('password1')
+        let re_password = document.getElementById('re_password1')
+        let firstname = document.getElementById('firstname1')
+        let lastname = document.getElementById('lastname1')
+        let projectID = document.getElementById('project_id1')
+
+        if (username.value == '' ||
+            email.value == '' ||
+            password == '' ||
+            re_password == '') {
+            btnCreateUser.innerHTML = 'Tạo'
+            createUserAndAddToProjectAlreadyClick = false
+            return
+        }
+
+        const data = new FormData()
+        data.append('username', username.value)
+        data.append('email', email.value)
+        data.append('password', password.value)
+        data.append('re_password', re_password.value)
+        data.append('firstname', firstname.value)
+        data.append('lastname', lastname.value)
+        data.append('project_id', projectID.value)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow',
+        }
+        fetch('<?= base_url('user/create-and-add-to-project') ?>', requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                if (result.errors) {
+                    if (result.errors.username) {
+                        errUsername = result.errors.username.replace('username', 'Tài khoản')
+                        $.growl.error({
+                            message: errUsername,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        btnCreateUser.innerHTML = 'Tạo'
+                        createUserAndAddToProjectAlreadyClick = false
+                        return
+                    }
+
+                    if (result.errors.email) {
+                        errEmail = result.errors.email.replace('email', 'Email')
+                        $.growl.error({
+                            message: errEmail,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        btnCreateUser.innerHTML = 'Tạo'
+                        createUserAndAddToProjectAlreadyClick = false
+                        return
+                    }
+
+                    if (result.errors.password) {
+                        errPassword = result.errors.password.replace('password', 'Mật khẩu')
+                        $.growl.error({
+                            message: errPassword,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        btnCreateUser.innerHTML = 'Tạo'
+                        createUserAndAddToProjectAlreadyClick = false
+                        return
+                    }
+
+                    if (result.errors.re_password) {
+                        errRepassword = result.errors.re_password.replace('re_password', 'Nhập lại mật khẩu')
+                        $.growl.error({
+                            message: errRepassword,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        btnCreateUser.innerHTML = 'Tạo'
+                        createUserAndAddToProjectAlreadyClick = false
+                        return
+                    }
+
+                    if (result.errors.project_id) {
+                        errProjectID = result.errors.project_id.replace('project_id', 'Dự án')
+                        $.growl.error({
+                            message: errProjectID,
+                            location: 'tr',
+                            size: 'large'
+                        });
+
+                        btnCreateUser.innerHTML = 'Tạo'
+                        createUserAndAddToProjectAlreadyClick = false
+                        return
+                    }
+
+                    btnCreateUser.innerHTML = 'Tạo'
+                    createUserAndAddToProjectAlreadyClick = false
+                    return
+                }
+
+                $.growl.notice({
+                    message: "Thành công"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 300)
+
+            }).catch((e) => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!',
+                    location: 'tr',
+                    size: 'large'
+                });
+                btnCreateUser.innerHTML = 'Tạo'
+                createUserAndAddToProjectAlreadyClick = false
+            })
+
+    }
+</script>
 <script>
     $(".add-member").select2({
         ajax: {

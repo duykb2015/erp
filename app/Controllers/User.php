@@ -3,10 +3,10 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\ProjectUser;
 use App\Models\User as ModelsUser;
 use CodeIgniter\Config\Services;
 use Exception;
-use Tests\Support\Models\UserModel;
 
 class User extends BaseController
 {
@@ -181,5 +181,52 @@ class User extends BaseController
         $userModel->update($this->request->getPost('user_id'), ['type' => USER]);
 
         return $this->handleResponse();
+    }
+
+    public function createAndAddToProject()
+    {
+        $userData = $this->request->getPost();
+        
+        $validation = service('validation');
+		$validation->setRules(
+			[
+				'username' 	  => 'required|string|min_length[3]|max_length[100]|is_unique[user.username]',
+				'email' 	  => 'required|string|is_unique[user.email]',
+				'password' 	  => 'required|string|min_length[4]|max_length[50]',
+				're_password' => 'required|string|min_length[4]|matches[password]',
+				'firstname'   => 'string|max_length[100]',
+				'lastname' 	  => 'string|max_length[100]',
+                'project_id'  => 'required|is_not_unique[project.id]'
+			],
+			customValidationErrorMessage()
+		);
+
+		if (!$validation->run($userData)) {
+			return $this->handleResponse(['errors' => $validation->getErrors()], 400);
+		}
+
+		$data = [
+
+			'username'  => $this->request->getPost('username'),
+			'password'  => md5((string)$this->request->getPost('password')),
+			'email'	    => $this->request->getPost('email'),
+			'firstname' => $this->request->getPost('firstname'),
+			'lastname'  => $this->request->getPost('lastname'),
+			'photo'		=> makeImage(strtoUpper($this->request->getPost('username')[0])),
+			'type' 		=> USER
+		];
+
+		$userModel = new ModelsUser();
+		$userID = $userModel->insert($data);
+
+        $projectUserModel = new ProjectUser();
+        $data = [
+            'project_id' => $userData['project_id'],
+            'user_id' => $userID,
+            'role' => MEMBER
+        ];
+        $projectUserModel->insert($data);
+
+		return $this->handleResponse([]);
     }
 }

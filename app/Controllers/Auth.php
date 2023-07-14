@@ -73,7 +73,6 @@ class Auth extends BaseController
 
 	public function checkRegister()
 	{
-
 		$validation = service('validation');
 		$validation->setRules(
 			[
@@ -81,8 +80,8 @@ class Auth extends BaseController
 				'password' 	  => 'required|string|min_length[4]|max_length[50]',
 				're_password' => 'required|string|min_length[4]|matches[password]',
 				'email' 	  => 'required|string|is_unique[user.email]',
-				'firstname'   => 'string|min_length[2]|max_length[100]',
-				'lastname' 	  => 'string|min_length[2]|max_length[100]',
+				'firstname'   => 'string|max_length[100]',
+				'lastname' 	  => 'string|max_length[100]',
 			],
 			customValidationErrorMessage()
 		);

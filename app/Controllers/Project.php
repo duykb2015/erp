@@ -210,8 +210,16 @@ class Project extends BaseController
                 $taskStatusModel = new TaskStatus();
                 $taskStatus = $taskStatusModel->where('task_status.project_id', $projectID)->findAll();
 
+                $filterUser = $this->request->getGet('user');
+                $data['filterUser'] = $filterUser;
+
                 foreach ($taskStatus as $key => $status) {
-                    $taskStatus[$key]['tasks'] = $taskModel->where('task.task_status_id', $status['id'])->findAll();
+                    if (!empty($filterUser && is_numeric($filterUser))) {
+                        $taskModel->where('task.assignee', $filterUser);
+                    }
+                    $taskStatus[$key]['tasks'] = $taskModel->select(['*', 'task.id as id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as assignee_name'])
+                        ->join('user', 'user.id = task.assignee', 'left')
+                        ->where('task.task_status_id', $status['id'])->findAll();
                 }
                 $data['taskStatus'] = collect($taskStatus)->sortBy('position')->toArray();
 
@@ -237,8 +245,9 @@ class Project extends BaseController
                     'role'
                 ])->join('user', 'user.id = project_user.user_id')
                     ->where('project_user.project_id', $projectID)
-                    ->find();
+                    ->paginate(5);
                 $data['members'] = $members;
+                $data['pager'] = $projectUserModel->pager;
 
                 $data['owner'] = collect($members)->where('role', 'leader')->first();
 
@@ -247,6 +256,14 @@ class Project extends BaseController
                 break;
 
             case 'Statistic':
+                $taskStatusModel = new TaskStatus();
+                $taskModel = new ModelsTask();
+                $taskStatus = $taskStatusModel->where('project_id', $projectID)->find();
+                $chartData['Trạng thái'] = 'Số lượng';
+                foreach ($taskStatus as $key => $status) {
+                    $chartData[$status['title']] = $taskModel->select('COUNT(id) as count')->where('task_status_id', $status['id'])->first()['count'];
+                }
+                $data['chartData'] = json_encode($chartData);
                 break;
 
             default:

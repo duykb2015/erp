@@ -83,8 +83,7 @@
                                     <div class="f-left">
                                         <h4><i class="icofont icofont-tasks-alt m-r-5"></i> <?= $task['title'] ?? 'Dự án chưa có tiêu đề' ?></h4>
                                     </div>
-                                    <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner']) : //|| $currentUser == $task['created_by']
-                                    ?>
+                                    <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner'] || $userRole == LEADER) : ?>
                                         <div class="f-right d-flex">
                                             <div class="dropdown-secondary dropdown d-inline-block">
                                                 <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
@@ -164,7 +163,7 @@
                                                                 </div>
                                                                 <div class="col-12 ">
                                                                     <button type="button" class="btn btn-secondary f-right rounded" onclick="clearComment()">Huỷ</button>
-                                                                    <button class="btn btn-primary f-right rounded mx-2" type="button" id="btn-save-comment" onclick="createComment(<?= $task['id'] ?>)">Bình luận</button>
+                                                                    <button class="btn btn-primary f-right rounded mx-2" type="button" id="btn-save-comment" onclick="createComments(<?= $task['id'] ?>)">Bình luận</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -213,6 +212,9 @@
                                                     </li>
                                                 <?php endif ?>
                                             </ul>
+                                            <div class="mb-3">
+                                                <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
+                                            </div>
                                         </div>
                                         <div class="tab-pane" id="activity" role="tabpanel">
                                             <div class="form-group">
@@ -423,7 +425,7 @@
                         <label for="message-text" class="col-form-label">Người được giao</label>
                         <select id="assignee" class="form-control">
                             <option value="">Trống</option>
-                            <option value="<?= session()->get('user_id') ?>">Cho tôi</option>
+                            <option value="<?= session()->get('user_id') ?>" <?= $task['assigneeID'] == session()->get('user_id') ? 'selected' : '' ?>>Cho tôi</option>
                             <?php if (!empty($assignees)) : ?>
                                 <?php foreach ($assignees as $assignee) : ?>
                                     <option value="<?= $assignee['user_id'] ?>" <?= $task['assigneeID'] == $assignee['user_id'] ? 'selected' : '' ?>><?= $assignee['name'] ?></option>
@@ -566,7 +568,6 @@
     var btnSaveComment
 
     function createComments(taskID) {
-        console.log(123);
         if (isCreateCommentAlreadyClick) return
         isCreateCommentAlreadyClick = true
 
@@ -617,9 +618,13 @@
                     }
                 }
 
+                $.growl.notice({
+                    message: 'Đã gửi bình luận'
+                });
+
                 setTimeout(() => {
-                    // window.location.reload()
-                }, 1000)
+                    window.location.reload()
+                }, 300)
 
                 return
             }).catch(() => {

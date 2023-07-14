@@ -4,7 +4,7 @@ $menu = [
     [
         'url' => base_url('project') . '/' . $project['id'],
         'active' => 'project/' . $project['id'],
-        'name' => 'Tổng quan dự án',
+        'name' => 'Tổng quan',
         'icon' => '<i class="feather icon-home"></i>',
         'sub_menu' => [
             'url' => 'project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : ''),
@@ -22,7 +22,7 @@ $menu = [
     [
         'url' => base_url('project') . '/' . $project['id'] . '/user',
         'active' => 'project/*/user',
-        'name' => 'Quản lý thành viên',
+        'name' => 'Thành viên',
         'icon' => '<i class="feather icon-user"></i>',
         'role' => [MEMBER, LEADER, OWNER]
     ],
@@ -42,7 +42,7 @@ $menu = [
         <ul class="pcoded-item pcoded-left-item">
             <?php foreach ($menu as $row) : ?>
                 <?php $classActive = url_is($row['active']) ? ' pcoded-trigger active active-enable-color' : '' ?>
-                <?php if (in_array($userRole, $row['role'])) : ?>
+                <?php if (isset($userRole) && in_array($userRole, $row['role'])) : ?>
                     <li class="<?= $classActive ?> ">
                         <a href="<?= $row['url'] ?>">
                             <span class="pcoded-micon"><?= $row['icon'] ?></span>

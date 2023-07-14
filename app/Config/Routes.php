@@ -47,6 +47,8 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'User::index');
 
     $routes->post('/', 'User::update');
+
+    $routes->post('create-and-add-to-project', 'User::createAndAddToProject');
     $routes->post('grant-mod-role', 'User::grantModRole');
     $routes->post('revoke-mod-role', 'User::revokeModRole');
     $routes->post('image/upload', 'User::upload');

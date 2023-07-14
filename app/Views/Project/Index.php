@@ -125,6 +125,24 @@
                 <div class="page-body">
                     <div class="row">
                         <div class="col-md-12">
+                            <nav class="navbar navbar-light m-b-30 p-10 ">
+                                <form class="form-material w-100" action="" id="filter" method="GET">
+                                    <div class="row">
+                                        <div class="col-2 pb-2">
+                                            <label class="p-1" for="dim"><i class="icofont icofont-filter"></i> Người được giao việc</label>
+                                            <select class="form-control rounded" name="user" onchange="submitForm()">
+                                                <option value="all">Toàn bộ</option>
+                                                <option value="<?= session()->get('user_id') ?>" <?= !empty($filterUser) && $filterUser == session()->get('user_id') ? 'selected' : '' ?>>Người dùng hiện tại</option>
+                                                <?php if (!empty($assignees)) : ?>
+                                                    <?php foreach ($assignees as $assignee) : ?>
+                                                        <option value="<?= $assignee['user_id'] ?>" <?= !empty($filterUser) && $filterUser == $assignee['user_id'] ? 'selected' : '' ?>><?= $assignee['name'] ?></option>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </nav>
                             <div class="card border d-flex">
                                 <div class="card-block scroll-x">
                                     <div class="row flex-nowrap" id="draggablePanelList">
@@ -152,13 +170,13 @@
                                                                         <?php foreach ($status['tasks'] as $task) : ?>
                                                                             <div class="sortable-moves border box">
                                                                                 <p class="task-name hover-pointer overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
-
-                                                                                <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee'])) : ?>
+                                                                                <p><b>Người được giao: </b><?= $task['assignee_name'] ?></p>
+                                                                                <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee']) || OWNER == $userRole) : ?>
                                                                                     <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                         <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                         <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                             <?php foreach ($taskStatus as $subStatus) : ?>
-                                                                                                <a class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subStatus['id'] ?>)">
+                                                                                                <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subStatus['id'] ?>)">
                                                                                                     <i class="icofont icofont-listine-dots"></i>
                                                                                                     <?= $subStatus['title'] ?>
                                                                                                 </a>
@@ -167,7 +185,7 @@
                                                                                     </div>
                                                                                 <?php endif ?>
 
-                                                                                <?php if (session()->get('user_id') == $task['created_by']) : ?>
+                                                                                <?php if (session()->get('user_id') == $task['created_by'] || OWNER == $userRole) : ?>
                                                                                     <button class="btn btn-sm btn-danger waves-light f-right" id="btn-delete-task-<?= $task['id'] ?>" type="button" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-bin"></i></button>
                                                                                 <?php endif ?>
                                                                             </div>
@@ -182,7 +200,7 @@
                                                 </div>
                                             <?php endforeach ?>
                                         <?php endif ?>
-                                        <?php if (MEMBER != session()->get('role')) ?> 
+                                        <?php if (MEMBER != session()->get('role')) ?>
                                         <div class="col-3">
                                             <div class="card border">
                                                 <div class="card-block">
@@ -295,6 +313,10 @@
 
 <!-- CK4 -->
 <script>
+    function submitForm() {
+        var form = document.getElementById('filter')
+        form.submit()
+    }
     var task_descriptions = CKEDITOR.replace('task_descriptions', {
         // width: '100%',
         height: 300,
@@ -464,7 +486,7 @@
                 if (result.errors) {
 
                     if (result.errors.task_id) {
-                        error = result.errors.section.replace('task_id', 'Mã công việc')
+                        error = result.errors.task_id.replace('task_id', 'Công việc')
                         $.growl.error({
                             message: error,
                             location: 'tr',
@@ -675,7 +697,7 @@
 
                         errProjectID = result.errors.project_id
                         if (errProjectID) {
-                            errProjectID = errProjectID.replace('project_id', 'Mã dự án')
+                            errProjectID = errProjectID.replace('project_id', 'Dự án')
                             $.growl.error({
                                 message: errProjectID,
                                 location: 'tr',
@@ -794,7 +816,7 @@
                     setTimeout(() => {
                         errTaskStatusID = result.errors.task_status_id
                         if (errTaskStatusID) {
-                            errTaskStatusID = errTaskStatusID.replace('task_status_id', 'Mã Section')
+                            errTaskStatusID = errTaskStatusID.replace('task_status_id', 'Trạng thái công việc')
                             $.growl.error({
                                 message: errTaskStatusID,
                                 location: 'tr',
@@ -804,7 +826,7 @@
 
                         errTaskStatusName = result.errors.task_status_name
                         if (errTaskStatusName) {
-                            errTaskStatusName = errTaskStatusName.replace('section_name', 'Tên Section')
+                            errTaskStatusName = errTaskStatusName.replace('section_name', 'Tên trạng thái công việc')
                             $.growl.error({
                                 message: errTaskStatusName,
                                 location: 'tr',
