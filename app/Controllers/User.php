@@ -3,7 +3,9 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\Project;
 use App\Models\ProjectUser;
+use App\Models\Task;
 use App\Models\User as ModelsUser;
 use CodeIgniter\Config\Services;
 use Exception;
@@ -134,6 +136,38 @@ class User extends BaseController
         $userModel = new ModelsUser();
         $users = $userModel->paginate(10);
 
+        $projectModel = new Project();
+        $taskModel = new Task();
+        foreach ($users as $key => $user) {
+            $users[$key]['projects'] = $projectModel->select([
+                'project.id',
+                'project.name',
+                'project.descriptions',
+                'project.prefix',
+                'project.photo'
+            ])->join('project_user', 'project.id = project_user.project_id')
+                ->where('project_user.user_id', $user['id'])->find();
+
+            $projectIds = collect($users[$key]['projects'])->pluck('id')->toArray();
+            $projectIds = implode(',', $projectIds);
+
+            $customWhere = "project.id IN ({$projectIds})";
+
+            if ($projectIds) {
+                $taskModel->where($customWhere);
+            }
+            
+            $tasks = $taskModel->select('task.id')
+                ->join('task_status', 'task_status.id = task.task_status_id')
+                ->join('project', 'project.id = task_status.project_id')
+                ->where('assignee', $user['id'])
+                ->where('task_status.base_status <>', 3)
+                ->find();
+
+            $users[$key]['totalProject'] = count($users[$key]['projects']);
+            $users[$key]['totalTask'] = count($tasks);
+        }
+
         $data['pager'] = $userModel->pager;
 
         $data['users'] = $users;
@@ -186,38 +220,38 @@ class User extends BaseController
     public function createAndAddToProject()
     {
         $userData = $this->request->getPost();
-        
+
         $validation = service('validation');
-		$validation->setRules(
-			[
-				'username' 	  => 'required|string|min_length[3]|max_length[100]|is_unique[user.username]',
-				'email' 	  => 'required|string|is_unique[user.email]',
-				'password' 	  => 'required|string|min_length[4]|max_length[50]',
-				're_password' => 'required|string|min_length[4]|matches[password]',
-				'firstname'   => 'string|max_length[100]',
-				'lastname' 	  => 'string|max_length[100]',
+        $validation->setRules(
+            [
+                'username'       => 'required|string|min_length[3]|max_length[100]|is_unique[user.username]',
+                'email'       => 'required|string|is_unique[user.email]',
+                'password'       => 'required|string|min_length[4]|max_length[50]',
+                're_password' => 'required|string|min_length[4]|matches[password]',
+                'firstname'   => 'string|max_length[100]',
+                'lastname'       => 'string|max_length[100]',
                 'project_id'  => 'required|is_not_unique[project.id]'
-			],
-			customValidationErrorMessage()
-		);
+            ],
+            customValidationErrorMessage()
+        );
 
-		if (!$validation->run($userData)) {
-			return $this->handleResponse(['errors' => $validation->getErrors()], 400);
-		}
+        if (!$validation->run($userData)) {
+            return $this->handleResponse(['errors' => $validation->getErrors()], 400);
+        }
 
-		$data = [
+        $data = [
 
-			'username'  => $this->request->getPost('username'),
-			'password'  => md5((string)$this->request->getPost('password')),
-			'email'	    => $this->request->getPost('email'),
-			'firstname' => $this->request->getPost('firstname'),
-			'lastname'  => $this->request->getPost('lastname'),
-			'photo'		=> makeImage(strtoUpper($this->request->getPost('username')[0])),
-			'type' 		=> USER
-		];
+            'username'  => $this->request->getPost('username'),
+            'password'  => md5((string)$this->request->getPost('password')),
+            'email'        => $this->request->getPost('email'),
+            'firstname' => $this->request->getPost('firstname'),
+            'lastname'  => $this->request->getPost('lastname'),
+            'photo'        => makeImage(strtoUpper($this->request->getPost('username')[0])),
+            'type'         => USER
+        ];
 
-		$userModel = new ModelsUser();
-		$userID = $userModel->insert($data);
+        $userModel = new ModelsUser();
+        $userID = $userModel->insert($data);
 
         $projectUserModel = new ProjectUser();
         $data = [
@@ -227,6 +261,6 @@ class User extends BaseController
         ];
         $projectUserModel->insert($data);
 
-		return $this->handleResponse([]);
+        return $this->handleResponse([]);
     }
 }

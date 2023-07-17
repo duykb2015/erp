@@ -107,6 +107,8 @@ $routes->group('task-status', ['filter' => 'login'], function ($routes) {
 
 $routes->group('task', ['filter' => 'login'], function ($routes) {
     $routes->post('create', 'Task::create');
+    $routes->post('create-v2', 'Task::createV2');
+    $routes->post('do-create', 'Task::doCreate');
     $routes->post('update', 'Task::update');
     $routes->post('delete', 'Task::delete');
 

@@ -176,6 +176,7 @@
                                                     <label class="p-1" for="lastname">Trạng thái dự án</label>
                                                     <select name="status" class="form-control rounded">
                                                         <?php foreach (PROJECT_STATUS as $key => $status) : ?>
+                                                            <?php if (CLOSE == $key || DELETED == $key) continue ?>
                                                             <option value="<?= $key ?>" <?= $project['status'] == $key ? 'selected' : '' ?>><?= $status ?></option>
                                                         <?php endforeach ?>
                                                     </select>

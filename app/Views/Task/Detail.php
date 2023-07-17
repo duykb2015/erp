@@ -196,7 +196,7 @@
                                                                     </div>
                                                                 </div>
 
-                                                                <?php if ($currentUser == $comment['created_by']) : ?>
+                                                                <?php if ($currentUser == $comment['user_id']) : ?>
                                                                     <div class="m-t-10 m-b-25 edit-and-delete">
                                                                         <span><a class="m-r-10 f-12 text-decoration-none" onclick="showEditCommentEditor(<?= $comment['id'] ?>)">Sửa</a></span><span><a class="m-r-10 f-12 text-decoration-none" id="btn-delete-comment" onclick="deleteComment(<?= $comment['id'] ?>)">Xoá</a> </span>
                                                                     </div>

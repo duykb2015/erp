@@ -3,14 +3,17 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\Attachment;
 use App\Models\Comment;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
+use App\Models\TaskAttachment;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
 use CodeIgniter\I18n\Time;
+use Exception;
 
 class Task extends BaseController
 {
@@ -85,11 +88,11 @@ class Task extends BaseController
                 'comment.id',
                 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
                 'user.photo',
-                'created_by',
+                'user_id',
                 'text',
                 'created_at'
             ])
-            ->join('user', 'user.id = comment.created_by')
+            ->join('user', 'user.id = comment.user_id')
             ->where('task_id', $segment[2])
             ->where('comment.type', USER_COMMENT_TYPE)
             ->orderBy('created_at', 'DESC')
@@ -182,7 +185,7 @@ class Task extends BaseController
         $taskKey = $taskModel->select('task_key')->join('task_status', 'task_status.id = task.task_status_id')
             ->join('project', 'project.id = task_status.project_id')
             ->where('project.id', $taskRawData['project_id'])
-            ->orderBy('task_key', 'DESC')
+            ->orderBy('task.id', 'DESC')
             ->limit(1)
             ->first();
 
@@ -218,12 +221,29 @@ class Task extends BaseController
 
         $taskID = $taskModel->insert($data);
 
+        $files = $this->request->getFiles();
+
+        $attachmentModel = new Attachment();
+
+        foreach ($files as $file) {
+            if ($file->isValid() && !$file->hasMoved()) {
+                $file->move(ATTACHMENT_PATH);
+
+                $type = collect(explode('.', $file->getName()))->last() ?? 'unknown';
+                $attachmentModel->insert([
+                    'name' => $file->getName(),
+                    'task_id' => $taskID,
+                    'type' => $type
+                ]);
+            }
+        }
+
         unset($data);
 
         $commentModel = new Comment();
         $data = [
             'task_id' => $taskID,
-            'created_by' => $userID,
+            'user_id' => $userID,
             'text' => '<b>' . session()->get('name') . '</b> đã tạo mới công việc.',
             'type' => SYSTEM_COMMENT_TYPE
         ];
@@ -324,7 +344,7 @@ class Task extends BaseController
         $commentModel = new Comment();
         $data = [
             'task_id' => $taskRawData['task_id'],
-            'created_by' => session()->get('user_id'),
+            'user_id' => session()->get('user_id'),
             'text' => '<b>' . session()->get('name') . '</b> đã chỉnh sửa công việc.',
             'type' => SYSTEM_COMMENT_TYPE
         ];
@@ -367,7 +387,7 @@ class Task extends BaseController
         $validation = service('validation');
 
         $rule = [
-            'task_id' => 'is_not_unique[task.id]',
+            'task_id' => 'required|is_not_unique[task.id]',
         ];
         $validation->setRules(
             $rule,
@@ -377,13 +397,14 @@ class Task extends BaseController
         if (!$validation->run($this->request->getPost())) {
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
-
         //attachment
 
         $commentModel = new Comment();
         $comments     = $commentModel->select('id')->where('task_id', $taskID)->find();
 
-        $commentModel->delete(collect($comments)->pluck('id')->toArray());
+        if ($comments) {
+            $commentModel->delete(collect($comments)->pluck('id')->toArray());
+        }
 
         $taskModel = new ModelsTask();
         $taskModel->delete($taskID);

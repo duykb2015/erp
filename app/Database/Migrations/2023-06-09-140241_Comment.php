@@ -18,7 +18,7 @@ class Comment extends Migration
                 'type'           => 'INT',
                 'null'           => FALSE,
             ],
-            'created_by' => [
+            'user_id' => [
                 'type'           => 'INT',
                 'null'           => FALSE,
             ],
@@ -26,16 +26,12 @@ class Comment extends Migration
                 'type'           => 'TEXT',
                 'null'           => FALSE,
             ],
-            'type' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 20,
-                'null'           => FALSE,
-            ],
             'created_at DATETIME NOT NULL DEFAULT current_timestamp',
+            // 'deleted_at DATETIME NULL',
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('task_id', 'task', 'id', '', '', 'fk_c_t_i_t_i');
-        $this->forge->addForeignKey('created_by', 'user', 'id', '', '', 'fk_c_c_b_u_i');
+        $this->forge->addForeignKey('user_id', 'user', 'id', '', '', 'fk_c_c_b_u_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',

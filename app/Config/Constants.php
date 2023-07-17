@@ -157,3 +157,6 @@ define('USER_TYPE', [
     MODERATOR => 'Quản trị viên',
     USER => 'Người dùng'
 ]);
+
+
+define('ATTACHMENT_PATH', FCPATH . 'attachments/');

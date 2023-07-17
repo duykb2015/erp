@@ -125,7 +125,7 @@
                     </div>
                 </li>
             </ul>
-            <!-- <ul class="nav-right">
+            <ul class="nav-right">
                 <li class="header-notification">
                     <div class="dropdown-primary dropdown">
                         <div class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -170,7 +170,7 @@
                         </ul>
                     </div>
                 </li>
-            </ul> -->
+            </ul>
         </div>
     </div>
 </nav>

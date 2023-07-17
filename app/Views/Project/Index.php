@@ -1,7 +1,6 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
 <link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\jquery.filer.css">
-<link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\themes\jquery.filer-dragdropbox-theme.css">
 
 <style>
     .breadcrumb-title div {
@@ -230,14 +229,15 @@
     <div class="modal-dialog modal-dialog-scrollable modal-xl">
         <div class="modal-content">
             <div class="modal-body">
-                <form class="needs-validation" id="create-project">
+                <form class="needs-validation" id="create-project" method="POST" action="<?= base_url('task/do-create') ?>" enctype="multipart/form-data" onsubmit="createNewTask(<?= $project['id'] ?>); return false">
+                    <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
                     <div class="mb-3">
                         <label for="task_name" class="col-form-label">Tên công việc<span class="text-danger"> *</span></label>
-                        <input type="text" class="form-control rounded" id="task_name" placeholder="Nhập tên công việc ..." minlength="5" maxlength="512" required>
+                        <input type="text" class="form-control rounded" name="name" id="task_name" placeholder="Nhập tên công việc ..." minlength="5" maxlength="512" required>
                     </div>
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
-                        <select id="choose_section" class="form-control" disabled>
+                        <select id="choose_section" name="task_status" class="form-control">
                             <?php if (!empty($taskStatus)) : ?>
                                 <option value="<?= $taskStatus[0]['id'] ?>"><?= $taskStatus[0]['title'] ?></option>
                             <?php endif ?>
@@ -245,7 +245,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="message-text" class="col-form-label">Người được giao</label>
-                        <select id="assignee" class="form-control">
+                        <select id="assignee" name="assignee" class="form-control">
                             <option value="">Trống</option>
                             <option value="<?= session()->get('user_id') ?>">Cho tôi</option>
                             <?php if (!empty($assignees)) : ?>
@@ -257,7 +257,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="task_descriptions" class="col-form-label">Chọn mức độ ưu tiên</label>
-                        <select id="task_priority" class="form-control">
+                        <select id="task_priority" name="priority" class="form-control">
                             <?php foreach (TASK_PRIORITY as $key => $priority) : ?>
                                 <option value="<?= $key ?>"><?= $priority ?></option>
                             <?php endforeach ?>
@@ -267,27 +267,25 @@
                         <div class="row">
                             <div class="col-6">
                                 <label for="task_start_date" class="col-form-label">Chọn ngày bắt đầu</label>
-                                <input type="date" id="task_start_date" class="form-control">
+                                <input type="date" name="start_date" id="task_start_date" class="form-control">
                             </div>
                             <div class="col-6">
                                 <label for="task_due_date" class="col-form-label">Chọn ngày kết thúc</label>
-                                <input type="date" id="task_due_date" class="form-control">
+                                <input type="date" name="due_date" id="task_due_date" class="form-control">
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="task_descriptions" class="col-form-label">Mô tả cho dự án</label>
-                        <textarea id="task_descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"></textarea>
+                        <textarea id="task_descriptions" name="descriptions" class="form-control rounded" id="task_descriptions" maxlength="512" rows="5"></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
-                        <br>
-                        <label for="user_avatar" class="col-form-label">Tính năng đang được bảo trì</label>
-                        <!-- <input type="file" id="attachment" accept="*"> -->
+                        <input type="file" id="attachment" name="attactment[]" accept="*" multiple="multiple">
                     </div>
 
                     <div class="float-end mb-5">
-                        <button type="submit" id="btn-create-task" onclick="createNewTask(<?= $project['id'] ?>)" class="btn btn-primary rounded">
+                        <button type="submit" id="btn-create-task" class="btn btn-primary rounded">
                             Tạo
                         </button>
                         <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
@@ -301,9 +299,7 @@
 <?= $this->endSection() ?>
 <?= $this->section('js') ?>
 <!-- jquery file upload js -->
-<script src="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>
-<script src="<?= base_url() ?>templates\libraries\assets\pages\filer\custom-filer.js" type="text/javascript"></script>
-<script src="<?= base_url() ?>templates\libraries\assets\pages\filer\jquery.fileuploads.init.js" type="text/javascript"></script>
+<script src="<?= base_url() ?>\templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>
 
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\bower_components\Sortable\js\Sortable.js"></script>
 <!-- Select 2 js -->
@@ -313,6 +309,15 @@
 
 <!-- CK4 -->
 <script>
+    $('#attachment').filer({
+        limit: 10,
+        maxSize: 5,
+        extensions: null,
+        changeInput: true,
+        showThumbs: true,
+        addMore: true
+    });
+
     function submitForm() {
         var form = document.getElementById('filter')
         form.submit()
@@ -343,7 +348,6 @@
     })
 </script>
 
-<!-- Dragable -->
 <script>
     draggablePanelList = document.getElementById('draggablePanelList');
     Sortable.create(draggablePanelList, {
@@ -526,6 +530,7 @@
     var projectId = document.getElementById('project-id')
 
     function createNewTask(projectID) {
+
         if (isCreateNewTaskAlreadyClick) return
         isCreateNewTaskAlreadyClick = true
 
@@ -548,10 +553,20 @@
         data.append('descriptions', task_descriptions.getData())
         data.append('project_id', projectID)
 
+        const files = document.getElementById('attachment').files
+        for (let i = 0; i < files.length; i++)
+        {
+             data.append(i, document.getElementById('attachment').files[i])
+        }
+
         var requestOptions = {
             method: 'POST',
             body: data,
-            redirect: 'follow'
+            redirect: 'follow',
+            contentType: false,
+            processData: true,
+            enctype: 'multipart/form-data',
+            synchron: true,
         };
 
         fetch('<?= base_url('task/create') ?>', requestOptions)
@@ -608,7 +623,6 @@
                 }
 
                 if (result.errors_datetime) {
-                    console.log(result.errors_datetime)
                     $.growl.error({
                         message: result.errors_datetime,
                         location: 'tr',
@@ -629,8 +643,9 @@
                 setTimeout(() => {
                     isCreateNewTaskAlreadyClick = false
                     btnCreateTask.innerHTML = 'Tạo'
-                    // window.location.href = `<?= base_url('project') ?>/${projectID}/task/${result.task_id}`
+
                     window.location.reload()
+                    // document.getElementById('create-project').submit()
                 }, 500)
 
                 return

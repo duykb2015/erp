@@ -19,6 +19,11 @@ class Attactment extends Migration
                 'constraint'     => 255,
                 'null'           => FALSE,
             ],
+            'task_id' => [
+                'type'           => 'INT',
+                'constraint'     => 255,
+                'null'           => FALSE,
+            ],
             'type' => [
                 'type'           => 'VARCHAR',
                 'constraint'     => 20,
@@ -26,6 +31,7 @@ class Attactment extends Migration
             ],
         ]);
         $this->forge->addPrimaryKey('id');
+        $this->forge->addForeignKey('task_id', 'task', 'id', '', '', 'fk_a_m_t_i_t_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',

@@ -1103,9 +1103,9 @@
             drop: "Thả tệp vào đây để tải lên",
             removeConfirmation: "Bạn có chắc là muốn xoá tệp này?",
             errors: {
-                filesLimit: "Chỉ hỗ trợ tải lên tệp có dạng {{fi-limit}}.",
+                filesLimit: "Tối đa có thể tải lên {{fi-limit}} tệp.",
                 filesType: "Chỉ hộ trợ tải lên tệp hình ảnh.",
-                filesSize: "{{fi-name}} quá lớn, tối đa có thể tải lên {{fi-fileMaxSize}} MB.",
+                filesSize: "Tệp {{fi-name}} quá lớn, kích thước tối đa có thể tải lên là {{fi-fileMaxSize}} MB.",
                 filesSizeAll: "Tệp bạn tải lên quá lớn, kích thước tối đa có thể tải lên là {{fi-maxSize}} MB.",
                 folderUpload: "Bạn không được phép tải thư mục lên."
             }

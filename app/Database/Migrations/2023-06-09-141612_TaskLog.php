@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class TimeTracking extends Migration
+class TaskLog extends Migration
 {
     public function up()
     {
@@ -14,29 +14,29 @@ class TimeTracking extends Migration
                 'null'           => FALSE,
                 'auto_increment' => TRUE
             ],
-            'task_id' => [
-                'type'           => 'INT',
+            'log' => [
+                'type'           => 'TEXT',
                 'null'           => FALSE,
             ],
-            'recorded_time' => [
+            'task_id' => [
                 'type'           => 'INT',
                 'null'           => TRUE,
             ],
             'created_at DATETIME NOT NULL DEFAULT current_timestamp',
-            'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp'
         ]);
+
         $this->forge->addPrimaryKey('id');
-        $this->forge->addForeignKey('task_id', 'task', 'id', '', '', 'fk_t_t_t_i_t_i');
+        $this->forge->addForeignKey('task_id', 'task', 'id', '', '', 'fk_t_l_t_i_t_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',
             'COLLATE' => 'utf8_general_ci'
         ];
-        $this->forge->createTable('time_tracking', TRUE, $attributes);
+        $this->forge->createTable('task_log', TRUE, $attributes);
     }
 
     public function down()
     {
-        $this->forge->dropTable('time_tracking', TRUE);
+        $this->forge->dropTable('task_log', TRUE);
     }
 }

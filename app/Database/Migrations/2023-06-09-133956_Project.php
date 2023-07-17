@@ -27,11 +27,11 @@ class Project extends Migration
             'descriptions' => [
                 'type'           => 'VARCHAR',
                 'constraint'     => 512,
-                'null'           => FALSE,
+                'null'           => TRUE,
             ],
             'owner' => [
-                'type'           => 'VARCHAR',
-                'constraint'     => 33,
+                'type'           => 'INT',
+                'constraint'     => 11,
                 'null'           => FALSE,
             ],
             'photo' => [
@@ -40,17 +40,17 @@ class Project extends Migration
                 'null'           => TRUE,
             ],
             'due_at' => [
-                'type'           => 'TIMESTAMP',
-                'null'           => TRUE,
+                'type'           => 'DATETIME',
+                'null'           => FALSE,
             ],
             'start_at' => [
-                'type'           => 'TIMESTAMP',
-                'null'           => TRUE,
+                'type'           => 'DATETIME',
+                'null'           => FALSE,
             ],
             'status' => [
                 'type'           => 'VARCHAR',
                 'constraint'     => 25,
-                'null'           => TRUE,
+                'null'           => FALSE,
             ],
             'created_at DATETIME NOT NULL DEFAULT current_timestamp',
             'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp',

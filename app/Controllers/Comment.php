@@ -28,7 +28,7 @@ class Comment extends BaseController
 
         $data = [
             'task_id'    => $commentData['task_id'],
-            'created_by' => session()->get('user_id'),
+            'user_id' => session()->get('user_id'),
             'text'       => $commentData['comment'],
             'type'       => USER_COMMENT_TYPE
         ];

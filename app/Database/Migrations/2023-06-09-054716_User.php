@@ -16,38 +16,42 @@ class User extends Migration
             ],
             'username' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 50,
                 'null'           => FALSE,
             ],
             'password' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 33,
+                'constraint'     => 36,
                 'null'           => FALSE,
             ],
             'email' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 50,
                 'null'           => FALSE,
             ],
             'firstname' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 50,
                 'null'           => TRUE,
             ],
             'lastname' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 100,
+                'constraint'     => 50,
                 'null'           => TRUE,
             ],
             'type' => [
-                'type'           => 'TINYINT',
+                'type'           => 'VARCHAR',
+                'constraint'     => 25,
                 'null'           => FALSE,
+                'default'        => 'user'
             ],
             'photo' => [
                 'type'           => 'VARCHAR',
                 'constraint'     => 255,
                 'null'           => TRUE,
             ],
+            'created_at DATETIME NOT NULL DEFAULT current_timestamp',
+            'updated_at DATETIME NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp',
         ]);
         $this->forge->addPrimaryKey('id');
         $attributes = [

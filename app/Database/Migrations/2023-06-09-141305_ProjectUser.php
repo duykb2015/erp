@@ -24,7 +24,7 @@ class ProjectUser extends Migration
             ],
             'role' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 50,
+                'constraint'     => 20,
                 'default'        => 'member',
             ],
         ]);

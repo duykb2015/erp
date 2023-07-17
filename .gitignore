@@ -129,3 +129,4 @@ nb-configuration.xml
 
 /.php-cs-fixer.php
 public/imgs
+public/attachments

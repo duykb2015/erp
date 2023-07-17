@@ -20,13 +20,13 @@ class TaskStatus extends Migration
             ],
             'title' => [
                 'type'           => 'VARCHAR',
-                'constraint'     => 512,
+                'constraint'     => 255,
                 'null'           => FALSE,
             ],
             'position' => [
-                'type'           => 'TINYINT',
+                'type'           => 'INT',
                 'null'           => FALSE,
-                'default'        => 0
+                'default'        => 11
             ],
             'base_status' => [
                 'type'           => 'TINYINT',
@@ -34,7 +34,7 @@ class TaskStatus extends Migration
             ],
         ]);
         $this->forge->addPrimaryKey('id');
-        $this->forge->addForeignKey('project_id', 'project', 'id', '', 'delete', 'fk_s_p_i_p_i');
+        $this->forge->addForeignKey('project_id', 'project', 'id', '', 'delete', 'fk_p_i_p_i');
         $attributes = [
             'ENGINE' => 'InnoDB',
             'CHARACTER SET' => 'utf8',

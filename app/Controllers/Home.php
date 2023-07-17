@@ -57,7 +57,7 @@ class Home extends BaseController
             'task_status.position',
         ])->join('task_status', 'task_status.id = task.task_status_id')
             ->join('project', 'project.id = task_status.project_id')
-            ->where('created_by', session()->get('user_id'))
+            ->where('user_id', session()->get('user_id'))
             ->where('task_status.base_status != ', 3)
             ->find();
 

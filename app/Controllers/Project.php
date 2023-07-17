@@ -8,6 +8,7 @@ use App\Models\Project as ModelsProject;
 use App\Models\ProjectUser;
 use App\Models\RelationAttachment;
 use App\Models\Task as ModelsTask;
+use App\Models\TaskAttachment;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
@@ -131,7 +132,13 @@ class Project extends BaseController
         foreach ($projects as $key => $project) {
             $time                         = new Time($project['updated_at']);
             $projects[$key]['updated_at'] = $time->humanize();
-            $users = $userModel->select('user.id')->join('project_user', 'project_user.user_id = user.id')
+            $users = $userModel->select([
+                'user.id',
+                'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username',
+                'user.email',
+                'user.photo',
+                'project_user.role'
+            ])->join('project_user', 'project_user.user_id = user.id')
                 ->where('project_user.project_id', $project['id'])->find();
 
             $tasks = $taskModel->select('task.id')
@@ -141,6 +148,7 @@ class Project extends BaseController
 
             $projects[$key]['totalUser'] = count($users);
             $projects[$key]['totalTask'] = count($tasks);
+            $projects[$key]['users'] = $users;
         }
 
         $data['projects'] = $projects;
@@ -235,6 +243,10 @@ class Project extends BaseController
                 break;
 
             case 'Setting':
+                if (session()->get('user_id') != $project['owner']) {
+                    $data['backLink']   = "/project/{$project['id']}";
+                    return view('Error/Forbidden', $data);
+                }
             case 'User':
                 $members = $projectUserModel->select([
                     'project_user.id as project_user_id',
@@ -249,7 +261,7 @@ class Project extends BaseController
                 $data['members'] = $members;
                 $data['pager'] = $projectUserModel->pager;
 
-                $data['owner'] = collect($members)->where('role', 'leader')->first();
+                $data['owner'] = collect($members)->where('role', 'owner')->first();
 
                 $project['start_at'] = explode(' ', $project['start_at'])[0];
                 $project['due_at'] = explode(' ', $project['due_at'])[0];
@@ -645,7 +657,7 @@ class Project extends BaseController
         $taskModel        = new ModelsTask();
         $commentModel     = new Comment();
         $attachmentModel  = new Attachment();
-        $relationAttachmentModel  = new RelationAttachment();
+        $relationAttachmentModel  = new TaskAttachment();
 
         try {
 
@@ -693,9 +705,7 @@ class Project extends BaseController
                     ->whereIn('relation_attachment.relation_id', $commentIds)->find();
 
                 $attachmentCommentIds         = collect($attachmentComments)->pluck('attachment_id')->toArray();
-                $relationAttachmentCommentIds = collect($attachmentComments)->pluck('relation_attachment_id')->toArray();
                 if (!empty($attachmentCommentIds)) {
-                    $relationAttachmentModel->delete($relationAttachmentCommentIds);
                     $attachmentModel->delete($attachmentCommentIds);
                 }
                 $commentModel->delete($commentIds);
@@ -729,9 +739,11 @@ class Project extends BaseController
 
         $projectUserModel = new ProjectUser();
 
-        $members = $projectUserModel->where('project_id', $projectUserData['project_id'])
+        $oldLeader = $projectUserModel->where('project_id', $projectUserData['project_id'])
             ->where('role', LEADER)->find();
-        $projectUserModel->update(collect($members)->pluck('id')->toArray(), ['role' => MEMBER]);
+        if ($oldLeader) {
+            $projectUserModel->update(collect($oldLeader)->pluck('id')->toArray(), ['role' => MEMBER]);
+        }
 
         $projectUserModel->update($projectUserData['project_user_id'], ['role' => LEADER]);
 

@@ -1,6 +1,9 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
 <style>
+    .card-header {
+        padding: 25px 25px 5px 25px !important;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -87,79 +90,138 @@
                             </div>
                         </form>
                     </nav>
-                    <!-- Nav Filter tab end -->
-                    <!-- Task board design block start-->
-                    <div class="card border">
-                        <?php if (!empty($projects)) : ?>
-                            <div class="card-block">
-                                <?php foreach ($projects as $project) : ?>
-                                    <div class="card shadow-sm border bg-light text-dark">
-                                        <div class="row m-3">
-                                            <div class="col-auto p-r-0">
-                                                <div class="u-img">
-                                                    <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" alt="user image" width="70" height="70" class="img-radius cover-img">
+
+                    <div class="col-lg-12">
+                        <div class="card border">
+                            <?php if (!empty($projects)) : ?>
+                                <div class="card-block accordion-block">
+                                    <?php foreach ($projects as $project) : ?>
+                                        <div id="accordion" role="tablist" aria-multiselectable="true">
+                                            <div class="accordion-panel" onclick="changeIcon(<?= $project['id'] ?>)">
+                                                <div class="accordion-heading" role="tab" id="headingOne">
+                                                    <h3 class="card-title accordion-title">
+                                                        <!-- class="accordion-msg" -->
+                                                        <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $project['id'] ?>" aria-expanded="true" aria-controls="collapse-<?= $project['id'] ?>">
+                                                            <div class="row m-3">
+                                                                <div class="col-auto p-r-0">
+                                                                    <div class="u-img">
+                                                                        <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" alt="user image" width="70" height="70" class="img-radius cover-img">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <?php if (CLOSE == $project['status']) : ?>
+                                                                        <h6 class="m-b-5" style="text-decoration: line-through;"><b>[<?= $project['prefix'] ?>] <?= $project['name'] ?></b></h6>
+                                                                    <?php else : ?>
+                                                                        <h6 class="m-b-5" onclick="window.location.href = 'project/<?= $project['id'] ?>'"><b><a class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></b></h6>
+                                                                    <?php endif ?>
+                                                                    <p class="text-muted m-b-0"><?= !empty($project['descriptions']) ? $project['descriptions'] : 'Dự án này chưa có mô tả.' ?></p>
+                                                                    <p class="text-muted m-b-0"><i class="feather icon-clock m-r-10"></i>Cập nhật: <?= $project['updated_at'] ?>.</p>
+                                                                </div>
+                                                                <div class="col-3">
+                                                                    <p class="m-b-0"><b>Thành viên:</b> <?= $project['totalUser'] ?></p>
+                                                                    <p class="m-b-0"><b>Công việc:</b> <?= $project['totalTask'] ?></p>
+                                                                    <p class="m-b-0"><b>Trạng thái:</b> <?= PROJECT_STATUS[$project['status']] ?></p>
+                                                                </div>
+                                                                <div class="col-1">
+                                                                    <?php if (CLOSE == $project['status'] && session()->get('user_id') == $project['owner']) : ?>
+                                                                        <div class="dropdown-secondary dropdown d-inline-block f-right">
+                                                                            <button class="btn btn-sm btn-primary waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                            <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                <a class="dropdown-item waves-light waves-effect" onclick="restoreProject(<?= $project['id'] ?>)"><i class="icofont icofont-redo"></i> Mở dự án</a>
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php endif ?>
+                                                                    <?php if (CLOSE != $project['status'] && session()->get('user_id') == $project['owner']) : ?>
+                                                                        <div class="dropdown-secondary dropdown d-inline-block f-right">
+                                                                            <button class="btn btn-sm btn-primary waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                            <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                <?php if (INITIALIZE == $project['status']) : ?>
+                                                                                    <a class="dropdown-item waves-light waves-effect" onclick="activateProject(<?= $project['id'] ?>)"><i class="icofont icofont-caret-right "></i> Kích hoạt dự án</a>
+                                                                                <?php endif ?>
+                                                                                <a class="dropdown-item waves-light waves-effect" onclick="closeProject(<?= $project['id'] ?>)"><i class="icofont icofont-close-line"></i> Đóng dự án</a>
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php endif ?>
+                                                                </div>
+                                                                <div class="justify-content-center d-flex" style="height: 15px;" id="show-project-<?= $project['id'] ?>">
+                                                                    <i class="icofont icofont-curved-down"></i>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </h3>
+                                                </div>
+                                                <div id="collapse-<?= $project['id'] ?>" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                                    <div class="accordion-content accordion-desc">
+                                                        <div class="card border" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
+                                                            <div class="card-header">
+                                                                <h5 class="card-header-text">Thành viên trong dự án</h5>
+                                                            </div>
+                                                            <div class="card-block">
+                                                                <ul class="media-list mt-3">
+                                                                    <?php foreach ($project['users'] as $user) : ?>
+                                                                        <hr>
+                                                                        <li class="media d-flex">
+                                                                            <div class="media-left">
+                                                                                <a href="#">
+                                                                                    <img class="media-object img-radius comment-img" src="<?= base_url("imgs/{$user['photo']}") ?>" alt="Generic placeholder image">
+                                                                                </a>
+                                                                            </div>
+                                                                            <div class="media-body w-100">
+                                                                                <a href="#" class="text-decoration-none">
+                                                                                    <h6 class="media-heading txt-primary"><?= $user['username'] ?> <span class="f-12 text-muted m-l-5 <?= $user['role'] ?>-role"><?= PROJECT_ROLE[$user['role']] ?></span></h6>
+                                                                                </a>
+                                                                                <p class="text-truncate"><?= $user['email'] ?></p>
+                                                                            </div>
+                                                                        </li>
+                                                                    <?php endforeach ?>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col">
-                                                <?php if (CLOSE == $project['status']) : ?>
-                                                    <h6 class="m-b-5" style="text-decoration: line-through;"><b>[<?= $project['prefix'] ?>] <?= $project['name'] ?></b></h6>
-                                                <?php else : ?>
-                                                    <h6 class="m-b-5"><b><a href="<?= base_url('project') . '/' . $project['id'] ?>" class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></b></h6>
-                                                <?php endif ?>
-                                                <p class="text-muted m-b-0"><?= !empty($project['descriptions']) ? $project['descriptions'] : 'Dự án này chưa có mô tả.' ?></p>
-                                                <p class="text-muted m-b-0"><i class="feather icon-clock m-r-10"></i>Cập nhật: <?= $project['updated_at'] ?>.</p>
-                                            </div>
-                                            <div class="col-3">
-                                                <p class="m-b-0"><b>Thành viên:</b> <?= $project['totalUser'] ?></p>
-                                                <p class="m-b-0"><b>Công việc:</b> <?= $project['totalTask'] ?></p>
-                                                <p class="m-b-0"><b>Trạng thái:</b> <?= PROJECT_STATUS[$project['status']] ?></p>
-                                            </div>
-                                            <div class="col-1">
-                                                <?php if (CLOSE == $project['status'] && session()->get('user_id') == $project['owner']) : ?>
-                                                    <div class="dropdown-secondary dropdown d-inline-block f-right">
-                                                        <button class="btn btn-sm btn-primary waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                            <a class="dropdown-item waves-light waves-effect" onclick="restoreProject(<?= $project['id'] ?>)"><i class="icofont icofont-redo"></i> Mở dự án</a>
-                                                        </div>
-                                                    </div>
-                                                <?php endif ?>
-                                                <?php if (CLOSE != $project['status'] && session()->get('user_id') == $project['owner']) : ?>
-                                                    <div class="dropdown-secondary dropdown d-inline-block f-right">
-                                                        <button class="btn btn-sm btn-primary waves-light" type="button" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                            <?php if (INITIALIZE == $project['status']) : ?>
-                                                                <a class="dropdown-item waves-light waves-effect" onclick="activateProject(<?= $project['id'] ?>)"><i class="icofont icofont-caret-right "></i> Kích hoạt dự án</a>
-                                                            <?php endif ?>
-                                                            <a class="dropdown-item waves-light waves-effect" onclick="closeProject(<?= $project['id'] ?>)"><i class="icofont icofont-close-line"></i> Đóng dự án</a>
-                                                        </div>
-                                                    </div>
-                                                <?php endif ?>
-                                            </div>
                                         </div>
+                                    <?php endforeach ?>
+                                    <div class="m-20">
+                                        <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
                                     </div>
-                                <?php endforeach ?>
-                                <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
-                            </div>
-                        <?php else : ?>
-                            <div class="card-header">
-                                <?php if (empty($dim)) : ?>
-                                    <div class="text-center"><span>Hiện tại không có dự án nào. </span><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">Tạo mới!</a></div>
-                                <?php else :  ?>
-                                    <div class="text-center"><span>Không có dự án nào trong khoảng thời gian này</div>
-                                <?php endif ?>
-                            </div>
-                        <?php endif ?>
+                                </div>
+                            <?php else : ?>
+                                <div class="card-header">
+                                    <?php if (empty($dim)) : ?>
+                                        <div class="text-center"><span>Hiện tại không có dự án nào. </span><a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">Tạo mới!</a></div>
+                                    <?php else :  ?>
+                                        <div class="text-center"><span>Không có dự án nào trong khoảng thời gian này</div>
+                                    <?php endif ?>
+                                </div>
+                            <?php endif ?>
+                        </div>
                     </div>
-                    <!-- Task board design block end -->
                 </div>
-                <!-- Left column end -->
             </div>
+            <!-- Left column end -->
         </div>
-        <!-- Page body end -->
     </div>
+    <!-- Page body end -->
+</div>
 </div>
 <!-- Main-body end -->
 <script>
+    var changeIconDirectionUp = true
+
+    function changeIcon(id) {
+        direction = document.getElementById(`show-project-${id}`)
+        if (changeIconDirectionUp) {
+            direction.innerHTML = '<i class="icofont icofont-curved-up"></i>'
+            changeIconDirectionUp = false
+            return
+        }
+
+        direction.innerHTML = '<i class="icofont icofont-curved-down"></i>'
+        changeIconDirectionUp = true
+        return
+    }
+
     function submitForm() {
         var form = document.getElementById('filter')
         form.submit()
