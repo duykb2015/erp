@@ -97,22 +97,22 @@
                                 <div class="card-block accordion-block">
                                     <?php foreach ($projects as $project) : ?>
                                         <div id="accordion" role="tablist" aria-multiselectable="true">
-                                            <div class="accordion-panel" onclick="changeIcon(<?= $project['id'] ?>)">
+                                            <div class="accordion-panel">
                                                 <div class="accordion-heading" role="tab" id="headingOne">
                                                     <h3 class="card-title accordion-title">
                                                         <!-- class="accordion-msg" -->
-                                                        <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $project['id'] ?>" aria-expanded="true" aria-controls="collapse-<?= $project['id'] ?>">
+                                                        <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;">
                                                             <div class="row m-3">
                                                                 <div class="col-auto p-r-0">
                                                                     <div class="u-img">
-                                                                        <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" alt="user image" width="70" height="70" class="img-radius cover-img">
+                                                                        <img src="<?= base_url("imgs/{$project['photo']}") ?>" alt="user image" width="70" height="70" class="img-radius cover-img">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col">
                                                                     <?php if (CLOSE == $project['status']) : ?>
                                                                         <h6 class="m-b-5" style="text-decoration: line-through;"><b>[<?= $project['prefix'] ?>] <?= $project['name'] ?></b></h6>
                                                                     <?php else : ?>
-                                                                        <h6 class="m-b-5" onclick="window.location.href = 'project/<?= $project['id'] ?>'"><b><a class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></b></h6>
+                                                                        <h6 class="m-b-5" onclick="window.location.href = 'project/<?= $project['prefix'] ?>'"><b><a class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></b></h6>
                                                                     <?php endif ?>
                                                                     <p class="text-muted m-b-0"><?= !empty($project['descriptions']) ? $project['descriptions'] : 'Dự án này chưa có mô tả.' ?></p>
                                                                     <p class="text-muted m-b-0"><i class="feather icon-clock m-r-10"></i>Cập nhật: <?= $project['updated_at'] ?>.</p>
@@ -143,7 +143,7 @@
                                                                         </div>
                                                                     <?php endif ?>
                                                                 </div>
-                                                                <div class="justify-content-center d-flex" style="height: 15px;" id="show-project-<?= $project['id'] ?>">
+                                                                <div class="justify-content-center d-flex" onclick="changeIcon(<?= $project['id'] ?>)" id="show-project-<?= $project['id'] ?>" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $project['id'] ?>" aria-expanded="true" aria-controls="collapse-<?= $project['id'] ?>">
                                                                     <i class="icofont icofont-curved-down"></i>
                                                                 </div>
                                                             </div>

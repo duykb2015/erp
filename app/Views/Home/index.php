@@ -1,7 +1,7 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('css') ?>
 <style>
-    .task > .sub-title {
+    .task>.sub-title {
         margin-bottom: 0px !important;
     }
 </style>
@@ -47,11 +47,11 @@
                                             <div class="row m-3">
                                                 <div class="col-2 p-r-0">
                                                     <div class="u-img">
-                                                        <img src="<?= base_url() . '/imgs/' . $project['photo'] ?>" width="50" height="50" alt="user image" class="img-radius cover-img">
+                                                        <img src="<?= base_url("imgs/{$project['photo']}") ?>" width="50" height="50" alt="user image" class="img-radius cover-img">
                                                     </div>
                                                 </div>
                                                 <div class="col-10 d-inline-block text-truncate">
-                                                    <h6 class="m-b-5"><a href="<?= base_url('project') . '/' . $project['id'] ?>" class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></h6>
+                                                    <h6 class="m-b-5"><a href="<?= base_url("project/{$project['prefix']}") ?>" class="text-decoration-none">[<?= $project['prefix'] ?>] <?= $project['name'] ?></a></h6>
                                                     <p class="text-muted m-b-0"><?= !empty($project['descriptions']) ? $project['descriptions'] : 'Dự án này chưa có mô tả.' ?></p>
                                                     <p class="text-muted m-b-0"><i class="feather icon-clock m-r-10"></i>Cập nhật: <?= $project['updated_at'] ?>.</p>
                                                 </div>
@@ -82,21 +82,25 @@
                                         <div class="card-header task">
                                             <div class="sub-title"><?= $section ?></div>
                                         </div>
-                                        <?php foreach ($tasks as $task) : ?>
-                                            <div class="card-block">
-                                                <div class="row m-3">
-                                                    <div class="col-auto p-r-0">
-                                                        <div class="u-img">
-                                                            <img src="<?= base_url() . '/imgs/' . $task['project_photo'] ?>" alt="user image" class="img-radius cover-img">
+                                        <div class="card-block">
+                                            <?php foreach ($tasks as $task) : ?>
+                                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="card shadow border bg-light text-dark">
+                                                        <div class="row m-3">
+                                                            <div class="col p-r-0">
+                                                                <div class="u-img">
+                                                                    <img src="<?= base_url("imgs/{$task['project_photo']}") ?>" width="50" height="50" alt="user image" class="img-radius cover-img">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-11 d-inline-block text-truncate">
+                                                                <h6 class="m-b-5"><a href="<?= base_url("project/{$task['project_prefix']}/task/{$task['task_key']}") ?>" class="text-decoration-none">[<?= $task['task_key'] ?>] <?= $task['title'] ?></a></h6>
+                                                                <p class="text-muted m-b-0"><?= $task['project_name'] ?></p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col">
-                                                        <h6 class="m-b-5"><a href="<?= base_url('project') . '/' . $task['project_id'] . '/task/' . $task['id'] ?>" class="text-decoration-none">[<?= $task['task_key'] ?>] <?= $task['title'] ?></a></h6>
-                                                        <p class="text-muted m-b-0"><?= $task['project_name'] ?></p>
-                                                    </div>
                                                 </div>
-                                            </div>
-                                        <?php endforeach ?>
+                                            <?php endforeach ?>
+                                        </div>
                                     </div>
                                 <?php endforeach ?>
                             </div>

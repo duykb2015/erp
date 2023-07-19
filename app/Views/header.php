@@ -93,7 +93,7 @@
                     </li>
                 <?php endif ?>
 
-                <?php if (url_is('project/' . (isset($project['id']) ? $project['id'] : 0))) : ?>
+                <?php if (url_is('project/' . (isset($project['prefix']) ? $project['prefix'] : 0))) : ?>
                     <li class="header-notification">
                         <div class="hover px-2">
                             <button type="button" class="btn btn-primary rounded" data-bs-toggle="modal" data-bs-target="#createNewTask">Tạo mới công việc</button>

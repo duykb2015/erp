@@ -115,12 +115,14 @@ define('TASK_PRIORITY', [
 define('CUSTOM', 0);
 define('INIT', 1);
 define('INPROGRESS', 2);
-define('DONE', 3);
+define('READY_TO_REVIEW', 3);
+define('DONE', 4);
 
 define('BASE_SECTION', [
     CUSTOM     => ['background' => '#e9f2ff', 'color' => '#0055cc'],
     INIT       => ['background' => '#e9eaee', 'color' => '#44546f'],
     INPROGRESS => ['background' => '#e9f2ff', 'color' => '#0055cc'],
+    READY_TO_REVIEW => ['background' => '#e9f2ff', 'color' => '#0055cc'],
     DONE       => ['background' => '#dffcf0', 'color' => '#216e4e'],
 ]);
 

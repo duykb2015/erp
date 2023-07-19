@@ -40,7 +40,7 @@
                                     </div>
                                     /
                                     <div>
-                                        <a href="<?= base_url('project/') . $project['id'] ?>/setting" class="text-decoration-none">Cài đặt dự án</a>
+                                        <a href="<?= base_url('project/') . $project['prefix'] ?>/setting" class="text-decoration-none">Cài đặt dự án</a>
                                     </div>
                                 </div>
                             </div>
@@ -83,55 +83,54 @@
                                         </div>
                                     </div>
                                 </div>
-                                <form class="md-float-material form-material needs-validation" method="POST" action="" novalidate>
-                                    <div class="card-block">
-                                        <div class="row m-b-20">
-                                            <div class="col-12">
-                                                <?php $success = session()->getFlashdata('success') ?>
-                                                <?php if (!empty($success)) :  ?>
-                                                    <div class="alert alert-success mb-1 rounded">
+                                <form class="md-float-material form-material needs-validation" method="POST" <?= base_url('project/') . $project['prefix'] . '/setting' ?> novalidate>
+                                    <div class="row m-b-20 justify-content-center">
+                                        <?php $success = session()->getFlashdata('success') ?>
+                                        <?php if (!empty($success)) :  ?>
+                                            <div class="col-4 m-b-20">
+                                                <div class="alert alert-success mb-1 rounded">
+                                                    <div class="row">
+                                                        <div class="col-11">
+                                                            Cập nhật thông tin thành công.
+                                                        </div>
+                                                        <div class="col-1">
+                                                            <i onclick="removeAlert()" class="feather icon-x-circle float-end"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endif ?>
+
+                                        <?php $errors = session()->getFlashdata('error_msg') ?>
+                                        <?php if (!empty($errors)) :  ?>
+                                            <div class="col-4 m-b-20">
+                                                <?php if (!is_array($errors)) : ?>
+                                                    <div class="alert alert-danger mb-1 rounded">
                                                         <div class="row">
                                                             <div class="col-11">
-                                                                Cập nhật thông tin thành công.
+                                                                <?= $errors ?>
                                                             </div>
                                                             <div class="col-1">
                                                                 <i onclick="removeAlert()" class="feather icon-x-circle float-end"></i>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                <?php endif ?>
-                                            </div>
-                                            <div class="col-12">
-                                                <?php $errors = session()->getFlashdata('error_msg') ?>
-                                                <?php if (!empty($errors)) :  ?>
-                                                    <?php if (!is_array($errors)) : ?>
+                                                <?php else : ?>
+                                                    <?php foreach ($errors as $error) : ?>
                                                         <div class="alert alert-danger mb-1 rounded">
                                                             <div class="row">
                                                                 <div class="col-11">
-                                                                    <?= $errors ?>
+                                                                    <?= $error ?>
                                                                 </div>
                                                                 <div class="col-1">
                                                                     <i onclick="removeAlert()" class="feather icon-x-circle float-end"></i>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    <?php else : ?>
-                                                        <?php foreach ($errors as $error) : ?>
-                                                            <div class="alert alert-danger mb-1 rounded">
-                                                                <div class="row">
-                                                                    <div class="col-11">
-                                                                        <?= $error ?>
-                                                                    </div>
-                                                                    <div class="col-1">
-                                                                        <i onclick="removeAlert()" class="feather icon-x-circle float-end"></i>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        <?php endforeach ?>
-                                                    <?php endif ?>
+                                                    <?php endforeach ?>
                                                 <?php endif ?>
                                             </div>
-                                        </div>
+                                        <?php endif ?>
 
                                         <div class="row justify-content-center">
                                             <div class="col-2">
@@ -149,6 +148,7 @@
                                             <div class="col-4">
                                                 <div class="form-group form-primary">
                                                     <input type="hidden" name="id" value="<?= $project['id'] ?>">
+                                                    <input type="hidden" name="prefix" value="<?= $project['prefix'] ?>">
                                                     <label class="p-1" for="username">Tên dự án <span class="text-danger">*</span></label>
                                                     <input type="text" value="<?= $project['name'] ?>" name="name" class="form-control rounded" placeholder="Tên dự án" required>
                                                 </div>
@@ -177,6 +177,7 @@
                                                     <select name="status" class="form-control rounded">
                                                         <?php foreach (PROJECT_STATUS as $key => $status) : ?>
                                                             <?php if (CLOSE == $key || DELETED == $key) continue ?>
+                                                            <?php if ($project['status'] == ACTIVE && INITIALIZE == $key) continue ?>
                                                             <option value="<?= $key ?>" <?= $project['status'] == $key ? 'selected' : '' ?>><?= $status ?></option>
                                                         <?php endforeach ?>
                                                     </select>
@@ -230,7 +231,7 @@
                                     </div>
                                     <div class="row justify-content-center">
                                         <div class="col-4 mb-3">
-                                            <a href="<?= base_url('project/') . $project['id'] . '/setting' ?>" id="edit-cancel" class=" rounded btn btn-default waves-effect float-end">Huỷ</a>
+                                            <a href="<?= base_url('project/') . $project['prefix'] . '/setting' ?>" id="edit-cancel" class=" rounded btn btn-default waves-effect float-end">Huỷ</a>
                                             <button class="btn btn-primary rounded waves-effect waves-light m-r-20 float-end">Lưu</button>
                                         </div>
                                     </div>

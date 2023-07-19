@@ -84,6 +84,14 @@
         color: <?= BASE_SECTION[3]['color'] ?> !important;
         background-color: <?= BASE_SECTION[3]['background'] ?> !important;
     }
+
+    .badge-custom-4 {
+        border-radius: 4px;
+        padding: 2px 6px;
+        margin-right: 4px;
+        color: <?= BASE_SECTION[4]['color'] ?> !important;
+        background-color: <?= BASE_SECTION[4]['background'] ?> !important;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -114,7 +122,7 @@
                                     </div>
                                     /
                                     <div>
-                                        <a href="<?= base_url('project/') . $project['id'] ?>" class="text-decoration-none">Chi tiết dự án</a>
+                                        <a href="<?= base_url('project/') . $project['prefix'] ?>" class="text-decoration-none">Chi tiết dự án</a>
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +138,8 @@
                                         <div class="col-2 pb-2">
                                             <label class="p-1" for="dim"><i class="icofont icofont-filter"></i> Người được giao việc</label>
                                             <select class="form-control rounded" name="user" onchange="submitForm()">
-                                                <option value="all">Toàn bộ</option>
+                                                <option value="all" <?= !empty($filterUser) && $filterUser == 'all' ? 'selected' : '' ?>>Toàn bộ</option>
+                                                <option value="unassigned" <?= !empty($filterUser) && $filterUser == 'unassigned' ? 'selected' : '' ?>>Chưa được giao</option>
                                                 <option value="<?= session()->get('user_id') ?>" <?= !empty($filterUser) && $filterUser == session()->get('user_id') ? 'selected' : '' ?>>Người dùng hiện tại</option>
                                                 <?php if (!empty($assignees)) : ?>
                                                     <?php foreach ($assignees as $assignee) : ?>
@@ -167,15 +176,15 @@
                                                                 <div class="col-md-12 section-container" id="draggableMultiple">
                                                                     <?php if (!empty($status['tasks'])) : ?>
                                                                         <?php foreach ($status['tasks'] as $task) : ?>
-                                                                            <div class="sortable-moves border box">
-                                                                                <p class="task-name hover-pointer overflow-auto" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['id'] . '/task/' . $task['id'] ?>')"><?= $task['title'] ?></p>
-                                                                                <p><b>Người được giao: </b><?= $task['assignee_name'] ?></p>
+                                                                            <div class="sortable-moves border box d-block ">
+                                                                                <p class="task-name hover-pointer text-truncate" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['prefix'] . '/task/' . $task['task_key'] ?>')"><?= $task['title'] ?></p>
+                                                                                <p><b>Người được giao: </b><?= $task['assignee_name'] ?? 'Trống' ?></p>
                                                                                 <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee']) || OWNER == $userRole) : ?>
                                                                                     <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                                                                         <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                         <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                             <?php foreach ($taskStatus as $subStatus) : ?>
-                                                                                                <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? 'disabled' : '' ?> onclick="changeTaskStatus(<?= $task['id'] ?>, <?= $subStatus['id'] ?>)">
+                                                                                                <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
                                                                                                     <i class="icofont icofont-listine-dots"></i>
                                                                                                     <?= $subStatus['title'] ?>
                                                                                                 </a>
@@ -259,7 +268,7 @@
                         <label for="task_descriptions" class="col-form-label">Chọn mức độ ưu tiên</label>
                         <select id="task_priority" name="priority" class="form-control">
                             <?php foreach (TASK_PRIORITY as $key => $priority) : ?>
-                                <option value="<?= $key ?>"><?= $priority ?></option>
+                                <option value="<?= $key ?>" <?= $key == NORMAL ? 'selected' : '' ?>><?= $priority ?></option>
                             <?php endforeach ?>
                         </select>
                     </div>
@@ -349,35 +358,35 @@
 </script>
 
 <script>
-    draggablePanelList = document.getElementById('draggablePanelList');
-    Sortable.create(draggablePanelList, {
-        group: 'draggablePanelList',
-        animation: 150,
-        cursor: 'move',
-        // Element dragging ended
-        onEnd: function( /**Event*/ evt) {
-            evt.to; // target list
-            evt.from; // previous list
-            evt.oldIndex; // element's old index within old parent
-            evt.newIndex; // element's new index within new parent
-            // console.log(evt.item, evt.oldIndex, evt.newIndex)
-        },
-    });
+    // draggablePanelList = document.getElementById('draggablePanelList');
+    // Sortable.create(draggablePanelList, {
+    //     group: 'draggablePanelList',
+    //     animation: 150,
+    //     cursor: 'move',
+    //     // Element dragging ended
+    //     onEnd: function( /**Event*/ evt) {
+    //         evt.to; // target list
+    //         evt.from; // previous list
+    //         evt.oldIndex; // element's old index within old parent
+    //         evt.newIndex; // element's new index within new parent
+    //         // console.log(evt.item, evt.oldIndex, evt.newIndex)
+    //     },
+    // });
 
-    draggableMultiple = document.getElementById('draggableMultiple');
-    Sortable.create(draggableMultiple, {
-        group: 'draggableMultiple',
-        animation: 150,
-        cursor: 'move',
-        // Element dragging ended
-        onEnd: function( /**Event*/ evt) {
-            evt.to; // target list
-            evt.from; // previous list
-            evt.oldIndex; // element's old index within old parent
-            evt.newIndex; // element's new index within new parent
-            // console.log(evt.item, evt.oldIndex, evt.newIndex)
-        },
-    });
+    // draggableMultiple = document.getElementById('draggableMultiple');
+    // Sortable.create(draggableMultiple, {
+    //     group: 'draggableMultiple',
+    //     animation: 150,
+    //     cursor: 'move',
+    //     // Element dragging ended
+    //     onEnd: function( /**Event*/ evt) {
+    //         evt.to; // target list
+    //         evt.from; // previous list
+    //         evt.oldIndex; // element's old index within old parent
+    //         evt.newIndex; // element's new index within new parent
+    //         // console.log(evt.item, evt.oldIndex, evt.newIndex)
+    //     },
+    // });
 </script>
 
 <script>
@@ -554,9 +563,10 @@
         data.append('project_id', projectID)
 
         const files = document.getElementById('attachment').files
-        for (let i = 0; i < files.length; i++)
-        {
-             data.append(i, document.getElementById('attachment').files[i])
+        if (0 < files.length) {
+            for (let i = 0; i < files.length; i++) {
+                data.append(i, document.getElementById('attachment').files[i])
+            }
         }
 
         var requestOptions = {
@@ -645,7 +655,6 @@
                     btnCreateTask.innerHTML = 'Tạo'
 
                     window.location.reload()
-                    // document.getElementById('create-project').submit()
                 }, 500)
 
                 return

@@ -36,6 +36,7 @@ class Home extends BaseController
             'task.title',
             'task.task_key',
             'project.id as project_id',
+            'project.prefix as project_prefix',
             'project.name as project_name',
             'project.photo as project_photo',
             'task_status.title as status_title',
@@ -46,22 +47,7 @@ class Home extends BaseController
             ->where('assignee', session()->get('user_id'))
             ->find();
 
-        $createdBy = $taskModel->select([
-            'task.id',
-            'task.title',
-            'task.task_key',
-            'project.id as project_id',
-            'project.name as project_name',
-            'project.photo as project_photo',
-            'task_status.title as status_title',
-            'task_status.position',
-        ])->join('task_status', 'task_status.id = task.task_status_id')
-            ->join('project', 'project.id = task_status.project_id')
-            ->where('user_id', session()->get('user_id'))
-            ->where('task_status.base_status != ', 3)
-            ->find();
-
-        $recentTasks = collect(array_merge($assignee, $createdBy))->unique();
+        $recentTasks = collect(array_merge($assignee))->unique();
         $recentTasks = $recentTasks->sortBy('position')->groupBy('status_title');
         $data['projects']    = $projects;
         $data['recentTasks'] = $recentTasks;

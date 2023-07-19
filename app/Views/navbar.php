@@ -2,8 +2,8 @@
 
 $menu = [
     [
-        'url' => base_url('project') . '/' . $project['id'],
-        'active' => 'project/' . $project['id'],
+        'url' => base_url("project/{$project['prefix']}"),
+        'active' => "project/{$project['prefix']}",
         'name' => 'Tổng quan',
         'icon' => '<i class="feather icon-home"></i>',
         'sub_menu' => [
@@ -13,21 +13,21 @@ $menu = [
         'role' => [MEMBER, LEADER, OWNER]
     ],
     [
-        'url' => base_url('project') . '/' . $project['id'] . '/statistic',
+        'url' => base_url("project/{$project['prefix']}/statistic"),
         'active' => 'project/*/statistic',
         'name' => 'Thống kê số liệu',
         'icon' => '<i class="feather icon-user"></i>',
         'role' => [MEMBER, LEADER, OWNER]
     ],
     [
-        'url' => base_url('project') . '/' . $project['id'] . '/user',
+        'url' => base_url("project/{$project['prefix']}/user"),
         'active' => 'project/*/user',
         'name' => 'Thành viên',
         'icon' => '<i class="feather icon-user"></i>',
         'role' => [MEMBER, LEADER, OWNER]
     ],
     [
-        'url' => base_url('project') . '/' . $project['id'] . '/setting',
+        'url' => base_url("project/{$project['prefix']}/setting"),
         'name' => 'Cài đặt dự án',
         'active' => 'project/*/setting',
         'icon' => '<i class="fa fa-gear"></i>',

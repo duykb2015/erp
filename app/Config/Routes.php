@@ -57,6 +57,7 @@ $routes->group('user', ['filter' => 'login'], function ($routes) {
 });
 
 $routes->group('project', ['filter' => 'login'], function ($routes) {
+
     $routes->get('/', 'Project::list');
     $routes->post('change-role-leader', 'Project::changeRoleLeader');
     $routes->post('change-role-member', 'Project::changeRoleMember');
@@ -76,14 +77,22 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
 
     $routes->get('(:num)/task/(:num)', 'Task::index');
 
-    $routes->group('(:any)', function ($routes) {
+    $routes->group('(:segment)', function ($routes) {
+        
         $routes->get('/', 'Project::detail');
-        // $routes->get('user', 'Project::user');
+
+        $routes->get('user', 'Project::detail');
         $routes->post('user', 'Project::addUser');
-        // $routes->get('setting', 'Project::setting');
+
+        $routes->get('setting', 'Project::detail');
         $routes->post('setting', 'Project::saveSetting');
+        
+        $routes->get('statistic', 'Project::detail');
         $routes->post('statistic', 'Project::statistic');
+
+        $routes->get('task/(:segment)', 'Task::index');
     });
+
 });
 
 $routes->group('user-management', ['filter' => 'login'], function ($routes) {

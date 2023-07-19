@@ -26,13 +26,13 @@ class TaskStatus extends BaseController
         }
 
         $taskStatusModel = new ModelsTaskStatus();
-        $taskStatus     = $taskStatusModel->select(['id', 'base_status', 'position'])
+        $taskStatus      = $taskStatusModel->select(['id', 'base_status', 'position'])
             ->where('project_id', $taskStatusData['project_id'])
             ->findAll();
-        $taskStatus     = collect($taskStatus);
-
-        $baseStatus3 = $taskStatus->where('base_status', '=', 3)->first();
-        $lastStatus = $taskStatus->last();
+            
+        $taskStatus  = collect($taskStatus);
+        $baseStatus3 = $taskStatus->where('base_status', '=', 4)->first();
+        $lastStatus  = $taskStatus->last();
 
         $data = [
             'project_id' => $taskStatusData['project_id'],

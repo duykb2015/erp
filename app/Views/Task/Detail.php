@@ -1,7 +1,8 @@
 <?= $this->extend('layout') ?>
 
 <?= $this->section('css') ?>
-
+<!-- Time line css -->
+<link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\assets\pages\timeline\style.css">
 <!-- Switch component css -->
 <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\bower_components\switchery\css\switchery.min.css">
 <!-- swiper css -->
@@ -108,25 +109,24 @@
                                                 <h6 class="sub-title m-b-15">Tệp đính kèm</h6>
                                             </div>
                                             <div class="col-sm-12">
-                                                <!-- Swiper slider card start -->
-
                                                 <div class="swiper-container">
                                                     <div class="swiper-wrapper">
                                                         <div class="swiper-slide">
-                                                            <div class="card thumb-block">
-                                                                <div class="thumb-img">
-                                                                    <img src="libraries\assets\images\task\task-u1.jpg" class="img-fluid width-100" alt="task-u1.jpg">
-                                                                    <div class="caption-hover">
-                                                                        <span>
-                                                                            <a href="#" class="btn btn-primary btn-sm"><i class="icofont icofont-ui-zoom-in"></i> </a>
-                                                                            <a href="#" class="btn btn-primary btn-sm"><i class="icofont icofont-download-alt"></i> </a>
-                                                                        </span>
+                                                            <?php foreach ($attachments as $attachment) : ?>
+                                                                <div class="card thumb-block">
+                                                                    <div class="thumb-img">
+                                                                        <img src="<?= base_url() ?>\file.jpg" class="img-fluid width-100" alt="<?= $attachment['name'] ?>">
+                                                                        <div class="caption-hover">
+                                                                            <span>
+                                                                                <a href="<?= base_url("attachments/{$attachment['name']}") ?>" class="btn btn-primary btn-sm"><i class="icofont icofont-download-alt"></i> </a>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="card-footer text-center">
+                                                                        <a target="_blank" href="<?= base_url("attachments/{$attachment['name']}") ?>"><?= $attachment['name'] ?></a>
                                                                     </div>
                                                                 </div>
-                                                                <div class="card-footer text-center">
-                                                                    <a href="#!"> task/task-u1.jpg </a>
-                                                                </div>
-                                                            </div>
+                                                            <?php endforeach ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -136,9 +136,6 @@
                                 </div>
                             </div>
                             <div class="card border comment-block">
-                                <!-- <div class="card-header">
-                                    <h5 class="card-header-text d-flex">Các hoạt động</h5>
-                                </div> -->
                                 <div class="card-block">
                                     <ul class="nav nav-tabs md-tabs" role="tablist">
                                         <li class="nav-item">
@@ -219,14 +216,69 @@
                                         <div class="tab-pane" id="activity" role="tabpanel">
                                             <div class="form-group">
                                                 <div class="row">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <h5>Timeline</h5>
+                                                        </div>
+                                                        <div class="card-block">
+                                                            <div class="main-timeline">
+                                                                <div class="cd-timeline cd-container">
+                                                                    <div class="cd-timeline-block">
+                                                                        <div class="cd-timeline-icon bg-success">
+                                                                            <i class="icofont icofont-ui-user"></i>
+                                                                        </div>
+                                                                        <!-- cd-timeline-img -->
+                                                                        <div class="cd-timeline-content card_main">
+                                                                            <div class="media bg-white d-flex p-10 d-block-phone">
+                                                                                <div class="media-left media-middle col-xs-12">
+                                                                                    <a href="#">
+                                                                                        <img class="media-object img-fluid" src="libraries\assets\images\timeline\img2.png" alt="">
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div class="media-body">
+                                                                                    <div class="f-15 f-bold m-b-5">Josephin Doe</div>
+                                                                                    <div class="f-13 text-muted">Software Engineer</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <span class="cd-date">October 25, 2014, 01:15 PM</span>
+                                                                            <span class="cd-details">You posed an artical with public</span>
+                                                                        </div>
+                                                                        <!-- cd-timeline-content -->
+                                                                    </div>
+                                                                    <div class="cd-timeline-block">
+                                                                        <div class="cd-timeline-icon bg-success">
+                                                                            <i class="icofont icofont-ui-user"></i>
+                                                                        </div>
+                                                                        <!-- cd-timeline-img -->
+                                                                        <div class="cd-timeline-content card_main">
+                                                                            <div class="media bg-white d-flex p-10 d-block-phone">
+                                                                                <div class="media-left media-middle col-xs-12">
+                                                                                    <a href="#">
+                                                                                        <img class="media-object img-fluid" src="libraries\assets\images\timeline\img2.png" alt="">
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div class="media-body">
+                                                                                    <div class="f-15 f-bold m-b-5">Josephin Doe</div>
+                                                                                    <div class="f-13 text-muted">Software Engineer</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <span class="cd-date">October 25, 2014, 01:15 PM</span>
+                                                                            <span class="cd-details">You posed an artical with public</span>
+                                                                        </div>
+                                                                        <!-- cd-timeline-content -->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <h6 class="sub-title m-t-30 m-b-15">Danh sách hoạt động</h6>
                                                     <ul class="media-list revision-blc">
                                                         <?php if (!empty($activities)) : ?>
                                                             <?php foreach ($activities as $activity) : ?>
                                                                 <li class="media d-flex m-t-5 m-b-15">
-                                                                    <div class="p-l-15 p-r-20 d-inline-block v-middle"><a class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icon-ghost f-18 v-middle"></i></a></div>
+                                                                    <div class="p-l-15 p-r-20 d-inline-block v-middle"><a class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icofont icofont-settings-alt"></i></a></div>
                                                                     <div class="d-inline-block">
-                                                                        <?= $activity['text'] ?>
+                                                                        <?= $activity['log'] ?>
                                                                         <div class="media-annotation"><?= $activity['created_at'] ?></div>
                                                                     </div>
                                                                 </li>

@@ -17,7 +17,7 @@ class User extends Seeder
             'photo' => $this->makeImage(strtoUpper('D')),
             'firstname' => 'Lãng',
             'lastname' => 'Duy',
-            'type' => '1'
+            'type' => 'admin'
         ];
         $user = new ModelsUser();
         $user->insert($data);
@@ -34,7 +34,7 @@ class User extends Seeder
                 'photo'     => $this->makeImage(strtoUpper($char[random_int(0, 24)])),
                 'firstname' => $faker->firstName(),
                 'lastname'  => $faker->lastName(),
-                'type'      => '0'
+                'type'      => 'user'
             ];
             $user->insert($data);
         }

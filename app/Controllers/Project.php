@@ -6,7 +6,6 @@ use App\Models\Attachment;
 use App\Models\Comment;
 use App\Models\Project as ModelsProject;
 use App\Models\ProjectUser;
-use App\Models\RelationAttachment;
 use App\Models\Task as ModelsTask;
 use App\Models\TaskAttachment;
 use App\Models\TaskStatus;
@@ -168,7 +167,7 @@ class Project extends BaseController
         $segment = $this->request->getUri()->getSegments();
         array_shift($segment); //remove segment 0 (project), we don't need it
 
-        $projectID = $segment[0];
+        $projectPrefix = $segment[0];
         $view = $segment[1] ?? null;
 
         $allowedView = [
@@ -177,26 +176,21 @@ class Project extends BaseController
             'statistic'
         ];
 
-        if (!is_numeric($projectID)) {
-            $data['backLink']   = '/project';
-            return view('Error/NotFound', $data);
-        }
-
         if (!empty($view) && !in_array($view, $allowedView)) {
-            $data['backLink']   = "/project/{$projectID}";
+            $data['backLink']   = "/project/{$projectPrefix}";
             return view('Error/NotFound', $data);
         }
 
         $projectModel     = new ModelsProject();
         $projectUserModel = new ProjectUser();
 
-        $project = $projectModel->find($projectID);
+        $project = $projectModel->where('prefix', $projectPrefix)->first();
         if (!$project) {
             $data['backLink'] = '/project';
             return view('Error/NotFound', $data);
         }
 
-        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $projectID)->find();
+        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $project['id'])->find();
         $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
 
         $userID = session()->get('user_id');
@@ -216,7 +210,7 @@ class Project extends BaseController
         switch (ucfirst($view)) {
             case 'Index':
                 $taskStatusModel = new TaskStatus();
-                $taskStatus = $taskStatusModel->where('task_status.project_id', $projectID)->findAll();
+                $taskStatus = $taskStatusModel->where('task_status.project_id', $project['id'])->findAll();
 
                 $filterUser = $this->request->getGet('user');
                 $data['filterUser'] = $filterUser;
@@ -224,6 +218,11 @@ class Project extends BaseController
                 foreach ($taskStatus as $key => $status) {
                     if (!empty($filterUser && is_numeric($filterUser))) {
                         $taskModel->where('task.assignee', $filterUser);
+                    }
+                    if ('unassigned' == $filterUser)
+                    {
+                        $builderWhere = 'task.assignee IS NULL';
+                        $taskModel->where($builderWhere);
                     }
                     $taskStatus[$key]['tasks'] = $taskModel->select(['*', 'task.id as id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as assignee_name'])
                         ->join('user', 'user.id = task.assignee', 'left')
@@ -235,7 +234,7 @@ class Project extends BaseController
                     'user.id as user_id',
                     'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
                 ])->join('user', 'user.id = project_user.user_id')
-                    ->where('project_user.project_id', $projectID)
+                    ->where('project_user.project_id', $project['id'])
                     ->where('project_user.user_id !=', session()->get('user_id'))
                     ->find();
                 $data['assignees'] = $assignees;
@@ -256,7 +255,7 @@ class Project extends BaseController
                     'photo',
                     'role'
                 ])->join('user', 'user.id = project_user.user_id')
-                    ->where('project_user.project_id', $projectID)
+                    ->where('project_user.project_id', $project['id'])
                     ->paginate(5);
                 $data['members'] = $members;
                 $data['pager'] = $projectUserModel->pager;
@@ -270,7 +269,7 @@ class Project extends BaseController
             case 'Statistic':
                 $taskStatusModel = new TaskStatus();
                 $taskModel = new ModelsTask();
-                $taskStatus = $taskStatusModel->where('project_id', $projectID)->find();
+                $taskStatus = $taskStatusModel->where('project_id', $projectPrefix)->find();
                 $chartData['Trạng thái'] = 'Số lượng';
                 foreach ($taskStatus as $key => $status) {
                     $chartData[$status['title']] = $taskModel->select('COUNT(id) as count')->where('task_status_id', $status['id'])->first()['count'];
@@ -391,9 +390,15 @@ class Project extends BaseController
             ],
             [
                 'project_id' => $projectID,
-                'title' => 'Hoàn thành',
+                'title' => 'Sẵn sàng xem xét',
                 'position' => 2,
                 'base_status' => 3
+            ],
+            [
+                'project_id' => $projectID,
+                'title' => 'Hoàn thành',
+                'position' => 2,
+                'base_status' => 4
             ],
         ]);
 
@@ -402,7 +407,7 @@ class Project extends BaseController
             $taskStatusModel->insert($item);
         });
 
-        $result = ['project_id' => $projectID];
+        $result = ['project_prefix' => $projectData['project_prefix']];
         return $this->handleResponse($result);
     }
 
@@ -411,17 +416,19 @@ class Project extends BaseController
         $validation = service('validation');
         $validation->setRules(
             [
-                'project_id' => 'required|integer|is_not_unique[project.id]',
-                'user_id'    => 'required|integer|is_not_unique[user.id]',
+                'project_id'     => 'required|integer|is_not_unique[project.id]',
+                'project_prefix' => 'required|string|is_not_unique[project.prefix]',
+                'user_id'        => 'required|integer|is_not_unique[user.id]',
             ],
             customValidationErrorMessage()
         );
 
         $projectID = ($this->request->getPost('project_id'));
+        $projectPrefix = ($this->request->getPost('project_prefix'));
         $userID = ($this->request->getPost('user_id'));
 
         if (!$validation->run($this->request->getPost())) {
-            return redirectWithMessage(base_url('project/') . $projectID . '/user', $validation->getErrors());
+            return redirectWithMessage(base_url("project/{$projectPrefix}/user"), $validation->getErrors());
         }
 
         $projectUserModel = new ProjectUser();
@@ -433,13 +440,13 @@ class Project extends BaseController
         $projectUser = $projectUserModel->where($data)->find();
 
         if ($projectUser) {
-            return redirectWithMessage(base_url('project/') . $projectID . '/user', 'Người dùng đã tham gia dự án');
+            return redirectWithMessage(base_url("project/{$projectPrefix}/user"), 'Người dùng đã tham gia dự án');
         }
 
         $data['role'] = 'member';
         $projectUserModel->insert($data);
 
-        return redirectWithMessage(base_url('project/') . $projectID . '/user', 'success', 'success', FALSE);
+        return redirectWithMessage(base_url("project/{$projectPrefix}/user"), 'success', 'success', FALSE);
     }
 
     public function removeUser()
@@ -480,9 +487,20 @@ class Project extends BaseController
     public function findUser()
     {
         $email = $this->request->getPost('email');
+        $project = $this->request->getPost('project');
+
+        $projectUserModel = new ProjectUser();
+        $userIDs = $projectUserModel->select('user_id')
+            ->where('project_id', $project)
+            ->find();
+        
+        $pluckIds = collect($userIDs)->pluck('user_id')->toArray();
 
         $userModel = new User();
-        $user      = $userModel->select(['id', 'email as text'])->like('email', $email)->find();
+        $user      = $userModel->select(['id', 'email as text'])
+            ->like('email', $email)
+            ->whereNotIn('id', $pluckIds)
+            ->find();
 
         return $this->handleResponse(json_encode($user));
     }
@@ -496,6 +514,7 @@ class Project extends BaseController
     public function saveSetting()
     {
         $projectID = $this->request->getPost('id');
+        $projectPrefix = $this->request->getPost('prefix');
 
         $projectData = $this->request->getPost();
 
@@ -503,6 +522,7 @@ class Project extends BaseController
         $validation->setRules(
             [
                 'id'           => 'required|integer|is_not_unique[project.id]',
+                'prefix'       => 'required|string|is_not_unique[project.prefix]',
                 'name'         => 'required|string|min_length[5]|max_length[255]',
                 'descriptions' => 'string|max_length[512]',
                 'status'       => 'required|string'
@@ -519,7 +539,7 @@ class Project extends BaseController
         }
 
         if (!$validation->run($projectData)) {
-            return redirectWithMessage(base_url('project/') . $projectID . '/setting', $validation->getErrors());
+            return redirectWithMessage(base_url("project/{$projectPrefix}/setting"), $validation->getErrors());
         }
 
         $startDate = NULL;
@@ -532,7 +552,7 @@ class Project extends BaseController
             $startDate = Carbon::createFromFormat('Y-m-d', $projectData['start_at'])->startOfDay();
 
             if ($startDate->lt($dateStartPoint) || $startDate->gt($dateEndPoint)) {
-                return redirectWithMessage(base_url('project/') . $projectID . '/setting', 'Vui lòng chọn một ngày bắt đầu hợp lệ');
+                return redirectWithMessage(base_url("project/{$projectPrefix}/setting"), 'Vui lòng chọn một ngày bắt đầu hợp lệ');
             }
         }
 
@@ -540,13 +560,13 @@ class Project extends BaseController
             $dueDate = Carbon::createFromFormat('Y-m-d', $projectData['due_at'])->endOfDay();
 
             if ($dueDate->gt($dateEndPoint)) {
-                return redirectWithMessage(base_url('project/') . $projectID . '/setting', 'Vui lòng chọn một kết thúc hợp lệ');
+                return redirectWithMessage(base_url("project/{$projectPrefix}/setting"), 'Vui lòng chọn một kết thúc hợp lệ');
             }
         }
 
         if ($startDate && $dueDate) {
             if ($dueDate->lt($startDate) || $dueDate->lt(Carbon::now())) {
-                return redirectWithMessage(base_url('project/') . $projectID . '/setting', 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu');
+                return redirectWithMessage(base_url("project/{$projectPrefix}/setting"), 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu');
             }
         }
 
@@ -571,7 +591,7 @@ class Project extends BaseController
 
         $projectModel->update($projectID, $data);
 
-        return redirectWithMessage(base_url('project/') . $projectID . '/setting', 'success', 'success', FALSE);
+        return redirectWithMessage(base_url("project/{$projectPrefix}/setting"), 'success', 'success', FALSE);
     }
 
     public function upload()
@@ -777,20 +797,8 @@ class Project extends BaseController
     {
         $projectData = $this->request->getPost();
 
-        $validation = service('validation');
-        $validation->setRules(
-            [
-                'project_id' => 'required|integer|is_not_unique[project_user.id]',
-            ],
-            customValidationErrorMessage()
-        );
-
-        if (!$validation->run($projectData)) {
-            return $this->handleResponse(['errors' => $validation->getErrors()], 400);
-        }
-
         $projectModel = new ModelsProject();
-        $projectModel->update($projectData['project_id'], [
+        $projectModel->withDeleted()->update($projectData['project_id'], [
             'status' => ACTIVE,
         ]);
 
@@ -801,20 +809,8 @@ class Project extends BaseController
     {
         $projectData = $this->request->getPost();
 
-        $validation = service('validation');
-        $validation->setRules(
-            [
-                'project_id' => 'required|integer|is_not_unique[project_user.id]',
-            ],
-            customValidationErrorMessage()
-        );
-
-        if (!$validation->run($projectData)) {
-            return $this->handleResponse(['errors' => $validation->getErrors()], 400);
-        }
-
         $projectModel = new ModelsProject();
-        $projectModel->update($projectData['project_id'], [
+        $projectModel->withDeleted()->update($projectData['project_id'], [
             'status' => INITIALIZE,
             'deleted_at' => NULL
         ]);

@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
 use App\Models\TaskAttachment;
+use App\Models\TaskLog;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
@@ -21,19 +22,32 @@ class Task extends BaseController
     {
         $segment = $this->request->getUri()->getSegments();
         array_shift($segment); //remove segment 0 (project), we don't need it
-        $projectID    = $segment[0];
+        $projectPrefix   = $segment[0];
 
-        $projectModel = new Project();
-        $project      = $projectModel->find($projectID);
-        if (empty($project)) {
-            $data['backLink']   = '/project//';
+        $projectModel     = new Project();
+        $projectUserModel = new ProjectUser();
+        $project = $projectModel->where('prefix', $projectPrefix)->first();
+        if (!$project) {
+            $data['backLink'] = '/project';
             return view('Error/NotFound', $data);
         }
 
+        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $project['id'])->find();
+        $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
+
+        $userID = session()->get('user_id');
+
+        if ($project['owner'] != $userID) {
+            if (!in_array($userID, $projectUserID)) {
+                $data['backLink']   = '/project';
+                return view('Error/Forbidden', $data);
+            }
+        }
+
         $taskModel = new ModelsTask();
-        $task      = $taskModel->find($segment[2]);
+        $task      = $taskModel->where('task_key', $segment[2])->first();
         if (empty($task)) {
-            $data['backLink']   = '/project//' . $projectID;
+            $data['backLink']   = "/project/{$projectPrefix}";
             return view('Error/NotFound', $data);
         }
 
@@ -56,22 +70,21 @@ class Task extends BaseController
             'user.id as user_id',
             'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
         ])->join('user', 'user.id = project_user.user_id')
-            ->where('project_user.project_id', $projectID)
+            ->where('project_user.project_id', $project['id'])
             ->where('project_user.user_id !=', session()->get('user_id'))
             ->find();
         $data['assignees'] = $assignees;
 
         // Get all task status
         $taskStatusModel = new TaskStatus();
-        $taskStatus = $taskStatusModel->where('task_status.project_id', $projectID)
+        $taskStatus = $taskStatusModel->where('task_status.project_id', $project['id'])
             ->orderBy('position', 'ASC')
             ->findAll();
 
-        $commentModel = new Comment();
+        $taskLogModel = new TaskLog();
 
-        $activities = $commentModel->select(['text', 'created_at'])
-            ->where('task_id', $segment[2])
-            ->where('type', SYSTEM_COMMENT_TYPE)
+        $activities = $taskLogModel->select(['log', 'created_at'])
+            ->where('task_id', $task['id'])
             ->orderBy('created_at', 'DESC')
             ->find();
 
@@ -80,9 +93,10 @@ class Task extends BaseController
             $activities[$key]['created_at'] = $time->humanize();
         }
 
-        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $projectID)->find();
+        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $project['id'])->find();
         $userRole = collect($projectUser)->where('user_id', session()->get('user_id'))->first()['role'];
 
+        $commentModel = new Comment();
         $comments = $commentModel
             ->select([
                 'comment.id',
@@ -90,11 +104,10 @@ class Task extends BaseController
                 'user.photo',
                 'user_id',
                 'text',
-                'created_at'
+                'comment.created_at'
             ])
             ->join('user', 'user.id = comment.user_id')
-            ->where('task_id', $segment[2])
-            ->where('comment.type', USER_COMMENT_TYPE)
+            ->where('task_id', $task['id'])
             ->orderBy('created_at', 'DESC')
             ->paginate(10);
 
@@ -105,14 +118,18 @@ class Task extends BaseController
 
         $task['status'] = (new TaskStatus)->select('title as status')->where('id', $task['task_status_id'])->first()['status'];
 
-        $data['pager'] = $commentModel->pager;
-        $data['userRole'] = $userRole;
-        $data['project']    = $project;
-        $data['task']       = $task;
-        $data['taskStatus'] = $taskStatus;
-        $data['activities'] = $activities;
-        $data['comments']   = $comments;
-        $data['title']      = 'Chi tiết công việc';
+        $attachmentModel = new Attachment();
+        $attachments = $attachmentModel->where('task_id', $task['id'])->find();
+
+        $data['pager']       = $commentModel->pager;
+        $data['userRole']    = $userRole;
+        $data['project']     = $project;
+        $data['task']        = $task;
+        $data['taskStatus']  = $taskStatus;
+        $data['activities']  = $activities;
+        $data['attachments'] = $attachments;
+        $data['comments']    = $comments;
+        $data['title']       = 'Chi tiết công việc';
         return view('Task/Detail', $data);
     }
 
@@ -240,15 +257,12 @@ class Task extends BaseController
 
         unset($data);
 
-        $commentModel = new Comment();
+        $taskLogModel = new TaskLog();
         $data = [
             'task_id' => $taskID,
-            'user_id' => $userID,
-            'text' => '<b>' . session()->get('name') . '</b> đã tạo mới công việc.',
-            'type' => SYSTEM_COMMENT_TYPE
+            'log' => '<b>' . session()->get('name') . '</b> đã tạo mới công việc.',
         ];
-
-        $commentModel = $commentModel->insert($data);
+        $taskLogModel->insert($data);
 
         return $this->handleResponse(['task_id' => $taskID]);
     }
@@ -402,8 +416,22 @@ class Task extends BaseController
         $commentModel = new Comment();
         $comments     = $commentModel->select('id')->where('task_id', $taskID)->find();
 
+        $taskLogModel = new TaskLog();
+        $logs     = $taskLogModel->select('id')->where('task_id', $taskID)->find();
+
+        $attachmentModel = new Attachment();
+        $attachments     = $attachmentModel->select('id')->where('task_id', $taskID)->find();
+
         if ($comments) {
             $commentModel->delete(collect($comments)->pluck('id')->toArray());
+        }
+
+        if ($logs) {
+            $taskLogModel->delete(collect($logs)->pluck('id')->toArray());
+        }
+
+        if ($attachments) {
+            $attachmentModel->delete(collect($attachments)->pluck('id')->toArray());
         }
 
         $taskModel = new ModelsTask();

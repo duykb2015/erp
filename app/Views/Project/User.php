@@ -120,6 +120,7 @@
                                             <div class="row m-b-20">
                                                 <div class="col-11 mb-2">
                                                     <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
+                                                    <input type="hidden" name="project_prefix" value="<?= $project['prefix'] ?>">
                                                     <label for="add_new_member" class="p-b-10">Nhập email người dùng</label>
                                                     <select name="user_id" class="add-member col-sm-12"></select>
                                                 </div>
@@ -440,10 +441,11 @@
             method: 'POST',
             url: "<?= base_url('project/find/user') ?>",
             dataType: 'json',
-            delay: 1000,
+            delay: 200,
             data: function(params) {
                 const request = {
-                    email: params.term
+                    email: params.term,
+                    project: <?= $project['id'] ?>
                 }
 
                 return request;
