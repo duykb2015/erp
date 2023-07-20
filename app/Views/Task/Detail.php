@@ -1402,10 +1402,10 @@
         data.append('descriptions', sub_task_descriptions.getData())
         data.append('project_id', projectID)
 
-        const files = document.getElementById('attachment').files
-        if (0 < files.length) {
-            for (let i = 0; i < files.length; i++) {
-                data.append(i, document.getElementById('attachment').files[i])
+        const fileManagers = document.getElementById('sub_attachment').files
+        if (0 < fileManagers.length) {
+            for (let i = 0; i < fileManagers.length; i++) {
+                data.append(i, document.getElementById('sub_attachment').files[i])
             }
         }
 
