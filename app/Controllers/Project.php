@@ -268,7 +268,7 @@ class Project extends BaseController
             case 'Statistic':
                 $taskStatusModel = new TaskStatus();
                 $taskModel = new ModelsTask();
-                $taskStatus = $taskStatusModel->where('project_id', $projectPrefix)->find();
+                $taskStatus = $taskStatusModel->where('project_id', $project['id'])->find();
                 $chartData['Trạng thái'] = 'Số lượng';
                 foreach ($taskStatus as $key => $status) {
                     $chartData[$status['title']] = $taskModel->select('COUNT(id) as count')->where('task_status_id', $status['id'])->first()['count'];

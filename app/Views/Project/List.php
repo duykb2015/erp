@@ -101,7 +101,7 @@
                                                 <div class="accordion-heading" role="tab" id="headingOne">
                                                     <h3 class="card-title accordion-title">
                                                         <!-- class="accordion-msg" -->
-                                                        <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;">
+                                                        <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset; border-bottom-left-radius: unset;">
                                                             <div class="row m-3">
                                                                 <div class="col-auto p-r-0">
                                                                     <div class="u-img">

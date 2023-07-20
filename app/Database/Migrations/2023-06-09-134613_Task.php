@@ -22,7 +22,8 @@ class Task extends Migration
             ],
             'parent_id' => [
                 'type'           => 'INT',
-                'null'           => TRUE,
+                'default'        => 0,
+                'null'           => FALSE,
             ],
             'task_status_id' => [
                 'type'           => 'INT',

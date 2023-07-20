@@ -104,44 +104,62 @@
                                     <?php endif ?>
                                 </div>
                                 <div class="card-block">
-                                    <div class="">
-                                        <div class="m-b-50">
+                                    <div>
+                                        <div class="m-b-30">
                                             <h6 class="sub-title m-b-15">Mô tả dự án</h6>
                                             <p>
                                                 <?= $task['descriptions'] ?? 'Dự án chưa có mô tả' ?>
                                             </p>
                                         </div>
                                         <?php if (!empty($attachments)) : ?>
-                                            <div class="m-t-20 m-b-20">
+                                            <div class="m-t-20 m-b-30">
                                                 <h6 class="sub-title m-b-15">Tệp đính kèm</h6>
-                                            </div>
-                                            <div class="col-sm-12">
-                                                <div class="swiper-container">
-                                                    <div class="swiper-wrapper">
-                                                        <?php foreach ($attachments as $attachment) : ?>
-                                                            <div class="swiper-slide">
-                                                                <div class="card thumb-block">
-                                                                    <div class="thumb-img">
-                                                                        <img src="<?= base_url() ?>\file.jpg" class="img-fluid width-100" alt="<?= $attachment['name'] ?>">
-                                                                        <div class="caption-hover">
-                                                                            <span>
-                                                                                <a href="<?= base_url("attachments/{$attachment['name']}") ?>" class="btn btn-primary btn-sm"><i class="icofont icofont-download-alt"></i></a>
-                                                                                <?php if (OWNER == $currentUser || LEADER == $currentUser || $task['created_by'] == session()->get('user_id')) : ?>
-                                                                                    <a onclick="removeFile(<?= $attachment['id'] ?> , '<?= $attachment['name'] ?>')" id="btn-delete-attachment-<?= $attachment['id'] ?>" class="btn btn-danger btn-sm"><i class="icofont icofont-trash"></i></a>
-                                                                                <?php endif ?>
-                                                                            </span>
+                                                <div class="col-sm-12">
+                                                    <div class="swiper-container">
+                                                        <div class="swiper-wrapper">
+                                                            <?php foreach ($attachments as $attachment) : ?>
+                                                                <div class="swiper-slide">
+                                                                    <div class="card thumb-block">
+                                                                        <div class="thumb-img">
+                                                                            <img src="<?= base_url() ?>\file.jpg" class="img-fluid width-100" alt="<?= $attachment['name'] ?>">
+                                                                            <div class="caption-hover">
+                                                                                <span>
+                                                                                    <a href="<?= base_url("attachments/{$attachment['name']}") ?>" class="btn btn-primary btn-sm"><i class="icofont icofont-download-alt"></i></a>
+                                                                                    <?php if (OWNER == $currentUser || LEADER == $currentUser || $task['created_by'] == session()->get('user_id')) : ?>
+                                                                                        <a onclick="removeFile(<?= $attachment['id'] ?> , '<?= $attachment['name'] ?>')" id="btn-delete-attachment-<?= $attachment['id'] ?>" class="btn btn-danger btn-sm"><i class="icofont icofont-trash"></i></a>
+                                                                                    <?php endif ?>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="card-footer text-center text-truncate">
+                                                                            <a target="_blank" class="text-decoration-none" title="<?= $attachment['name'] ?>" href="<?= base_url("attachments/{$attachment['name']}") ?>"><?= $attachment['name'] ?></a>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="card-footer text-center text-truncate">
-                                                                        <a target="_blank" class="text-decoration-none" title="<?= $attachment['name'] ?>" href="<?= base_url("attachments/{$attachment['name']}") ?>"><?= $attachment['name'] ?></a>
-                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        <?php endforeach ?>
+                                                            <?php endforeach ?>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         <?php endif ?>
+                                        <div class="m-t-20 m-b-30">
+                                            <h6 class="sub-title m-b-15">Công việc phụ</h6>
+                                            <div class="dropdown-secondary dropdown d-inline-block">
+                                                <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm nhiệm vụ phụ</button>
+                                            </div>
+
+                                            <?php if (!empty($subtasks)) : ?>
+                                                <div class="card my-2">
+                                                    <div class="card-header border" style="border-bottom-right-radius: unset; border-bottom-left-radius: unset;">
+
+                                                    </div>
+                                                    <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
+                                                        <?php foreach ($subtasks as $sub) : ?>
+                                                        <?php endforeach ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +244,7 @@
                                         <div class="tab-pane" id="activity" role="tabpanel">
                                             <div class="form-group">
                                                 <div class="row">
-                                                    <div class="card">
+                                                    <!-- <div class="card">
                                                         <div class="card-header">
                                                             <h5>Timeline</h5>
                                                         </div>
@@ -237,7 +255,6 @@
                                                                         <div class="cd-timeline-icon bg-success">
                                                                             <i class="icofont icofont-ui-user"></i>
                                                                         </div>
-                                                                        <!-- cd-timeline-img -->
                                                                         <div class="cd-timeline-content card_main">
                                                                             <div class="media bg-white d-flex p-10 d-block-phone">
                                                                                 <div class="media-left media-middle col-xs-12">
@@ -253,13 +270,11 @@
                                                                             <span class="cd-date">October 25, 2014, 01:15 PM</span>
                                                                             <span class="cd-details">You posed an artical with public</span>
                                                                         </div>
-                                                                        <!-- cd-timeline-content -->
                                                                     </div>
                                                                     <div class="cd-timeline-block">
                                                                         <div class="cd-timeline-icon bg-success">
                                                                             <i class="icofont icofont-ui-user"></i>
                                                                         </div>
-                                                                        <!-- cd-timeline-img -->
                                                                         <div class="cd-timeline-content card_main">
                                                                             <div class="media bg-white d-flex p-10 d-block-phone">
                                                                                 <div class="media-left media-middle col-xs-12">
@@ -275,12 +290,11 @@
                                                                             <span class="cd-date">October 25, 2014, 01:15 PM</span>
                                                                             <span class="cd-details">You posed an artical with public</span>
                                                                         </div>
-                                                                        <!-- cd-timeline-content -->
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                     <h6 class="sub-title m-t-30 m-b-15">Danh sách hoạt động</h6>
                                                     <ul class="media-list revision-blc">
                                                         <?php if (!empty($activities)) : ?>
@@ -347,8 +361,11 @@
                                             </tr>
                                             <tr>
                                                 <td><i class="icofont icofont-user"></i> Người thực hiện: </td>
-                                                <!-- <td class="text-right"><a href="#"></a></td> -->
                                                 <td class="text-right"><?= $task['assignee'] ?? 'Trống' ?></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="icofont icofont-user"></i> Người nhận báo cáo: </td>
+                                                <td class="text-right"><?= $task['reporter'] ?? 'Trống' ?></td>
                                             </tr>
                                             <tr>
                                                 <td><i class="icofont icofont-washing-machine"></i> Trạng thái:</td>
@@ -464,7 +481,6 @@
 
 <!-- Create new update task modal -->
 <div class="modal modal-xl fade mt-5" id="updateTaskInformation" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel">
-    <!-- modal-xl -->
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
@@ -535,6 +551,92 @@
         </div>
     </div>
 </div>
+
+<!-- Create new sub task modal -->
+<div class="modal modal-xl fade mt-5" id="createSubTask" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form class="needs-validation" id="create-project">
+                    <div class="mb-3">
+                        <label for="sub_task_name" class="col-form-label">Tên công việc<span class="text-danger"> *</span></label>
+                        <input type="text" class="form-control rounded" id="sub_task_name" value="" placeholder="Nhập tên công việc ..." minlength="5" maxlength="512" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sub_task_status" class="col-form-label">Trạng thái công việc<span class="text-danger"> *</span></label>
+                        <select id="sub_task_status" class="form-control">
+                            <?php if (!empty($taskStatus)) : ?>
+                                <?php foreach ($taskStatus as $status) : ?>
+                                    <?php if ($status['base_status'] != 1) continue ?>
+                                    <option value="<?= $status['id'] ?>"><?= $status['title'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sub_assignee" class="col-form-label">Người được giao</label>
+                        <select id="sub_assignee" class="form-control">
+                            <option value="">Trống</option>
+                            <option value="<?= session()->get('user_id') ?>">Cho tôi</option>
+                            <?php if (!empty($assignees)) : ?>
+                                <?php foreach ($assignees as $assignee) : ?>
+                                    <option value="<?= $assignee['user_id'] ?>"><?= $assignee['name'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sub_reporter" class="col-form-label">Người nhận báo cáo</label>
+                        <select id="sub_reporter" class="form-control">
+                            <option value="">Trống</option>
+                            <?php if (!empty($reporters)) : ?>
+                                <?php foreach ($reporters as $reporter) : ?>
+                                    <option value="<?= $reporter['user_id'] ?>"><?= $reporter['name'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sub_task_priority" class="col-form-label">Chọn mức độ ưu tiên</label>
+                        <select id="sub_task_priority" class="form-control">
+                            <?php foreach (TASK_PRIORITY as $key => $priority) : ?>
+                                <option value="<?= $key ?>" <?= $key == NORMAL ? 'selected' : '' ?>><?= $priority ?></option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="sub_task_start_date" class="col-form-label">Chọn ngày bắt đầu</label>
+                                <input type="date" id="sub_task_start_date" value="" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label for="sub_task_due_date" class="col-form-label">Chọn ngày kết thúc</label>
+                                <input type="date" id="sub_task_due_date" value="" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="task_descriptions" class="col-form-label">Mô tả cho dự án</label>
+                        <textarea id="sub_task_descriptions" class="form-control rounded" maxlength="512" rows="5"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_avatar" class="col-form-label">Tệp đính kèm</label>
+                        <input type="file" id="sub_attachment" name="sub_attactment[]" accept="*" multiple="multiple">
+                    </div>
+
+                    <div class="float-end mb-5">
+                        <button type="button" id="btn-create-sub-task" onclick="createSubTask(<?= $project['id'] ?>)" class="btn btn-primary rounded">
+                            Tạo
+                        </button>
+                        <button type="button" class="btn btn-secondary rounded" data-bs-dismiss="modal">Huỷ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('js')  ?>
@@ -578,9 +680,54 @@
         }],
         removeDialogTabs: 'image:advanced;link:advanced',
     })
+    var sub_task_descriptions = CKEDITOR.replace('sub_task_descriptions', {
+        // width: '100%',
+        height: 300,
+        toolbar: [{
+            name: 'clipboard',
+            items: ['Undo', 'Redo']
+        }, {
+            name: 'styles',
+            items: ['Styles', 'Format']
+        }, {
+            name: 'basicstyles',
+            items: ['Bold', 'Italic', 'Strike', '-', 'RemoveFormat']
+        }, {
+            name: 'paragraph',
+            items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote']
+        }, {
+            name: 'links',
+            items: ['Link', 'Unlink']
+        }, {
+            name: 'insert',
+            items: ['Table'] //'Image', 
+        }],
+        removeDialogTabs: 'image:advanced;link:advanced',
+    })
 </script>
 
 <script>
+    $('#sub_attachment').filer({
+        limit: 10,
+        maxSize: 5,
+        extensions: null,
+        changeInput: true,
+        showThumbs: true,
+        addMore: true,
+        captions: {
+            button: "Chọn tệp",
+            feedback: "Chọn tệp để tải lên",
+            feedback2: "Tệp đã được chọn",
+            removeConfirmation: "Bạn có chắc là muốn xoá tệp này?",
+            errors: {
+                filesLimit: "Tối đa chỉ được tải lên {{fi-limit}} tệp.",
+                filesSize: "{{fi-name}} quá lớn, dung lượng tối đa mà tệp có thể tải lên là {{fi-fileMaxSize}} MB.",
+                filesSizeAll: "Tệp bạn tải lên quá lớn, dung lượng tối đa mà tệp có thể tải lên là {{fi-maxSize}} MB.",
+                folderUpload: "Bạn không được phép tải thư mục lên."
+            }
+        }
+    });
+
     $('#attachment').filer({
         limit: 10,
         maxSize: 5,
@@ -962,8 +1109,8 @@
             return
         }
 
-        btnCreateTask = document.getElementById('btn-create-task')
-        btnCreateTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        btnUpdateTask = document.getElementById('btn-create-task')
+        btnUpdateTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
 
         const data = new FormData()
         data.append('task_id', <?= $task['id'] ?>)
@@ -1005,7 +1152,7 @@
                         });
                         setTimeout(() => {
                             isUpdateTaskAlreadyClick = false
-                            btnCreateTask.innerHTML = 'Lưu'
+                            btnUpdateTask.innerHTML = 'Lưu'
                         }, 500)
 
                         return
@@ -1020,7 +1167,7 @@
                         });
                         setTimeout(() => {
                             isUpdateTaskAlreadyClick = false
-                            btnCreateTask.innerHTML = 'Lưu'
+                            btnUpdateTask.innerHTML = 'Lưu'
                         }, 500)
 
                         return
@@ -1035,7 +1182,7 @@
                         });
                         setTimeout(() => {
                             isUpdateTaskAlreadyClick = false
-                            btnCreateTask.innerHTML = 'Lưu'
+                            btnUpdateTask.innerHTML = 'Lưu'
                         }, 500)
 
                         return
@@ -1050,7 +1197,7 @@
                     });
                     setTimeout(() => {
                         isUpdateTaskAlreadyClick = false
-                        btnCreateTask.innerHTML = 'Lưu'
+                        btnUpdateTask.innerHTML = 'Lưu'
                     }, 500)
 
                     return
@@ -1070,7 +1217,7 @@
                     message: error
                 });
                 isUpdateTaskAlreadyClick = false
-                btnCreateTask.innerHTML = 'Lưu'
+                btnUpdateTask.innerHTML = 'Lưu'
             })
     }
 
@@ -1224,16 +1371,152 @@
         return hours + ':' + minutes + ':' + seconds;
     }
 
-    // Multiple swithces
-    var elem = Array.prototype.slice.call(document.querySelectorAll('.js-small'));
+    // var files
+    var btnCreateSubTask = null
+    var isCreateSubTaskAlreadyClick = false
+    var projectId = document.getElementById('project-id')
 
-    elem.forEach(function(html) {
-        var switchery = new Switchery(html, {
-            color: '#1abc9c',
-            jackColor: '#fff',
-            size: 'small'
-        });
-    });
+    function createSubTask(projectID) {
+
+        if (isCreateSubTaskAlreadyClick) return
+        isCreateSubTaskAlreadyClick = true
+
+        taskName = document.getElementById('task_name')
+        if (taskName.value == '') {
+            isCreateSubTaskAlreadyClick = false
+            return
+        }
+
+        btnCreateSubTask = document.getElementById('btn-create-sub-task')
+        btnCreateSubTask.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('parent_id', <?= $task['id'] ?>)
+        data.append('name', taskName.value)
+        data.append('task_status', document.getElementById('sub_task_status').value)
+        data.append('assignee', document.getElementById('sub_assignee').value)
+        data.append('reporter', document.getElementById('sub_reporter').value)
+        data.append('priority', document.getElementById('sub_task_priority').value)
+        data.append('start_date', document.getElementById('sub_task_start_date').value)
+        data.append('due_date', document.getElementById('sub_task_due_date').value)
+        data.append('descriptions', sub_task_descriptions.getData())
+        data.append('project_id', projectID)
+
+        const files = document.getElementById('attachment').files
+        if (0 < files.length) {
+            for (let i = 0; i < files.length; i++) {
+                data.append(i, document.getElementById('attachment').files[i])
+            }
+        }
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow',
+            contentType: false,
+            processData: false,
+            enctype: 'multipart/form-data',
+            synchron: true,
+        };
+
+        fetch('<?= base_url('task/create') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+
+                    if (result.errors.section) {
+                        error = result.errors.section.replace('task_status', 'Trạng thái công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateSubTaskAlreadyClick = false
+                            btnCreateSubTask.innerHTML = 'Tạo'
+                        }, 500)
+
+                        return
+                    }
+
+                    if (result.errors.assignee) {
+                        error = result.errors.assignee.replace('assignee', 'Người được giao')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateSubTaskAlreadyClick = false
+                            btnCreateSubTask.innerHTML = 'Tạo'
+                        }, 500)
+
+                        return
+                    }
+
+                    if (result.errors.name) {
+                        error = result.errors.task_name.replace('name', 'Tên công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isCreateSubTaskAlreadyClick = false
+                            btnCreateSubTask.innerHTML = 'Tạo'
+                        }, 500)
+
+                        return
+                    }
+                }
+
+                if (result.errors_datetime) {
+                    $.growl.error({
+                        message: result.errors_datetime,
+                        location: 'tr',
+                        size: 'large'
+                    });
+                    setTimeout(() => {
+                        isCreateSubTaskAlreadyClick = false
+                        btnCreateSubTask.innerHTML = 'Tạo'
+                    }, 500)
+
+                    return
+                }
+
+                $.growl.notice({
+                    message: "Tạo mới công việc thành công"
+                });
+
+                setTimeout(() => {
+                    isCreateSubTaskAlreadyClick = false
+                    btnCreateSubTask.innerHTML = 'Tạo'
+
+                    window.location.reload()
+                }, 500)
+
+                return
+            }).catch(error => {
+                $.growl.error({
+                    message: error
+                });
+                isCreateSubTaskAlreadyClick = false
+                btnCreateSubTask.innerHTML = 'Tạo'
+            })
+    }
+
+    // Multiple swithces
+    // var elem = Array.prototype.slice.call(document.querySelectorAll('.js-small'));
+
+    // elem.forEach(function(html) {
+    //     var switchery = new Switchery(html, {
+    //         color: '#1abc9c',
+    //         jackColor: '#fff',
+    //         size: 'small'
+    //     });
+    // });
 </script>
 
 <?= $this->endSection() ?>

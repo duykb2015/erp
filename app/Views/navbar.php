@@ -7,7 +7,7 @@ $menu = [
         'name' => 'Tổng quan',
         'icon' => '<i class="feather icon-home"></i>',
         'sub_menu' => [
-            'url' => 'project/' . $project['id'] . '/task/' . (!empty($task['id']) ? $task['id'] : ''),
+            'url' => "project/{$project['prefix']}/task/" . (!empty($task['id']) ? $task['task_key'] : ''),
             'name' => 'Chi tiết công việc',
         ],
         'role' => [MEMBER, LEADER, OWNER]

@@ -7,6 +7,10 @@
         display: inline;
     }
 
+    #draggableMultiple .sortable-moves {
+        cursor: default !important;
+    }
+
     .sortable-moves {
         padding: 15px !important;
     }
@@ -176,6 +180,57 @@
                                                                 <div class="col-md-12 section-container" id="draggableMultiple">
                                                                     <?php if (!empty($status['tasks'])) : ?>
                                                                         <?php foreach ($status['tasks'] as $task) : ?>
+                                                                            <!-- <div class="col">
+                                                                                <div class="card card-border-default">
+                                                                                    <div class="card-header text-truncate">
+                                                                                        <a href="<?= base_url("project/{$project['prefix']}/task/{$task['task_key']}") ?>" class="card-title text-decoration-none">[<?= $task['task_key'] ?>] <?= $task['title'] ?></a>
+                                                                                    </div>
+                                                                                    <div class="card-block">
+                                                                                        <p class="task-due"><strong>Đến hạn: </strong><strong class="label label-primary"><?= $task['due_at'] ?? 'Trống' ?></strong></p>
+                                                                                    </div>
+                                                                                    <div class="card-footer">
+                                                                                        <div class="task-list-table">
+                                                                                            <a href="#!"><img class="img-fluid img-radius" src="libraries\assets\images\avatar-1.jpg" alt="1"></a>
+                                                                                        </div>
+                                                                                        <div class="task-board">
+                                                                                            <div class="dropdown-secondary dropdown">
+                                                                                                <button class="btn btn-primary btn-mini dropdown-toggle waves-effect waves-light" type="button" id="dropdown1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Normal</button>
+                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown1" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><span class="point-marker bg-danger"></span>Highest priority</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><span class="point-marker bg-warning"></span>High priority</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect active" href="#!"><span class="point-marker bg-success"></span>Normal priority</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><span class="point-marker bg-info"></span>Low priority</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="dropdown-secondary dropdown">
+                                                                                                <button class="btn btn-default btn-mini dropdown-toggle waves-light b-none txt-muted" type="button" id="dropdown2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Open</button>
+                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown2" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                                    <a class="dropdown-item waves-light waves-effect active" href="#!">Open</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">On hold</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Resolved</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Closed</a>
+                                                                                                    <div class="dropdown-divider"></div>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Dublicate</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Invalid</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Wontfix</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="dropdown-secondary dropdown">
+                                                                                                <button class="btn btn-default btn-mini dropdown-toggle waves-light b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-ui-alarm"></i> Check in</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-attachment"></i> Attach screenshot</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-spinner-alt-5"></i> Reassign</a>
+                                                                                                    <div class="dropdown-divider"></div>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-ui-edit"></i> Edit task</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-close-line"></i> Remove</a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div> -->
+
                                                                             <div class="sortable-moves border box d-block ">
                                                                                 <p class="task-name hover-pointer text-truncate" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['prefix'] . '/task/' . $task['task_key'] ?>')"><?= $task['title'] ?></p>
                                                                                 <p><b>Người được giao: </b><?= $task['assignee_name'] ?? 'Trống' ?></p>
@@ -316,6 +371,8 @@
 <!-- Custom js -->
 <script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\advance-elements\select2-custom.js"></script>
 
+<!-- task board js -->
+<script type="text/javascript" src="<?= base_url() ?>templates\libraries\assets\pages\task-board\task-board.js"></script>
 <!-- CK4 -->
 <script>
     $('#attachment').filer({
@@ -418,7 +475,7 @@
                 if (result.errors) {
                     errTaskID = result.errors.task_id
                     if (errTaskID) {
-                        errTaskID = errTaskID.replace('section', 'Công việc')
+                        errTaskID = errTaskID.replace('task_id', 'Công việc')
                         $.growl.error({
                             message: error,
                             location: 'tr',
@@ -586,8 +643,8 @@
             .then(result => {
                 if (result.errors) {
 
-                    if (result.errors.section) {
-                        error = result.errors.section.replace('section', 'Trạng thái công việc')
+                    if (result.errors.task_status) {
+                        error = result.errors.task_status.replace('task_status', 'Trạng thái công việc')
                         $.growl.error({
                             message: error,
                             location: 'tr',

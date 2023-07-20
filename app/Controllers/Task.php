@@ -73,7 +73,15 @@ class Task extends BaseController
             ->where('project_user.project_id', $project['id'])
             ->where('project_user.user_id !=', session()->get('user_id'))
             ->find();
-        $data['assignees'] = $assignees;
+
+        $whereRole = '"' . OWNER . '","' . LEADER . '"';
+        $reporters = $projectUserModel->select([
+            'user.id as user_id',
+            'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+        ])->join('user', 'user.id = project_user.user_id')
+            ->where('project_user.project_id', $project['id'])
+            ->where("project_user.role IN({$whereRole})")
+            ->find();
 
         // Get all task status
         $taskStatusModel = new TaskStatus();
@@ -122,6 +130,8 @@ class Task extends BaseController
         $attachments = $attachmentModel->where('task_id', $task['id'])->find();
 
         $data['pager']       = $commentModel->pager;
+        $data['reporters']   = $reporters;
+        $data['assignees']   = $assignees;
         $data['userRole']    = $userRole;
         $data['project']     = $project;
         $data['task']        = $task;
@@ -216,16 +226,21 @@ class Task extends BaseController
         $userID = session()->get('user_id');
 
         $data = [
-            'task_key'      => $project['prefix'] . '-' . ($key + 1),
+            'parent_id'      => $taskRawData['parent_id'] ?? 0,
+            'task_key'       => $project['prefix'] . '-' . ($key + 1),
             'task_status_id' => $taskRawData['task_status'],
-            'title'         => $taskRawData['name'],
-            'descriptions'  => $taskRawData['descriptions'],
-            'priority'      => $taskRawData['priority'],
-            'created_by'    => $userID,
+            'title'          => $taskRawData['name'],
+            'descriptions'   => $taskRawData['descriptions'],
+            'priority'       => $taskRawData['priority'],
+            'created_by'     => $userID,
         ];
 
         if ($taskRawData['assignee']) {
             $data['assignee'] = $taskRawData['assignee'];
+        }
+
+        if ($taskRawData['reporter']) {
+            $data['reporter'] = $taskRawData['reporter'];
         }
 
         if ($startDate) {
