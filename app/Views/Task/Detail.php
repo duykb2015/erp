@@ -7,7 +7,14 @@
 <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\bower_components\switchery\css\switchery.min.css">
 <!-- swiper css -->
 <link rel="stylesheet" type="text/css" href="<?= base_url() ?>\templates\libraries\bower_components\swiper\css\swiper.min.css">
+
+<link type="text/css" rel="stylesheet" href="<?= base_url() ?>templates\libraries\assets\pages\jquery.filer\css\jquery.filer.css">
+
 <style>
+    .icon-jfi-trash {
+        text-decoration: none;
+    }
+
     .breadcrumb-title div {
         display: inline;
     }
@@ -111,23 +118,26 @@
                                             <div class="col-sm-12">
                                                 <div class="swiper-container">
                                                     <div class="swiper-wrapper">
-                                                        <div class="swiper-slide">
-                                                            <?php foreach ($attachments as $attachment) : ?>
+                                                        <?php foreach ($attachments as $attachment) : ?>
+                                                            <div class="swiper-slide">
                                                                 <div class="card thumb-block">
                                                                     <div class="thumb-img">
                                                                         <img src="<?= base_url() ?>\file.jpg" class="img-fluid width-100" alt="<?= $attachment['name'] ?>">
                                                                         <div class="caption-hover">
                                                                             <span>
-                                                                                <a href="<?= base_url("attachments/{$attachment['name']}") ?>" class="btn btn-primary btn-sm"><i class="icofont icofont-download-alt"></i> </a>
+                                                                                <a href="<?= base_url("attachments/{$attachment['name']}") ?>" class="btn btn-primary btn-sm"><i class="icofont icofont-download-alt"></i></a>
+                                                                                <?php if (OWNER == $currentUser || LEADER == $currentUser || $task['created_by'] == session()->get('user_id')) : ?>
+                                                                                    <a onclick="removeFile(<?= $attachment['id'] ?> , '<?= $attachment['name'] ?>')" id="btn-delete-attachment-<?= $attachment['id'] ?>" class="btn btn-danger btn-sm"><i class="icofont icofont-trash"></i></a>
+                                                                                <?php endif ?>
                                                                             </span>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="card-footer text-center">
-                                                                        <a target="_blank" href="<?= base_url("attachments/{$attachment['name']}") ?>"><?= $attachment['name'] ?></a>
+                                                                    <div class="card-footer text-center text-truncate">
+                                                                        <a target="_blank" class="text-decoration-none" title="<?= $attachment['name'] ?>" href="<?= base_url("attachments/{$attachment['name']}") ?>"><?= $attachment['name'] ?></a>
                                                                     </div>
                                                                 </div>
-                                                            <?php endforeach ?>
-                                                        </div>
+                                                            </div>
+                                                        <?php endforeach ?>
                                                     </div>
                                                 </div>
                                             </div>
@@ -453,7 +463,7 @@
 </div>
 
 <!-- Create new update task modal -->
-<div class="modal modal-xl fade mt-5" id="updateTaskInformation" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal modal-xl fade mt-5" id="updateTaskInformation" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel">
     <!-- modal-xl -->
     <div class="modal-dialog">
         <div class="modal-content">
@@ -510,10 +520,8 @@
                         <textarea id="task_descriptions" class="form-control rounded" maxlength="512" rows="5"><?= $task['descriptions'] ?></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="user_avatar" class="col-form-label">Thêm tệp đính kèm</label>
-                        <br>
-                        <label for="user_avatar" class="col-form-label">Tính năng đang được bảo trì</label>
-                        <!-- <input type="file" id="attachment" accept="*"> -->
+                        <label for="user_avatar" class="col-form-label">Tệp đính kèm</label>
+                        <input type="file" id="attachment" name="attactment[]" accept="*" multiple="multiple">
                     </div>
 
                     <div class="float-end mb-5">
@@ -540,6 +548,9 @@
 <!-- swiper js -->
 <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\bower_components\swiper\js\swiper.min.js"></script>
 <script type="text/javascript" src="<?= base_url() ?>\templates\libraries\assets\js\swiper-custom.js"></script>
+
+<!-- jquery file upload js -->
+<script src="<?= base_url() ?>\templates\libraries\assets\pages\jquery.filer\js\jquery.filer.js"></script>
 
 <!-- CK4 -->
 <script>
@@ -570,6 +581,74 @@
 </script>
 
 <script>
+    $('#attachment').filer({
+        limit: 10,
+        maxSize: 5,
+        extensions: null,
+        changeInput: true,
+        showThumbs: true,
+        addMore: true,
+        files: [
+            <?php empty($attachments) and $attachments = []; ?>
+            <?php foreach ($attachments as $attachment) : ?> {
+                    id: <?= $attachment['id'] ?>,
+                    name: "<?= $attachment['name'] ?>",
+                    size: <?= filesize((ATTACHMENT_PATH . $attachment['name'])) ?>,
+                    type: "<?= $attachment['type'] ?>",
+                    file: "<?= base_url("attachments/{$attachment['name']}") ?>",
+                    url: "<?= base_url("attachments/{$attachment['name']}") ?>"
+                },
+            <?php endforeach ?>
+        ],
+        onRemove: function(itemEl, file, id, listEl, boxEl, newInputEl, inputEl) {
+            var filerKit = inputEl.prop("jFiler"),
+                file_name = filerKit.files_list[id].file.name;
+            file_id = filerKit.files_list[id].file.id;
+
+            $.post('/task/attachment/remove', {
+                file: file_name,
+                attachment_id: file_id,
+            });
+        },
+        captions: {
+            button: "Chọn tệp",
+            feedback: "Chọn tệp để tải lên",
+            feedback2: "Tệp đã được chọn",
+            removeConfirmation: "Bạn có chắc là muốn xoá tệp này?",
+            errors: {
+                filesLimit: "Tối đa chỉ được tải lên {{fi-limit}} tệp.",
+                filesSize: "{{fi-name}} quá lớn, dung lượng tối đa mà tệp có thể tải lên là {{fi-fileMaxSize}} MB.",
+                filesSizeAll: "Tệp bạn tải lên quá lớn, dung lượng tối đa mà tệp có thể tải lên là {{fi-maxSize}} MB.",
+                folderUpload: "Bạn không được phép tải thư mục lên."
+            }
+        }
+    });
+
+    var btnDA
+
+    function removeFile(id, name) {
+        if (!confirm('Bạn có chắc là muốn xoá tệp này?')) return
+
+        btnDA = document.getElementById(`btn-delete-attachment-${id}`)
+        btnDA.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        $.post('/task/attachment/remove', {
+            file: name,
+            attachment_id: id,
+        }).then(() => {
+            $.growl.notice({
+                message: "Đã xoá!"
+            });
+            setTimeout(() => {
+                window.location.reload()
+            }, 300)
+        }).catch(() => {
+            $.growl.error({
+                message: "Có lỗi xảy ra, vui lòng thử lại sau!"
+            });
+            btnDA.innerHTML = '<i class="icofont icofont-trash"></i>'
+        });
+    }
     // window.addEventListener('beforeunload', function(){})
 
     var commentDecorator = document.getElementById('comment-decorator')
@@ -632,7 +711,10 @@
         var requestOptions = {
             method: 'POST',
             body: data,
-            redirect: 'follow'
+            redirect: 'follow',
+            contentType: false,
+            processData: false,
+            enctype: 'multipart/form-data',
         };
         fetch('<?= base_url('comment/create') ?>', requestOptions)
             .then(response => {
@@ -893,6 +975,13 @@
         data.append('due_date', document.getElementById('task_due_date').value)
         data.append('descriptions', task_descriptions.getData())
         data.append('project_id', projectID)
+
+        const files = document.getElementById('attachment').files
+        if (0 < files.length) {
+            for (let i = 0; i < files.length; i++) {
+                data.append(i, document.getElementById('attachment').files[i])
+            }
+        }
 
         var requestOptions = {
             method: 'POST',

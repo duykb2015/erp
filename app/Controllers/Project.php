@@ -219,8 +219,7 @@ class Project extends BaseController
                     if (!empty($filterUser && is_numeric($filterUser))) {
                         $taskModel->where('task.assignee', $filterUser);
                     }
-                    if ('unassigned' == $filterUser)
-                    {
+                    if ('unassigned' == $filterUser) {
                         $builderWhere = 'task.assignee IS NULL';
                         $taskModel->where($builderWhere);
                     }
@@ -493,7 +492,7 @@ class Project extends BaseController
         $userIDs = $projectUserModel->select('user_id')
             ->where('project_id', $project)
             ->find();
-        
+
         $pluckIds = collect($userIDs)->pluck('user_id')->toArray();
 
         $userModel = new User();

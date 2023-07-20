@@ -5,7 +5,7 @@ var swiper = new Swiper('.swiper-container', {
         slidesPerView: 5,
         paginationClickable: true,
         spaceBetween: 20,
-        loop: true,
+        loop: false,
         breakpoints: {
                 // when window width is <= 576px
                 576: {

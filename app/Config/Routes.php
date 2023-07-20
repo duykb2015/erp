@@ -92,7 +92,6 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
 
         $routes->get('task/(:segment)', 'Task::index');
     });
-
 });
 
 $routes->group('user-management', ['filter' => 'login'], function ($routes) {
@@ -120,6 +119,8 @@ $routes->group('task', ['filter' => 'login'], function ($routes) {
     $routes->post('do-create', 'Task::doCreate');
     $routes->post('update', 'Task::update');
     $routes->post('delete', 'Task::delete');
+
+    $routes->post('attachment/remove', 'Task::removeAttachment');
 
     $routes->post('change-status', 'Task::changeStatus');
 });

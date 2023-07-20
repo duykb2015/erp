@@ -15,7 +15,7 @@ $menu = [
     [
         'url' => base_url("project/{$project['prefix']}/statistic"),
         'active' => 'project/*/statistic',
-        'name' => 'Thống kê số liệu',
+        'name' => 'Thống kê',
         'icon' => '<i class="feather icon-user"></i>',
         'role' => [MEMBER, LEADER, OWNER]
     ],

@@ -353,6 +353,23 @@ class Task extends BaseController
 
         $taskModel->save($data);
 
+        $files = $this->request->getFiles();
+
+        $attachmentModel = new Attachment();
+
+        foreach ($files as $file) {
+            if ($file->isValid() && !$file->hasMoved()) {
+                $file->move(ATTACHMENT_PATH);
+
+                $type = collect(explode('.', $file->getName()))->last() ?? 'unknown';
+                $attachmentModel->insert([
+                    'name' => $file->getName(),
+                    'task_id' => $taskRawData['task_id'],
+                    'type' => $type
+                ]);
+            }
+        }
+
         unset($data);
 
         $commentModel = new Comment();
@@ -436,6 +453,19 @@ class Task extends BaseController
 
         $taskModel = new ModelsTask();
         $taskModel->delete($taskID);
+        return $this->handleResponse();
+    }
+
+    public function removeAttachment()
+    {
+        $fileID = $this->request->getPost('attachment_id');
+        $fileName = $this->request->getPost('file');
+
+        $attachmentModel = new Attachment();
+        $attachmentModel->delete($fileID);
+
+        unlink(ATTACHMENT_PATH . $fileName);
+
         return $this->handleResponse();
     }
 }

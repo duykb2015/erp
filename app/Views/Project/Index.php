@@ -574,7 +574,7 @@
             body: data,
             redirect: 'follow',
             contentType: false,
-            processData: true,
+            processData: false,
             enctype: 'multipart/form-data',
             synchron: true,
         };
