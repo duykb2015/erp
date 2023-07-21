@@ -124,10 +124,30 @@ class Task extends BaseController
             $comments[$key]['created_at'] = $time->humanize();
         }
 
-        $task['status'] = (new TaskStatus)->select('title as status')->where('id', $task['task_status_id'])->first()['status'];
+        $status = (new TaskStatus)->select(['title as status', 'base_status'])->where('id', $task['task_status_id'])->first();
+        $task['status'] = $status['status'];
+        $task['base_status'] = $status['base_status'];
 
         $attachmentModel = new Attachment();
         $attachments = $attachmentModel->where('task_id', $task['id'])->find();
+
+        $parentTask = $taskModel->select(['task_key'])->where('id', $task['parent_id'])->first();
+        if (!empty($parentTask)) {
+            $data['parentTask'] = $parentTask['task_key'];
+        }
+
+        $subtasks = $taskModel->where('parent_id', $task['id'])->find();
+        if (!empty($subtasks)) {
+            $doneStatus = collect($taskStatus)->where('base_status', '=', 4)->first();
+            $percenSubtaskProgress = (count(collect($subtasks)->where('task_status_id', $doneStatus['id'])->all()) / count($subtasks)) * 100;
+            foreach ($subtasks as $key => $sub) {
+                $sub_status = (new TaskStatus)->select(['title as status', 'base_status'])->where('id', $sub['task_status_id'])->first();
+                $subtasks[$key]['status'] = $sub_status['status'];
+                $subtasks[$key]['base_status'] = $sub_status['base_status'];
+            }
+            $data['subtasks']              = $subtasks;
+            $data['percenSubtaskProgress'] = $percenSubtaskProgress;
+        }
 
         $data['pager']       = $commentModel->pager;
         $data['reporters']   = $reporters;

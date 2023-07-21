@@ -57,45 +57,6 @@
         cursor: pointer !important;
     }
 
-    .badge-custom-0 {
-        border-radius: 4px;
-        padding: 2px 6px;
-        margin-right: 4px;
-        color: <?= BASE_SECTION[0]['color'] ?> !important;
-        background-color: <?= BASE_SECTION[0]['background'] ?> !important;
-    }
-
-    .badge-custom-1 {
-        border-radius: 4px;
-        padding: 2px 6px;
-        margin-right: 4px;
-        color: <?= BASE_SECTION[1]['color'] ?> !important;
-        background-color: <?= BASE_SECTION[1]['background'] ?> !important;
-    }
-
-    .badge-custom-2 {
-        border-radius: 4px;
-        padding: 2px 6px;
-        margin-right: 4px;
-        color: <?= BASE_SECTION[2]['color'] ?> !important;
-        background-color: <?= BASE_SECTION[2]['background'] ?> !important;
-    }
-
-    .badge-custom-3 {
-        border-radius: 4px;
-        padding: 2px 6px;
-        margin-right: 4px;
-        color: <?= BASE_SECTION[3]['color'] ?> !important;
-        background-color: <?= BASE_SECTION[3]['background'] ?> !important;
-    }
-
-    .badge-custom-4 {
-        border-radius: 4px;
-        padding: 2px 6px;
-        margin-right: 4px;
-        color: <?= BASE_SECTION[4]['color'] ?> !important;
-        background-color: <?= BASE_SECTION[4]['background'] ?> !important;
-    }
 </style>
 <?= $this->endSection() ?>
 

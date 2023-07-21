@@ -225,6 +225,7 @@ class Project extends BaseController
                     }
                     $taskStatus[$key]['tasks'] = $taskModel->select(['*', 'task.id as id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as assignee_name'])
                         ->join('user', 'user.id = task.assignee', 'left')
+                        ->where('parent_id = 0')
                         ->where('task.task_status_id', $status['id'])->findAll();
                 }
                 $data['taskStatus'] = collect($taskStatus)->sortBy('position')->toArray();

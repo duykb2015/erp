@@ -88,6 +88,17 @@
                         <div class="col-xl-8 col-lg-12 pull-xl-4 scroll-y">
                             <div class="card border">
                                 <div class="card-header mb-2">
+                                    <div class="d-flex">
+                                        <a href="<?= base_url("project/{$project['prefix']}") ?>" class="text-decoration-none"><?= $project['name'] ?></a>
+                                        &nbsp;/&nbsp;
+                                        <?php if (!empty($parentTask)) : ?>
+                                            <a href="<?= base_url("project/{$project['prefix']}/task/{$parentTask}") ?>" class="text-decoration-none"><?= $parentTask ?></a>
+                                            &nbsp;/&nbsp;
+                                            <a href="<?= base_url("project/{$project['prefix']}/task/{$task['task_key']}") ?>" class="text-decoration-none"><?= $task['task_key'] ?></a>
+                                        <?php else : ?>
+                                            <a href="<?= base_url("project/{$project['prefix']}/{$task['task_key']}") ?>" class="text-decoration-none"><?= $task['task_key'] ?></a>
+                                        <?php endif ?>
+                                    </div>
                                     <div class="f-left">
                                         <h4><i class="icofont icofont-tasks-alt m-r-5"></i> <?= $task['title'] ?? 'Dự án chưa có tiêu đề' ?></h4>
                                     </div>
@@ -142,24 +153,42 @@
                                                 </div>
                                             </div>
                                         <?php endif ?>
-                                        <div class="m-t-20 m-b-30">
-                                            <h6 class="sub-title m-b-15">Công việc phụ</h6>
-                                            <div class="dropdown-secondary dropdown d-inline-block">
-                                                <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm nhiệm vụ phụ</button>
-                                            </div>
-
-                                            <?php if (!empty($subtasks)) : ?>
-                                                <div class="card my-2">
-                                                    <div class="card-header border" style="border-bottom-right-radius: unset; border-bottom-left-radius: unset;">
-
-                                                    </div>
-                                                    <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
-                                                        <?php foreach ($subtasks as $sub) : ?>
-                                                        <?php endforeach ?>
-                                                    </div>
+                                        <?php if (0 == $task['parent_id']) : ?>
+                                            <div class="m-t-20 m-b-30">
+                                                <h6 class="sub-title m-b-15">Công việc phụ</h6>
+                                                <div class="dropdown-secondary dropdown d-inline-block">
+                                                    <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm nhiệm vụ phụ</button>
                                                 </div>
-                                            <?php endif ?>
-                                        </div>
+                                                <?php if (!empty($subtasks)) : ?>
+                                                    <div class="card my-3">
+                                                        <div class="card-header border " style="border-bottom-right-radius: unset; border-bottom-left-radius: unset;">
+                                                            <div class="col-md-12">
+                                                                <h5 class="card-header-text">Tiến độ hoàn thành</h5>
+                                                                <div class="d-flex">
+                                                                    <div class="progress" style="width:95%">
+                                                                        <div class="progress-bar progress-bar-primary" role="progressbar" style="width: <?= $percenSubtaskProgress ?>%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                    </div>
+                                                                    <span style="font-weight: bold; color: black; padding-left: 10px; top:-5px; position: relative;" style="width:5%"><?= $percenSubtaskProgress ?>%</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
+                                                            <div class="row">
+                                                                <?php foreach ($subtasks as $sub) : ?>
+                                                                    <div class="col-12 border bg-light rounded m-1">
+                                                                        <p class="m-b-0"><b><a class="text-decoration-none" href='<?= base_url("project/{$project['prefix']}/task/{$sub['task_key']}") ?>'>[<?= $sub['task_key'] ?>] <?= $sub['title'] ?></a></b></p>
+                                                                        <p class="" style="margin-bottom: 1px;">
+                                                                            <b>Trạng thái:</b>
+                                                                            <span class="badge-custom-<?= $sub['base_status'] ?>"><?= $sub['status'] ?></span>
+                                                                        </p>
+                                                                    </div>
+                                                                <?php endforeach ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <?php endif ?>
+                                            </div>
+                                        <?php endif ?>
                                     </div>
                                 </div>
                             </div>
@@ -369,10 +398,28 @@
                                             </tr>
                                             <tr>
                                                 <td><i class="icofont icofont-washing-machine"></i> Trạng thái:</td>
-                                                <td class="text-right"><?= $task['status'] ?></td>
+                                                <td class="text-right">
+                                                    <span class="badge-custom-<?= $task['base_status'] ?>"><?= $task['status'] ?></span>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="card-footer">
+                                    <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee']) || OWNER == $userRole) : ?>
+                                        <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
+                                            Trạng thái:
+                                            <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                            <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                <?php foreach ($taskStatus as $subStatus) : ?>
+                                                    <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
+                                                        <i class="icofont icofont-listine-dots"></i>
+                                                        <?= $subStatus['title'] ?>
+                                                    </a>
+                                                <?php endforeach ?>
+                                            </div>
+                                        </div>
+                                    <?php endif ?>
                                 </div>
                             </div>
                             <?php if ($currentUser == $task['assignee']) : ?>
@@ -1507,6 +1554,82 @@
             })
     }
 
+    var isChangeTaskStatusAlreadyClick = false
+    var dropDownChangeStatus
+
+    function changeTaskStatus(taskID, statusID) {
+        if (isChangeTaskStatusAlreadyClick) return
+        isChangeTaskStatusAlreadyClick = true
+
+        const data = new FormData()
+        data.append('task_id', taskID)
+        data.append('status_id', statusID)
+
+        dropDownChangeStatus = document.getElementById(`dropdown-${taskID}`)
+        dropDownChangeStatus.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/change-status') ?>', requestOptions)
+            .then(response => {
+                return response.json()
+            })
+            .then(result => {
+                if (result.errors) {
+                    errTaskID = result.errors.task_id
+                    if (errTaskID) {
+                        errTaskID = errTaskID.replace('task_id', 'Công việc')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isChangeTaskStatusAlreadyClick = false
+                            dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                        }, 500)
+
+                        return
+                    }
+
+                    errStatusID = result.errors.status_id
+                    if (errStatusID) {
+                        errStatusID = errStatusID.replace('status_id', 'Trạng thái')
+                        $.growl.error({
+                            message: error,
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        setTimeout(() => {
+                            isChangeTaskStatusAlreadyClick = false
+                            dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+                        }, 500)
+
+                        return
+                    }
+                }
+
+                $.growl.notice({
+                    message: "Cập nhật trạng thái thành công"
+                });
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 500)
+
+                return
+            }).catch(() => {
+                $.growl.error({
+                    message: 'Có lỗi xảy ra, vui lòng thử lại sau!'
+                });
+                isChangeTaskStatusAlreadyClick = false
+                dropDownChangeStatus.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+            })
+    }
     // Multiple swithces
     // var elem = Array.prototype.slice.call(document.querySelectorAll('.js-small'));
 
