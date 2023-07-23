@@ -102,7 +102,7 @@
                                     <div class="f-left">
                                         <h4><i class="icofont icofont-tasks-alt m-r-5"></i> <?= $task['title'] ?? 'Dự án chưa có tiêu đề' ?></h4>
                                     </div>
-                                    <?php if ($currentUser == $task['assignee'] || $currentUser == $project['owner'] || $userRole == LEADER) : ?>
+                                    <?php if ($currentUser == $task['assigneeID'] || $currentUser == $project['owner'] || $userRole == LEADER) : ?>
                                         <div class="f-right d-flex">
                                             <div class="dropdown-secondary dropdown d-inline-block">
                                                 <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
@@ -157,7 +157,7 @@
                                             <div class="m-t-20 m-b-30">
                                                 <h6 class="sub-title m-b-15">Công việc phụ</h6>
                                                 <div class="dropdown-secondary dropdown d-inline-block">
-                                                    <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm nhiệm vụ phụ</button>
+                                                    <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm công việc phụ</button>
                                                 </div>
                                                 <?php if (!empty($subtasks)) : ?>
                                                     <div class="card my-3">
@@ -175,9 +175,9 @@
                                                         <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
                                                             <div class="row">
                                                                 <?php foreach ($subtasks as $sub) : ?>
-                                                                    <div class="col-12 border bg-light rounded m-1">
-                                                                        <p class="m-b-0"><b><a class="text-decoration-none" href='<?= base_url("project/{$project['prefix']}/task/{$sub['task_key']}") ?>'>[<?= $sub['task_key'] ?>] <?= $sub['title'] ?></a></b></p>
-                                                                        <p class="" style="margin-bottom: 1px;">
+                                                                    <div class="col border bg-light rounded mt-3 mx-2">
+                                                                        <p class="m-b-0 m-t-10"><b><a class="text-decoration-none" href='<?= base_url("project/{$project['prefix']}/task/{$sub['task_key']}") ?>'>[<?= $sub['task_key'] ?>] <?= $sub['title'] ?></a></b></p>
+                                                                        <p class="m-b-10">
                                                                             <b>Trạng thái:</b>
                                                                             <span class="badge-custom-<?= $sub['base_status'] ?>"><?= $sub['status'] ?></span>
                                                                         </p>
@@ -201,6 +201,12 @@
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" data-toggle="tab" href="#activity" role="tab"><i class="icofont icofont-certificate-alt-2 m-r-10"></i>Hoạt động</a>
+                                            <div class="slide"></div>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-toggle="tab" href="#work-log" role="tab">
+                                                <i class="icofont icofont-clock-time m-r-10"></i>Nhật ký làm việc
+                                            </a>
                                             <div class="slide"></div>
                                         </li>
                                     </ul>
@@ -273,57 +279,6 @@
                                         <div class="tab-pane" id="activity" role="tabpanel">
                                             <div class="form-group">
                                                 <div class="row">
-                                                    <!-- <div class="card">
-                                                        <div class="card-header">
-                                                            <h5>Timeline</h5>
-                                                        </div>
-                                                        <div class="card-block">
-                                                            <div class="main-timeline">
-                                                                <div class="cd-timeline cd-container">
-                                                                    <div class="cd-timeline-block">
-                                                                        <div class="cd-timeline-icon bg-success">
-                                                                            <i class="icofont icofont-ui-user"></i>
-                                                                        </div>
-                                                                        <div class="cd-timeline-content card_main">
-                                                                            <div class="media bg-white d-flex p-10 d-block-phone">
-                                                                                <div class="media-left media-middle col-xs-12">
-                                                                                    <a href="#">
-                                                                                        <img class="media-object img-fluid" src="libraries\assets\images\timeline\img2.png" alt="">
-                                                                                    </a>
-                                                                                </div>
-                                                                                <div class="media-body">
-                                                                                    <div class="f-15 f-bold m-b-5">Josephin Doe</div>
-                                                                                    <div class="f-13 text-muted">Software Engineer</div>
-                                                                                </div>
-                                                                            </div>
-                                                                            <span class="cd-date">October 25, 2014, 01:15 PM</span>
-                                                                            <span class="cd-details">You posed an artical with public</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="cd-timeline-block">
-                                                                        <div class="cd-timeline-icon bg-success">
-                                                                            <i class="icofont icofont-ui-user"></i>
-                                                                        </div>
-                                                                        <div class="cd-timeline-content card_main">
-                                                                            <div class="media bg-white d-flex p-10 d-block-phone">
-                                                                                <div class="media-left media-middle col-xs-12">
-                                                                                    <a href="#">
-                                                                                        <img class="media-object img-fluid" src="libraries\assets\images\timeline\img2.png" alt="">
-                                                                                    </a>
-                                                                                </div>
-                                                                                <div class="media-body">
-                                                                                    <div class="f-15 f-bold m-b-5">Josephin Doe</div>
-                                                                                    <div class="f-13 text-muted">Software Engineer</div>
-                                                                                </div>
-                                                                            </div>
-                                                                            <span class="cd-date">October 25, 2014, 01:15 PM</span>
-                                                                            <span class="cd-details">You posed an artical with public</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div> -->
                                                     <h6 class="sub-title m-t-30 m-b-15">Danh sách hoạt động</h6>
                                                     <ul class="media-list revision-blc">
                                                         <?php if (!empty($activities)) : ?>
@@ -340,6 +295,34 @@
                                                             <li>
                                                                 <div class="d-inline-block">
                                                                     Chưa có hoạt động nào.
+                                                                </div>
+                                                            </li>
+                                                        <?php endif ?>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane" id="work-log" role="tabpanel">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <h6 class="sub-title m-t-30 m-b-15">Danh sách nhật ký</h6>
+                                                    <ul class="media-list revision-blc">
+                                                        <?php if (!empty($timeTrackings)) : ?>
+                                                            <?php foreach ($timeTrackings as $time) : ?>
+                                                                <li class="media d-flex m-t-5 m-b-15">
+                                                                    <div class="p-l-15 p-r-20 d-inline-block v-middle">
+                                                                        <a class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icofont icofont-clock-time m-r-10"></i></a>
+                                                                    </div>
+                                                                    <div class="d-inline-block">
+                                                                        <b><?= $time['created_by'] ?></b> đã ghi lại <code> <?= $time['time'] ?> </code> thời gian làm việc.
+                                                                        <div class="media-annotation"><?= $time['created_at'] ?></div>
+                                                                    </div>
+                                                                </li>
+                                                            <?php endforeach ?>
+                                                        <?php else : ?>
+                                                            <li>
+                                                                <div class="d-inline-block">
+                                                                    Chưa có nhật ký làm việc nào.
                                                                 </div>
                                                             </li>
                                                         <?php endif ?>
@@ -402,11 +385,17 @@
                                                     <span class="badge-custom-<?= $task['base_status'] ?>"><?= $task['status'] ?></span>
                                                 </td>
                                             </tr>
+                                            <tr>
+                                                <td><i class="icofont icofont-washing-machine"></i> Tổng thời gian làm việc:</td>
+                                                <td class="text-right">
+                                                    <?= $totalWorkTime ?? 'Chưa có' ?>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="card-footer">
-                                    <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee']) || OWNER == $userRole) : ?>
+                                    <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assigneeID']) || OWNER == $userRole) : ?>
                                         <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                             Trạng thái:
                                             <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
@@ -422,7 +411,7 @@
                                     <?php endif ?>
                                 </div>
                             </div>
-                            <?php if ($currentUser == $task['assignee']) : ?>
+                            <?php if ($currentUser == $task['assigneeID']) : ?>
                                 <div class="card border">
                                     <div class="card-header">
                                         <h5 class="card-header-text"><i class="icofont icofont-clock-time m-r-10"></i>Bộ đếm thời gian</h5>
@@ -488,35 +477,7 @@
                                     </div>
                                 </div>
                             </div> -->
-
-                            <!-- <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-header-text"><i class="icofont icofont-attachment"></i> Attached Files</h5>
-                                </div>
-                                <div class="card-block task-attachment">
-                                    <ul class="media-list">
-                                        <li class="media d-flex m-b-10">
-                                            <div class="m-r-20 v-middle">
-                                                <i class="icofont icofont-file-word f-28 text-muted"></i>
-                                            </div>
-                                            <div class="media-body">
-                                                <a href="#" class="m-b-5 d-block">Overdrew_scowled.doc</a>
-                                                <div class="text-muted">
-                                                    <span>Size: 1.2Mb</span>
-                                                    <span>
-                                                        Added by <a href="">Winnie</a>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="f-right v-middle text-muted">
-                                                <i class="icofont icofont-download-alt f-18"></i>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div> -->
                         </div>
-
                     </div>
                 </div>
                 <!-- Page-body end -->
@@ -550,10 +511,21 @@
                         <label for="message-text" class="col-form-label">Người được giao</label>
                         <select id="assignee" class="form-control">
                             <option value="">Trống</option>
-                            <option value="<?= session()->get('user_id') ?>" <?= $task['assigneeID'] == session()->get('user_id') ? 'selected' : '' ?>>Cho tôi</option>
+                            <option value="<?= session()->get('user_id') ?>" <?= !empty($task['assigneeID']) && $task['assigneeID'] == session()->get('user_id') ? 'selected' : '' ?>>Cho tôi</option>
                             <?php if (!empty($assignees)) : ?>
                                 <?php foreach ($assignees as $assignee) : ?>
-                                    <option value="<?= $assignee['user_id'] ?>" <?= $task['assigneeID'] == $assignee['user_id'] ? 'selected' : '' ?>><?= $assignee['name'] ?></option>
+                                    <option value="<?= $assignee['user_id'] ?>" <?= !empty($task['assigneeID']) &&  $task['assigneeID'] == $assignee['user_id'] ? 'selected' : '' ?>><?= $assignee['name'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reporter" class="col-form-label">Người nhận báo cáo</label>
+                        <select id="reporter" class="form-control">
+                            <option value="">Trống</option>
+                            <?php if (!empty($reporters)) : ?>
+                                <?php foreach ($reporters as $reporter) : ?>
+                                    <option value="<?= $reporter['user_id'] ?>" <?= !empty($task['reporterID']) && $reporter['user_id'] == $task['reporterID'] ? 'selected' : '' ?>><?= $reporter['name'] ?></option>
                                 <?php endforeach ?>
                             <?php endif ?>
                         </select>
@@ -584,7 +556,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="user_avatar" class="col-form-label">Tệp đính kèm</label>
-                        <input type="file" id="attachment" name="attactment[]" accept="*" multiple="multiple">
+                        <input type="file" id="attachment" name="attachment[]" accept="*" multiple="multiple">
                     </div>
 
                     <div class="float-end mb-5">
@@ -843,7 +815,6 @@
             btnDA.innerHTML = '<i class="icofont icofont-trash"></i>'
         });
     }
-    // window.addEventListener('beforeunload', function(){})
 
     var commentDecorator = document.getElementById('comment-decorator')
     var formEditor = document.getElementById('form-comment')
@@ -1164,6 +1135,7 @@
         data.append('name', taskName.value)
         data.append('task_status', document.getElementById('task_status').value)
         data.append('assignee', document.getElementById('assignee').value)
+        data.append('reporter', document.getElementById('reporter').value)
         data.append('priority', document.getElementById('task_priority').value)
         data.append('start_date', document.getElementById('task_start_date').value)
         data.append('due_date', document.getElementById('task_due_date').value)
@@ -1332,90 +1304,6 @@
                 isDeleteTaskAlreadyClick = false
                 btnDeleteTask.innerHTML = '<i class="icofont icofont-close m-r-10"></i>Xoá'
             })
-    }
-
-    var counter = 0
-    var counterInterval
-    var countBox = document.getElementById('count')
-
-    var isBtnStartCounterClick = false
-    var btnStartCounter = document.getElementById('start-counter')
-
-    var isBtnStopCounterClick = false
-    var btnStopCounter = document.getElementById('stop-counter')
-
-    function doCounter() {
-        if (isBtnStartCounterClick) {
-            return
-        }
-        isBtnStartCounterClick = true
-        btnStartCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-        setTimeout(() => {
-            $.growl.notice({
-                message: "Bắt đầu ca làm việc"
-            });
-            counterInterval = setInterval(countTime, 1000)
-            btnStartCounter.innerHTML = 'Bắt đầu'
-        }, 500)
-    }
-
-    function countTime() {
-        counter++
-        countBox.innerHTML = toHHMMSS(counter)
-    }
-
-    function stopCouter() {
-        if (isBtnStopCounterClick) {
-            return
-        }
-        isBtnStopCounterClick = true
-
-        if (0 == counter) {
-            return
-        }
-
-        clearInterval(counterInterval)
-
-        // >> ===================================
-        btnStopCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-        btnStartCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
-
-        setTimeout(() => {
-            //handle save counter
-
-            $.growl.notice({
-                message: "Đã ghi lại thời gian làm việc"
-            })
-
-            countBox.innerHTML = '00:00:00'
-            isBtnStopCounterClick = false
-            btnStopCounter.innerHTML = 'Dừng'
-            isBtnStartCounterClick = false
-            btnStartCounter.innerHTML = 'Bắt đầu'
-        }, 1500)
-        // =================================== <<
-
-        // >> ===================================
-        counter = 0
-        // =================================== <<
-    }
-
-    function toHHMMSS(second) {
-        var sec_num = parseInt(second, 10);
-        var hours = Math.floor(sec_num / 3600);
-        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-        var seconds = sec_num - (hours * 3600) - (minutes * 60);
-
-        if (hours < 10) {
-            hours = "0" + hours;
-        }
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-        if (seconds < 10) {
-            seconds = "0" + seconds;
-        }
-        return hours + ':' + minutes + ':' + seconds;
     }
 
     // var files
@@ -1640,6 +1528,103 @@
     //         size: 'small'
     //     });
     // });
+
+    var counter = 0
+    var counterInterval
+    var countBox = document.getElementById('count')
+
+    var isBtnStartCounterClick = false
+    var btnStartCounter = document.getElementById('start-counter')
+
+    var isBtnStopCounterClick = false
+    var btnStopCounter = document.getElementById('stop-counter')
+
+    function doCounter() {
+        if (isBtnStartCounterClick) {
+            return
+        }
+
+        isBtnStartCounterClick = true
+        btnStartCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        setTimeout(() => {
+            $.growl.notice({
+                message: "Bắt đầu ca làm việc"
+            });
+            counterInterval = setInterval(countTime, 1000)
+            btnStartCounter.innerHTML = 'Bắt đầu'
+        }, 500)
+    }
+
+    function countTime() {
+        counter++
+        countBox.innerHTML = toHHMMSS(counter)
+    }
+
+    function stopCouter() {
+
+        if (isBtnStopCounterClick) {
+            return
+        }
+        isBtnStopCounterClick = true
+
+        if (0 == counter) {
+            isBtnStopCounterClick = false
+            return
+        }
+
+        clearInterval(counterInterval)
+
+        // >> ===================================
+        btnStopCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+        btnStartCounter.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+        const data = new FormData()
+        data.append('time', counter)
+        data.append('task', <?= $task['id'] ?>)
+
+        var requestOptions = {
+            method: 'POST',
+            body: data,
+            redirect: 'follow'
+        };
+
+        fetch('<?= base_url('task/save-tracking-time') ?>', requestOptions)
+            .then(() => {
+                $.growl.notice({
+                    message: "Đã ghi lại thời gian làm việc"
+                })
+
+                counter = 0
+
+                countBox.innerHTML = '00:00:00'
+                isBtnStopCounterClick = false
+                btnStopCounter.innerHTML = 'Dừng'
+                isBtnStartCounterClick = false
+                btnStartCounter.innerHTML = 'Bắt đầu'
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 500)
+            })
+    }
+
+    function toHHMMSS(second) {
+        var sec_num = parseInt(second, 10);
+        var hours = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+        if (seconds < 10) {
+            seconds = "0" + seconds;
+        }
+        return hours + ':' + minutes + ':' + seconds;
+    }
 </script>
 
 <?= $this->endSection() ?>

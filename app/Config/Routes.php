@@ -86,6 +86,8 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
 
         $routes->get('setting', 'Project::detail');
         $routes->post('setting', 'Project::saveSetting');
+
+        $routes->get('log', 'Project::detail');
         
         $routes->get('statistic', 'Project::detail');
         $routes->post('statistic', 'Project::statistic');
@@ -123,6 +125,8 @@ $routes->group('task', ['filter' => 'login'], function ($routes) {
     $routes->post('attachment/remove', 'Task::removeAttachment');
 
     $routes->post('change-status', 'Task::changeStatus');
+
+    $routes->post('save-tracking-time', 'Task::saveTrackingTime');
 });
 
 $routes->group('upload', ['filter' => 'login'], function ($routes) {

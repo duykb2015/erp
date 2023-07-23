@@ -52,6 +52,13 @@ class Home extends BaseController
         $data['projects']    = $projects;
         $data['recentTasks'] = $recentTasks;
         $data['title']       = 'Không gian làm việc';
+
+        foreach ($this->notifications as $key => $notify) {
+            $this->notifications[$key]['created_at'] = (new Time($notify['created_at']))->humanize();
+        }
+
+        $data['notifications'] = $this->notifications;
+        $data['totalNotification'] = count($this->notifications);
         return view('Home/index', $data);
     }
 }

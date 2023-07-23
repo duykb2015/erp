@@ -30,7 +30,6 @@ class Comment extends BaseController
             'task_id'    => $commentData['task_id'],
             'user_id' => session()->get('user_id'),
             'text'       => $commentData['comment'],
-            'type'       => USER_COMMENT_TYPE
         ];
 
         $commentModel = new ModelsComment();

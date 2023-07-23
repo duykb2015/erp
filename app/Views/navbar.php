@@ -16,7 +16,7 @@ $menu = [
         'url' => base_url("project/{$project['prefix']}/statistic"),
         'active' => 'project/*/statistic',
         'name' => 'Thống kê',
-        'icon' => '<i class="feather icon-user"></i>',
+        'icon' => '<i class="icofont icofont-chart-bar-graph"></i>',
         'role' => [MEMBER, LEADER, OWNER]
     ],
     [
@@ -25,6 +25,13 @@ $menu = [
         'name' => 'Thành viên',
         'icon' => '<i class="feather icon-user"></i>',
         'role' => [MEMBER, LEADER, OWNER]
+    ],
+    [
+        'url' => base_url("project/{$project['prefix']}/log"),
+        'name' => 'Nhật ký hoạt động',
+        'active' => 'project/*/log',
+        'icon' => '<i class="icofont icofont-document-search"></i>',
+        'role' => [LEADER, OWNER]
     ],
     [
         'url' => base_url("project/{$project['prefix']}/setting"),

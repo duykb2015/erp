@@ -127,46 +127,49 @@
             </ul>
             <ul class="nav-right">
                 <li class="header-notification">
-                    <div class="dropdown-primary dropdown">
-                        <div class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <div class="dropdown-primary dropdown someyourContainer">
+                        <div class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                             <i class="feather icon-bell"></i>
-                            <span class="badge bg-c-pink">5</span>
+                            <?php if (!empty($totalNotification)) : ?>
+                                <span class="badge bg-c-pink"><?= $totalNotification ?></span>
+                            <?php endif ?>
                         </div>
                         <ul class="show-notification notification-view dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                             <li>
-                                <h6>Notifications</h6>
-                                <label class="label label-danger">New</label>
+                                <h6>Thông báo</h6>
+                                <?php if (!empty($notifications)) : ?>
+                                    <span class="f-right">
+                                        <a href="">Đánh dấu tất cả là đã đọc</a>
+                                    </span>
+                                <?php endif ?>
                             </li>
-                            <li>
-                                <div class="media">
-                                    <img class="d-flex align-self-center img-radius" src="<?= base_url() ?>\templates\libraries\assets\images\avatar-4.jpg" alt="Generic placeholder image">
-                                    <div class="media-body">
-                                        <h5 class="notification-user">John Doe</h5>
-                                        <p class="notification-msg">Lorem ipsum dolor sit amet, consectetuer elit.</p>
-                                        <span class="notification-time">30 minutes ago</span>
+                            <?php if (!empty($notifications)) : ?>
+                                <?php foreach ($notifications as $notify) : ?>
+                                    <li>
+                                        <div class="media d-flex">
+                                            <div class="media-left">
+                                                <img class="d-flex align-self-center img-radius" src="<?= base_url("imgs/{$notify['photo']}") ?>" alt="Generic placeholder image">
+                                            </div>
+                                            <div class="media-body">
+                                                <h5 class="notification-user"><?= $notify['title'] ?></h5>
+                                                <p class="notification-msg"><?= $notify['message'] ?></p>
+                                                <span class="notification-time"><?= $notify['created_at'] ?></span>
+                                            </div>
+                                            <div class="media-right">
+                                            <label class="label label-primary">Mới</label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <?php endforeach ?>
+                            <?php else : ?>
+                                <li>
+                                    <div class="media d-flex">
+                                        <div class="media-body">
+                                            <p class="notification-msg">Hiện không có thông báo nào.</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="media">
-                                    <img class="d-flex align-self-center img-radius" src="<?= base_url() ?>\templates\libraries\assets\images\avatar-4.jpg" alt="Generic placeholder image">
-                                    <div class="media-body">
-                                        <h5 class="notification-user">Joseph William</h5>
-                                        <p class="notification-msg">Lorem ipsum dolor sit amet, consectetuer elit.</p>
-                                        <span class="notification-time">30 minutes ago</span>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="media">
-                                    <img class="d-flex align-self-center img-radius" src="<?= base_url() ?>\templates\libraries\assets\images\avatar-4.jpg" alt="Generic placeholder image">
-                                    <div class="media-body">
-                                        <h5 class="notification-user">Sara Soudein</h5>
-                                        <p class="notification-msg">Lorem ipsum dolor sit amet, consectetuer elit.</p>
-                                        <span class="notification-time">30 minutes ago</span>
-                                    </div>
-                                </div>
-                            </li>
+                                </li>
+                            <?php endif ?>
                         </ul>
                     </div>
                 </li>

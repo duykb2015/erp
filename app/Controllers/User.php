@@ -19,6 +19,9 @@ class User extends BaseController
         $user      = $userModel->find(session()->get('user_id'));
         $data['user'] = $user;
 
+        $data['notifications'] = $this->notifications;
+        $data['totalNotification'] = count($this->notifications);
+
         $data['title']   = 'Thông tin cá nhân';
         return view('User/Profile', $data);
     }

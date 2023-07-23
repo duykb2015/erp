@@ -153,6 +153,10 @@
         function login() {
             btnLogin = document.getElementById('btn-login')
             btnLogin.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'
+
+            setTimeout(() => {
+                btnLogin.innerHTML = 'Đăng nhập'
+            }, 2000)
         }
     </script>
 </body>

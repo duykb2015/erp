@@ -143,6 +143,10 @@
             color: <?= BASE_SECTION[4]['color'] ?> !important;
             background-color: <?= BASE_SECTION[4]['background'] ?> !important;
         }
+
+        .header-navbar .navbar-wrapper .navbar-container .nav-right a {
+            padding: 0px;
+        }
     </style>
 </head>
 
@@ -264,6 +268,10 @@
     <?= $this->renderSection('js') ?>
 
     <script>
+        $(document).on('click', '.someyourContainer .dropdown-menu', function(e) {
+            e.stopPropagation();
+        });
+
         // ===========================>
         var createNewProjectModal = document.getElementById('createNewProject')
         var projectName = document.getElementById('project_name')

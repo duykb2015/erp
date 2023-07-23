@@ -5,16 +5,18 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\Attachment;
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\Project;
 use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
-use App\Models\TaskAttachment;
 use App\Models\TaskLog;
 use App\Models\TaskStatus;
+use App\Models\TimeTracking;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use CodeIgniter\I18n\Time;
-use Exception;
+use Notification as GlobalNotification;
 
 class Task extends BaseController
 {
@@ -55,13 +57,20 @@ class Task extends BaseController
         $task['due_at']   = $task['due_at']   ? Carbon::createFromDate($task['due_at'])->format('Y-m-d')   : NULL;
 
         $assigneeID         = $task['assignee'];
-        $task['assigneeID'] = $assigneeID;
+        $reporterID         = $task['reporter'];
 
         // Get current assignee name
         $userModel = new User();
         if ($assigneeID) {
+            $task['assigneeID'] = $assigneeID;
             $task['assignee'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
                 ->find($assigneeID)['username'];
+        }
+
+        if ($reporterID) {
+            $task['reporterID'] = $reporterID;
+            $task['reporter'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
+                ->find($reporterID)['username'];
         }
 
         // Get all assignees
@@ -149,6 +158,37 @@ class Task extends BaseController
             $data['percenSubtaskProgress'] = $percenSubtaskProgress;
         }
 
+        $timeTrackingModel = new TimeTracking();
+        $timeTrackings = $timeTrackingModel->select(['recorded_time as time', 'created_at'])
+            ->where('task_id', $task['id'])
+            ->orderBy('id', 'DESC')
+            ->find();
+
+        if (!empty($timeTrackings)) {
+            $totalWorkTime = 0;
+            foreach ($timeTrackings as $key => $time) {
+                $totalWorkTime += $time['time'];
+
+                $carbonInterval = CarbonInterval::second($time['time']);
+                $carbonInterval->setLocale('vi');
+                $timeTrackings[$key]['time']       = $carbonInterval->cascade()->forHumans();
+
+                $i18nTime                          = new Time($time['created_at']);
+                $timeTrackings[$key]['created_at'] = $i18nTime->humanize();
+                $timeTrackings[$key]['created_by'] = $task['assignee'];
+            }
+
+            $carbonInterval2 = CarbonInterval::second($totalWorkTime);
+            $carbonInterval2->setLocale('vi');
+
+            $data['totalWorkTime'] = $carbonInterval2->cascade()->forHumans();
+
+            $data['timeTrackings'] = $timeTrackings;
+        }
+
+        $data['notifications'] = $this->notifications;
+        $data['totalNotification'] = count($this->notifications);
+        
         $data['pager']       = $commentModel->pager;
         $data['reporters']   = $reporters;
         $data['assignees']   = $assignees;
@@ -255,12 +295,34 @@ class Task extends BaseController
             'created_by'     => $userID,
         ];
 
+        $notificationModel = new Notification();
+
         if ($taskRawData['assignee']) {
             $data['assignee'] = $taskRawData['assignee'];
+
+            if (session()->get('user_id') != $taskRawData['assignee']) {
+                $notificationModel->insert([
+                    'title' => session()->get('name'),
+                    'message' => GlobalNotification::assignedTask(session()->get('name'), $project['prefix'], $data['task_key']),
+                    'sender_id' => session()->get('user_id'),
+                    'recipient_id' => $taskRawData['assignee'],
+                    'is_read' => FALSE
+                ]);
+            }
         }
 
         if ($taskRawData['reporter']) {
             $data['reporter'] = $taskRawData['reporter'];
+
+            if (session()->get('user_id') != $taskRawData['reporter']) {
+                $notificationModel->insert([
+                    'title' => session()->get('name'),
+                    'message' => GlobalNotification::assignedTaskReporter(session()->get('name'), $project['prefix'], $data['task_key']),
+                    'sender_id' => session()->get('user_id'),
+                    'recipient_id' => $taskRawData['reporter'],
+                    'is_read' => FALSE
+                ]);
+            }
         }
 
         if ($startDate) {
@@ -366,6 +428,9 @@ class Task extends BaseController
 
         $taskModel = new ModelsTask();
 
+        $projectModel = new Project();
+        $project = $projectModel->select('prefix')->where('id', $taskRawData['project_id'])->first();
+
         $data = [
             'id'            => $taskRawData['task_id'],
             'task_status_id' => $taskRawData['task_status'],
@@ -382,8 +447,34 @@ class Task extends BaseController
             $data['due_at'] = $dueDate->format('Y-m-d H:i:s');
         }
 
+        $notificationModel = new Notification();
+
         if ($taskRawData['assignee']) {
             $data['assignee'] = $taskRawData['assignee'];
+
+            if (session()->get('user_id') != $taskRawData['assignee']) {
+                $notificationModel->insert([
+                    'title' => session()->get('name'),
+                    'message' => GlobalNotification::assignedTask(session()->get('name'), $project['prefix'], $data['task_key']),
+                    'sender_id' => session()->get('user_id'),
+                    'recipient_id' => $taskRawData['assignee'],
+                    'is_read' => FALSE
+                ]);
+            }
+        }
+
+        if ($taskRawData['reporter']) {
+            $data['reporter'] = $taskRawData['reporter'];
+
+            if (session()->get('user_id') != $taskRawData['reporter']) {
+                $notificationModel->insert([
+                    'title' => session()->get('name'),
+                    'message' => GlobalNotification::assignedTaskReporter(session()->get('name'), $project['prefix'], $data['task_key']),
+                    'sender_id' => session()->get('user_id'),
+                    'recipient_id' => $taskRawData['reporter'],
+                    'is_read' => FALSE
+                ]);
+            }
         }
 
         $taskModel->save($data);
@@ -407,15 +498,12 @@ class Task extends BaseController
 
         unset($data);
 
-        $commentModel = new Comment();
+        $taskLogModel = new TaskLog();
         $data = [
             'task_id' => $taskRawData['task_id'],
-            'user_id' => session()->get('user_id'),
-            'text' => '<b>' . session()->get('name') . '</b> đã chỉnh sửa công việc.',
-            'type' => SYSTEM_COMMENT_TYPE
+            'log' => '<b>' . session()->get('name') . '</b> đã chỉnh sửa công việc.',
         ];
-
-        $commentModel = $commentModel->insert($data);
+        $taskLogModel->insert($data);
 
         return $this->handleResponse();
     }
@@ -502,5 +590,20 @@ class Task extends BaseController
         unlink(ATTACHMENT_PATH . $fileName);
 
         return $this->handleResponse();
+    }
+
+    public function saveTrackingTime()
+    {
+        $time = (int) $this->request->getPost('time');
+        $task = (int) $this->request->getPost('task');
+
+        $timeTrackingModel = new TimeTracking();
+
+        $timeTrackingModel->insert([
+            'task_id' => $task,
+            'recorded_time' => $time
+        ]);
+
+        return true;
     }
 }

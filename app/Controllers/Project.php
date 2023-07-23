@@ -153,6 +153,9 @@ class Project extends BaseController
         $data['projects'] = $projects;
         $data['pager'] = $projectModel->pager;
 
+        $data['notifications'] = $this->notifications;
+        $data['totalNotification'] = count($this->notifications);
+
         $data['name']  = $name;
         $data['dim']   = $filter;
         $data['sort']  = $sort;
@@ -173,6 +176,7 @@ class Project extends BaseController
         $allowedView = [
             'user',
             'setting',
+            'log',
             'statistic'
         ];
 
@@ -277,11 +281,17 @@ class Project extends BaseController
                 $data['chartData'] = json_encode($chartData);
                 break;
 
+            case 'Log':
+                break;
+
             default:
                 $data['backLink']   = '/project';
                 return view('Error/NotFound', $data);
         }
 
+        $data['notifications'] = $this->notifications;
+        $data['totalNotification'] = count($this->notifications);
+        
         $data['userRole'] = $userRole;
         $data['project'] = $project;
         $data['title']   = $project['name'];
@@ -839,4 +849,7 @@ class Project extends BaseController
 
         return $this->handleResponse([]);
     }
+
+    // public function log() {
+    // }
 }
