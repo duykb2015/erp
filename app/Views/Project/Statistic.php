@@ -81,6 +81,45 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="auth-box card">
+                                <div class="card-header">
+                                    <div class="row justify-content-center">
+                                        <div class="col-12">
+                                            <h5 class="card-header-text sub-title d-flex">Thống kê tiến độ thành viên</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-block">
+                                    <div class="row">
+                                        <div class="col-md-12 col-lg-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5>Thành viên</h5>
+                                                    <span>Tổng số lượng công việc đã hoàn thành của từng thành viên.</span>
+                                                </div>
+                                                <div class="card-block">
+                                                    <?php foreach ($teamStatistic as $user) : ?>
+                                                        <div class="row m-3">
+                                                            <div class="col-2">
+                                                                <p class="m-b-0"><span style="font-weight: bold; color: black; padding-left: 10px;" style="width:15%"><?= $user['name'] ?></span></p>
+                                                            </div>
+                                                            <div class="col-9">
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-primary" role="progressbar" style="width: <?= $user['percentComplete'] ?>%" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-1">
+                                                                <span style="font-weight: bold; color: black; "><b><?= $user['taskDone'] ?>/<?= $user['totalTask'] ?></b></span>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

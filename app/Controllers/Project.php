@@ -153,6 +153,10 @@ class Project extends BaseController
         $data['projects'] = $projects;
         $data['pager'] = $projectModel->pager;
 
+        foreach ($this->notifications as $key => $notify) {
+            $this->notifications[$key]['created_at'] = (new Time($notify['created_at']))->humanize();
+        }
+
         $data['notifications'] = $this->notifications;
         $data['totalNotification'] = count($this->notifications);
 
@@ -194,7 +198,13 @@ class Project extends BaseController
             return view('Error/NotFound', $data);
         }
 
-        $projectUser   = $projectUserModel->select(['user_id', 'role'])->where('project_id', $project['id'])->find();
+        $projectUser = $projectUserModel->select([
+            'user_id',
+            'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+            'role'
+        ])
+            ->join('user', 'user.id = project_user.user_id')
+            ->where('project_id', $project['id'])->find();
         $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
 
         $userID = session()->get('user_id');
@@ -272,13 +282,47 @@ class Project extends BaseController
 
             case 'Statistic':
                 $taskStatusModel = new TaskStatus();
-                $taskModel = new ModelsTask();
-                $taskStatus = $taskStatusModel->where('project_id', $project['id'])->find();
+                $taskModel       = new ModelsTask();
+                $taskStatus      = $taskStatusModel->where('project_id', $project['id'])->find();
+                $statusDoneID    = NULL;
+
                 $chartData['Trạng thái'] = 'Số lượng';
+
                 foreach ($taskStatus as $key => $status) {
+                    if (4 == $status['base_status']) {
+                        $statusDoneID = $status['id'];
+                    }
                     $chartData[$status['title']] = $taskModel->select('COUNT(id) as count')->where('task_status_id', $status['id'])->first()['count'];
                 }
                 $data['chartData'] = json_encode($chartData);
+
+                $teamStatistic = [];
+
+                foreach ($projectUser as $user) {
+                    $countDone = $taskModel->select('count(id) as total')
+                        ->where('assignee', $user['user_id'])
+                        ->where('task_status_id', $statusDoneID)
+                        ->first();
+
+                    $countAll = $taskModel->select('count(id) as total')
+                        ->where('assignee', $user['user_id'])
+                        ->first();
+
+
+                    $percenComplete = 0;
+                    if (0 != $countAll['total'] && 0 != $countDone['total']) {
+                        $percenComplete = (float) number_format(($countDone['total'] / $countAll['total']) * 100, 2);
+                    }
+
+                    $teamStatistic[] = [
+                        'name' => $user['name'],
+                        'taskDone' => $countDone['total'],
+                        'totalTask' => $countAll['total'],
+                        'percentComplete' => $percenComplete
+                    ];
+                }
+
+                $data['teamStatistic'] = $teamStatistic;
                 break;
 
             case 'Log':
@@ -288,10 +332,13 @@ class Project extends BaseController
                 $data['backLink']   = '/project';
                 return view('Error/NotFound', $data);
         }
+        foreach ($this->notifications as $key => $notify) {
+            $this->notifications[$key]['created_at'] = (new Time($notify['created_at']))->humanize();
+        }
 
         $data['notifications'] = $this->notifications;
         $data['totalNotification'] = count($this->notifications);
-        
+
         $data['userRole'] = $userRole;
         $data['project'] = $project;
         $data['title']   = $project['name'];
@@ -849,7 +896,4 @@ class Project extends BaseController
 
         return $this->handleResponse([]);
     }
-
-    // public function log() {
-    // }
 }

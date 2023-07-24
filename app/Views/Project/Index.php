@@ -56,7 +56,6 @@
     .hover-pointer:hover {
         cursor: pointer !important;
     }
-
 </style>
 <?= $this->endSection() ?>
 
@@ -200,6 +199,9 @@
                                                                                         <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                         <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                                                             <?php foreach ($taskStatus as $subStatus) : ?>
+                                                                                                <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
+                                                                                                    continue;
+                                                                                                } ?>
                                                                                                 <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
                                                                                                     <i class="icofont icofont-listine-dots"></i>
                                                                                                     <?= $subStatus['title'] ?>
@@ -209,7 +211,7 @@
                                                                                     </div>
                                                                                 <?php endif ?>
 
-                                                                                <?php if (session()->get('user_id') == $task['created_by'] || OWNER == $userRole) : ?>
+                                                                                <?php if (session()->get('user_id') == $task['created_by'] || OWNER == $userRole || LEADER == $userRole) : ?>
                                                                                     <button class="btn btn-sm btn-danger waves-light f-right" id="btn-delete-task-<?= $task['id'] ?>" type="button" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-bin"></i></button>
                                                                                 <?php endif ?>
                                                                             </div>
@@ -224,20 +226,21 @@
                                                 </div>
                                             <?php endforeach ?>
                                         <?php endif ?>
-                                        <?php if (MEMBER != session()->get('role')) ?>
-                                        <div class="col-3">
-                                            <div class="card border">
-                                                <div class="card-block">
-                                                    <form action="" method="post" onsubmit="createSection(event)" id="save-section">
-                                                        <div class="input-group">
-                                                            <input type="hidden" id="project-id" value="<?= $project['id'] ?>">
-                                                            <input type="text" name="section_name" id="section-name" class="form-control hidden">
-                                                            <button type="button" id="submit-button" class="btn btn-primary input-group-addon" onclick="doCreateSection()"><i class="icofont icofont-plus"></i></button>
-                                                        </div>
-                                                    </form>
+                                        <?php if (MEMBER != $userRole) : ?>
+                                            <div class="col-3">
+                                                <div class="card border">
+                                                    <div class="card-block">
+                                                        <form action="" method="post" onsubmit="createSection(event)" id="save-section">
+                                                            <div class="input-group">
+                                                                <input type="hidden" id="project-id" value="<?= $project['id'] ?>">
+                                                                <input type="text" name="section_name" id="section-name" class="form-control hidden">
+                                                                <button type="button" id="submit-button" class="btn btn-primary input-group-addon" onclick="doCreateSection()"><i class="icofont icofont-plus"></i></button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        <?php endif ?>
                                     </div>
                                 </div>
                             </div>
@@ -502,6 +505,7 @@
 
         const data = new FormData()
         data.append('task_id', taskID)
+        data.append('project_id', <?= $project['id'] ?>)
 
         var requestOptions = {
             method: 'POST',
@@ -562,7 +566,7 @@
         isCreateNewTaskAlreadyClick = true
 
         taskName = document.getElementById('task_name')
-        if (taskName.value == '') {
+        if (taskName.value == '' || taskName.value.length < 5) {
             isCreateNewTaskAlreadyClick = false
             return
         }

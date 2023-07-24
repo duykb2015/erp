@@ -7,6 +7,7 @@ use App\Models\Attachment;
 use App\Models\Comment;
 use App\Models\Notification;
 use App\Models\Project;
+use App\Models\ProjectLog;
 use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
 use App\Models\TaskLog;
@@ -66,12 +67,16 @@ class Task extends BaseController
             $task['assignee'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
                 ->find($assigneeID)['username'];
         }
+        // Make default value if assignee is null
+        // use 0 because user id always >= 1
+        empty($task['assigneeID']) and $task['assigneeID'] = 0;
 
         if ($reporterID) {
             $task['reporterID'] = $reporterID;
             $task['reporter'] = $userModel->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as username')
                 ->find($reporterID)['username'];
         }
+        empty($task['reporterID']) and $task['reporterID'] = 0;
 
         // Get all assignees
         $projectUserModel = new ProjectUser();
@@ -186,9 +191,13 @@ class Task extends BaseController
             $data['timeTrackings'] = $timeTrackings;
         }
 
+        foreach ($this->notifications as $key => $notify) {
+            $this->notifications[$key]['created_at'] = (new Time($notify['created_at']))->humanize();
+        }
+
         $data['notifications'] = $this->notifications;
         $data['totalNotification'] = count($this->notifications);
-        
+
         $data['pager']       = $commentModel->pager;
         $data['reporters']   = $reporters;
         $data['assignees']   = $assignees;
@@ -301,12 +310,16 @@ class Task extends BaseController
             $data['assignee'] = $taskRawData['assignee'];
 
             if (session()->get('user_id') != $taskRawData['assignee']) {
-                $notificationModel->insert([
+                $notificationID = $notificationModel->insert([
                     'title' => session()->get('name'),
-                    'message' => GlobalNotification::assignedTask(session()->get('name'), $project['prefix'], $data['task_key']),
+                    'message' => '',
                     'sender_id' => session()->get('user_id'),
                     'recipient_id' => $taskRawData['assignee'],
                     'is_read' => FALSE
+                ]);
+
+                $notificationModel->update($notificationID, [
+                    'message' => GlobalNotification::assignedTask(session()->get('name'), $project['prefix'], $data['task_key'], $notificationID)
                 ]);
             }
         }
@@ -315,12 +328,15 @@ class Task extends BaseController
             $data['reporter'] = $taskRawData['reporter'];
 
             if (session()->get('user_id') != $taskRawData['reporter']) {
-                $notificationModel->insert([
+                $notificationID = $notificationModel->insert([
                     'title' => session()->get('name'),
-                    'message' => GlobalNotification::assignedTaskReporter(session()->get('name'), $project['prefix'], $data['task_key']),
+                    'message' => '',
                     'sender_id' => session()->get('user_id'),
                     'recipient_id' => $taskRawData['reporter'],
                     'is_read' => FALSE
+                ]);
+                $notificationModel->update($notificationID, [
+                    'message' => GlobalNotification::assignedTaskReporter(session()->get('name'), $project['prefix'], $data['task_key'], $notificationID)
                 ]);
             }
         }
@@ -355,11 +371,19 @@ class Task extends BaseController
         unset($data);
 
         $taskLogModel = new TaskLog();
-        $data = [
+
+        $userName = session()->get('name');
+        if (0 != $taskRawData['parent_id']) {
+            $taskLogModel->insert([
+                'task_id' => $taskRawData['parent_id'],
+                'log' => "<b>{$userName}</b> thêm mới một công việc phụ.",
+            ]);
+        }
+
+        $taskLogModel->insert([
             'task_id' => $taskID,
-            'log' => '<b>' . session()->get('name') . '</b> đã tạo mới công việc.',
-        ];
-        $taskLogModel->insert($data);
+            'log' => "<b>{$userName}</b> đã tạo mới công việc.",
+        ]);
 
         return $this->handleResponse(['task_id' => $taskID]);
     }
@@ -427,6 +451,7 @@ class Task extends BaseController
         }
 
         $taskModel = new ModelsTask();
+        $task = $taskModel->select(['task_key', 'assignee', 'reporter'])->find($taskRawData['task_id']);
 
         $projectModel = new Project();
         $project = $projectModel->select('prefix')->where('id', $taskRawData['project_id'])->first();
@@ -448,33 +473,35 @@ class Task extends BaseController
         }
 
         $notificationModel = new Notification();
+        $data['assignee'] = !empty($taskRawData['assignee']) ? $taskRawData['assignee'] : NULL;
 
-        if ($taskRawData['assignee']) {
-            $data['assignee'] = $taskRawData['assignee'];
+        if ($task['assignee'] != $taskRawData['assignee'] && $taskRawData['assignee'] != session()->get('user_id') && NULL != $taskRawData['assignee']) {
+            $notificationID = $notificationModel->insert([
+                'title' => session()->get('name'),
+                'message' => '',
+                'sender_id' => session()->get('user_id'),
+                'recipient_id' => $taskRawData['assignee'],
+                'is_read' => FALSE
+            ]);
 
-            if (session()->get('user_id') != $taskRawData['assignee']) {
-                $notificationModel->insert([
-                    'title' => session()->get('name'),
-                    'message' => GlobalNotification::assignedTask(session()->get('name'), $project['prefix'], $data['task_key']),
-                    'sender_id' => session()->get('user_id'),
-                    'recipient_id' => $taskRawData['assignee'],
-                    'is_read' => FALSE
-                ]);
-            }
+            $notificationModel->update($notificationID, [
+                'message' => GlobalNotification::assignedTask(session()->get('name'), $project['prefix'], $task['task_key'], $notificationID)
+            ]);
         }
 
-        if ($taskRawData['reporter']) {
-            $data['reporter'] = $taskRawData['reporter'];
+        $data['reporter'] = !empty($taskRawData['reporter']) ? $taskRawData['reporter'] : NULL;
 
-            if (session()->get('user_id') != $taskRawData['reporter']) {
-                $notificationModel->insert([
-                    'title' => session()->get('name'),
-                    'message' => GlobalNotification::assignedTaskReporter(session()->get('name'), $project['prefix'], $data['task_key']),
-                    'sender_id' => session()->get('user_id'),
-                    'recipient_id' => $taskRawData['reporter'],
-                    'is_read' => FALSE
-                ]);
-            }
+        if ($task['reporter'] != $taskRawData['reporter'] && $taskRawData['reporter'] != session()->get('user_id') && NULL != $taskRawData['reporter']) {
+            $notificationID = $notificationModel->insert([
+                'title' => session()->get('name'),
+                'message' => '',
+                'sender_id' => session()->get('user_id'),
+                'recipient_id' => $taskRawData['reporter'],
+                'is_read' => FALSE
+            ]);
+            $notificationModel->update($notificationID, [
+                'message' => GlobalNotification::assignedTaskReporter(session()->get('name'), $project['prefix'], $task['task_key'], $notificationID)
+            ]);
         }
 
         $taskModel->save($data);
@@ -531,6 +558,14 @@ class Task extends BaseController
         $taskModel = new ModelsTask();
         $taskModel->update($taskID, ['task_status_id' => $sectionID]);
 
+        $taskLogModel = new TaskLog();
+
+        $userName = session()->get('name');
+        $taskLogModel->insert([
+            'task_id' => $taskID,
+            'log' => "<b>$userName</b> đã thay đổi trạng thái công việc."
+        ]);
+
         return $this->handleResponse();
     }
 
@@ -571,11 +606,22 @@ class Task extends BaseController
         }
 
         if ($attachments) {
+            foreach ($attachments as $attachment) {
+                @unlink(ATTACHMENT_PATH . '/' . $attachment['name']);
+            }
             $attachmentModel->delete(collect($attachments)->pluck('id')->toArray());
         }
 
         $taskModel = new ModelsTask();
+        $task = $taskModel->find($taskID);
         $taskModel->delete($taskID);
+
+        $userName = session()->get('name');
+        (new ProjectLog())->insert([
+            'project_id' => $this->request->getPost('project_id'),
+            'log' => "<b>$userName</b> đã xoá công việc: <b>[{$task['task_key']}] {$task['title']}</b>."
+        ]);
+
         return $this->handleResponse();
     }
 

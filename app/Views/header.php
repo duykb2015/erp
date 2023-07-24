@@ -139,7 +139,7 @@
                                 <h6>Thông báo</h6>
                                 <?php if (!empty($notifications)) : ?>
                                     <span class="f-right">
-                                        <a href="">Đánh dấu tất cả là đã đọc</a>
+                                        <a onclick="markAllAsRead([<?= collect($notifications)->implode('id', '') ?>])">Đánh dấu tất cả là đã đọc</a>
                                     </span>
                                 <?php endif ?>
                             </li>

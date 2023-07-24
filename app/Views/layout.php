@@ -144,8 +144,17 @@
             background-color: <?= BASE_SECTION[4]['background'] ?> !important;
         }
 
+        .dropdown-primary .dropdown-menu a:hover {
+            text-decoration: underline !important;
+            background-color: transparent !important;
+        }
+
         .header-navbar .navbar-wrapper .navbar-container .nav-right a {
             padding: 0px;
+        }
+
+        .card-header>span {
+            color: #505458 !important;
         }
     </style>
 </head>
@@ -268,6 +277,43 @@
     <?= $this->renderSection('js') ?>
 
     <script>
+        function markAsRead(id) {
+
+            const data = new FormData();
+            data.append('id', id);
+
+            var requestOptions = {
+                method: 'POST',
+                body: data,
+                redirect: 'follow'
+            };
+            fetch('<?= base_url('notification/mask-as-read') ?>', requestOptions)
+                .then(() => {
+                    window.location.href = document.getElementById(`notification-link-${id}`).value
+                })
+        }
+
+        function markAllAsRead(ids) {
+            const data = new FormData();
+            data.append('ids', ids);
+
+            var requestOptions = {
+                method: 'POST',
+                body: data,
+                redirect: 'follow'
+            };
+            fetch('<?= base_url('notification/mask-all-as-read') ?>', requestOptions)
+                .then(() => {
+                    $.growl.notice({
+                        message: "Đã đánh dấu tất cả là đã đọc!"
+                    });
+
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 500)
+                })
+        }
+
         $(document).on('click', '.someyourContainer .dropdown-menu', function(e) {
             e.stopPropagation();
         });

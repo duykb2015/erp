@@ -78,12 +78,14 @@ abstract class BaseController extends Controller
     {
         $notificationModel = new Notification();
         return $notificationModel->select([
+            'notification.id',
             'notification.title',
             'notification.message',
             'notification.created_at',
             'user.photo'
         ])->join('user', 'user.id = notification.sender_id')->where('notification.recipient_id', session()->get('user_id'))
             ->where('notification.is_read', FALSE)
+            ->orderBy('id', 'DESC')
             ->find();
     }
 }

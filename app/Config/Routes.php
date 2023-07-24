@@ -129,6 +129,11 @@ $routes->group('task', ['filter' => 'login'], function ($routes) {
     $routes->post('save-tracking-time', 'Task::saveTrackingTime');
 });
 
+$routes->group('notification', function ($routes) {
+    $routes->post('mask-as-read', 'Notification::markAsRead');
+    $routes->post('mask-all-as-read', 'Notification::markAllAsRead');
+});
+
 $routes->group('upload', ['filter' => 'login'], function ($routes) {
     $routes->group('task', function ($routes) {
         $routes->post('attachment', 'Upload::task_attachment');

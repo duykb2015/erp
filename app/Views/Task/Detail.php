@@ -99,20 +99,25 @@
                                             <a href="<?= base_url("project/{$project['prefix']}/{$task['task_key']}") ?>" class="text-decoration-none"><?= $task['task_key'] ?></a>
                                         <?php endif ?>
                                     </div>
-                                    <div class="f-left">
-                                        <h4><i class="icofont icofont-tasks-alt m-r-5"></i> <?= $task['title'] ?? 'Dự án chưa có tiêu đề' ?></h4>
-                                    </div>
-                                    <?php if ($currentUser == $task['assigneeID'] || $currentUser == $project['owner'] || $userRole == LEADER) : ?>
-                                        <div class="f-right d-flex">
-                                            <div class="dropdown-secondary dropdown d-inline-block">
-                                                <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                <div class="dropdown-menu" aria-labelledby="dropdown35" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                    <a class="dropdown-item waves-light waves-effect" data-bs-toggle="modal" data-bs-target="#updateTaskInformation"><i class="icofont icofont-edit-alt m-r-10"></i>Chỉnh sửa</a>
-                                                    <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>, <?= $project['id'] ?>)"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
+                                    <div class="d-flex">
+                                        <div style="width: 95%;">
+                                            <h4><i class="icofont icofont-tasks-alt m-r-5"></i> <?= $task['title'] ?? 'Dự án chưa có tiêu đề' ?></h4>
+                                        </div>
+                                        <?php if ((!empty($task['assigneeID']) && $currentUser == $task['assigneeID']) || $currentUser == $task['created_by'] || OWNER == $userRole || LEADER == $userRole) : ?>
+                                            <div class="mx-2">
+                                                <div class="dropdown-secondary dropdown d-inline-block">
+                                                    <button class="btn btn-sm btn-primary dropdown-toggle waves-light" type="button" id="dropdown35" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                    <div class="dropdown-menu" aria-labelledby="dropdown35" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                        <a class="dropdown-item waves-light waves-effect" data-bs-toggle="modal" data-bs-target="#updateTaskInformation"><i class="icofont icofont-edit-alt m-r-10"></i>Chỉnh sửa</a>
+                                                        <?php if ($currentUser == $task['created_by'] || OWNER == $userRole || LEADER == $userRole) : ?>
+                                                            <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>, <?= $project['id'] ?>)"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
+                                                        <?php endif ?>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    <?php endif ?>
+                                        <?php endif ?>
+                                    </div>
+
                                 </div>
                                 <div class="card-block">
                                     <div>
@@ -173,9 +178,9 @@
                                                             </div>
                                                         </div>
                                                         <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
-                                                            <div class="row">
+                                                            <div class="row d-block">
                                                                 <?php foreach ($subtasks as $sub) : ?>
-                                                                    <div class="col border bg-light rounded mt-3 mx-2">
+                                                                    <div class="col border bg-light rounded mt-3 mx-2" style="width: 98%;">
                                                                         <p class="m-b-0 m-t-10"><b><a class="text-decoration-none" href='<?= base_url("project/{$project['prefix']}/task/{$sub['task_key']}") ?>'>[<?= $sub['task_key'] ?>] <?= $sub['title'] ?></a></b></p>
                                                                         <p class="m-b-10">
                                                                             <b>Trạng thái:</b>
@@ -255,13 +260,11 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
-
                                                                 <?php if ($currentUser == $comment['user_id']) : ?>
                                                                     <div class="m-t-10 m-b-25 edit-and-delete">
                                                                         <span><a class="m-r-10 f-12 text-decoration-none" onclick="showEditCommentEditor(<?= $comment['id'] ?>)">Sửa</a></span><span><a class="m-r-10 f-12 text-decoration-none" id="btn-delete-comment" onclick="deleteComment(<?= $comment['id'] ?>)">Xoá</a> </span>
                                                                     </div>
                                                                 <?php endif ?>
-
                                                                 <hr>
                                                             </div>
                                                         </li>
@@ -380,13 +383,13 @@
                                                 <td class="text-right"><?= $task['reporter'] ?? 'Trống' ?></td>
                                             </tr>
                                             <tr>
-                                                <td><i class="icofont icofont-washing-machine"></i> Trạng thái:</td>
+                                                <td><i class="icofont icofont-check-circled"></i></i> Trạng thái:</td>
                                                 <td class="text-right">
                                                     <span class="badge-custom-<?= $task['base_status'] ?>"><?= $task['status'] ?></span>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td><i class="icofont icofont-washing-machine"></i> Tổng thời gian làm việc:</td>
+                                                <td><i class="icofont icofont-clock-time"></i> Tổng thời gian làm việc:</td>
                                                 <td class="text-right">
                                                     <?= $totalWorkTime ?? 'Chưa có' ?>
                                                 </td>
@@ -401,6 +404,9 @@
                                             <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                             <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                 <?php foreach ($taskStatus as $subStatus) : ?>
+                                                    <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
+                                                        continue;
+                                                    } ?>
                                                     <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
                                                         <i class="icofont icofont-listine-dots"></i>
                                                         <?= $subStatus['title'] ?>
@@ -411,7 +417,7 @@
                                     <?php endif ?>
                                 </div>
                             </div>
-                            <?php if ($currentUser == $task['assigneeID']) : ?>
+                            <?php if (!empty($task['assigneeID']) && $currentUser == $task['assigneeID']) : ?>
                                 <div class="card border">
                                     <div class="card-header">
                                         <h5 class="card-header-text"><i class="icofont icofont-clock-time m-r-10"></i>Bộ đếm thời gian</h5>
@@ -576,7 +582,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <form class="needs-validation" id="create-project">
+                <form class="needs-validation" onsubmit="return false" id="create-project">
                     <div class="mb-3">
                         <label for="sub_task_name" class="col-form-label">Tên công việc<span class="text-danger"> *</span></label>
                         <input type="text" class="form-control rounded" id="sub_task_name" value="" placeholder="Nhập tên công việc ..." minlength="5" maxlength="512" required>
@@ -1221,7 +1227,8 @@
 
                     return
                 }
-
+                isUpdateTaskAlreadyClick = false
+                btnUpdateTask.innerHTML = 'Lưu'
                 $.growl.notice({
                     message: "Lưu thông tin thành công công việc"
                 });
@@ -1316,8 +1323,8 @@
         if (isCreateSubTaskAlreadyClick) return
         isCreateSubTaskAlreadyClick = true
 
-        taskName = document.getElementById('task_name')
-        if (taskName.value == '') {
+        taskName = document.getElementById('sub_task_name')
+        if (taskName.value == '' || taskName.value.length < 5) {
             isCreateSubTaskAlreadyClick = false
             return
         }
@@ -1361,8 +1368,8 @@
             .then(result => {
                 if (result.errors) {
 
-                    if (result.errors.section) {
-                        error = result.errors.section.replace('task_status', 'Trạng thái công việc')
+                    if (result.errors.task_status) {
+                        error = result.errors.task_status.replace('task_status', 'Trạng thái công việc')
                         $.growl.error({
                             message: error,
                             location: 'tr',
@@ -1392,7 +1399,7 @@
                     }
 
                     if (result.errors.name) {
-                        error = result.errors.task_name.replace('name', 'Tên công việc')
+                        error = result.errors.name.replace('name', 'Tên công việc')
                         $.growl.error({
                             message: error,
                             location: 'tr',
