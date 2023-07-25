@@ -26,30 +26,20 @@ class TaskStatus extends BaseController
         }
 
         $taskStatusModel = new ModelsTaskStatus();
-        $taskStatus      = $taskStatusModel->select(['id', 'base_status', 'position'])
+        $taskDoneStatus = $taskStatusModel->select(['id', 'base_status', 'position'])
             ->where('project_id', $taskStatusData['project_id'])
-            ->findAll();
-            
-        $taskStatus  = collect($taskStatus);
-        $baseStatus3 = $taskStatus->where('base_status', '=', 4)->first();
-        $lastStatus  = $taskStatus->last();
+            ->where('base_status', 4)
+            ->first();
 
         $data = [
             'project_id' => $taskStatusData['project_id'],
             'title' => $taskStatusData['task_status_name'],
-            // The case where the section finish has been moved to a non-last position, ignore and do nothing.
+            'position' => $taskDoneStatus['position']
         ];
-        // In case the section finish is in the last position, we will swap them to make their state clear.
-        // (if it's finished, it should be last)
-        if ($lastStatus['position'] == $baseStatus3['position']) {
-            $data['position'] = $baseStatus3['position'];
-            $baseStatus3['position'] = $lastStatus['id'] + 1;
 
-            $taskStatusModel->save($baseStatus3);
-        } else {
-            $data['position'] = $lastStatus['id'] + 1;
-        }
-
+        $taskDoneStatus['position'] += 1;
+        $taskStatusModel->save($taskDoneStatus);
+        
         try {
             $taskStatusModel->insert($data);
         } catch (Exception $e) {

@@ -69,11 +69,11 @@
                             <div class="card-block accordion-block">
                                 <?php foreach ($users as $user) : ?>
                                     <div id="accordion" role="tablist" aria-multiselectable="true">
-                                        <div class="accordion-panel" onclick="changeIcon(<?= $user['id'] ?>)">
+                                        <div class="accordion-panel">
                                             <div class="accordion-heading" role="tab" id="headingOne">
                                                 <h3 class="card-title accordion-title">
                                                     <!-- class="accordion-msg" -->
-                                                    <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $user['id'] ?>" aria-expanded="true" aria-controls="collapse-<?= $user['id'] ?>">
+                                                    <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;">
                                                         <div class="row my-3 mx-1">
                                                             <div class="col-auto p-r-0">
                                                                 <div class="u-img">
@@ -108,7 +108,7 @@
                                                                     <?php endif ?>
                                                                 <?php endif ?>
                                                             </div>
-                                                            <div class="justify-content-center d-flex" style="height: 15px;" id="show-project-<?= $user['id'] ?>">
+                                                            <div class="justify-content-center d-flex" id="show-project-<?= $user['id'] ?>" onclick="changeIcon(<?= $user['id'] ?>)" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $user['id'] ?>" aria-expanded="true" aria-controls="collapse-<?= $user['id'] ?>">
                                                                 <i class="icofont icofont-curved-down"></i>
                                                             </div>
                                                         </div>
@@ -123,7 +123,7 @@
                                                         </div>
                                                         <div class="card-block">
                                                             <ul class="media-list mt-3">
-                                                                <?php if ($user['projects']) : ?>
+                                                                <?php if (!empty($user['projects'])) : ?>
                                                                     <?php foreach ($user['projects'] as $project) : ?>
                                                                         <hr>
                                                                         <li class="media d-flex">
@@ -133,7 +133,7 @@
                                                                                 </a>
                                                                             </div>
                                                                             <div class="media-body w-100">
-                                                                                <a href="<?= base_url("project/{$project['id']}") ?>" class="text-decoration-none">
+                                                                                <a href="<?= base_url("project/{$project['prefix']}") ?>" class="text-decoration-none">
                                                                                     <h6 class="media-heading txt-primary">[<?= $project['prefix'] ?>] <?= $project['name'] ?></h6>
                                                                                 </a>
                                                                                 <p class="text-truncate"><?= $project['descriptions'] ?></p>

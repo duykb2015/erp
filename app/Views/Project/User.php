@@ -156,51 +156,107 @@
                                 <div class="card-block">
                                     <ul class="media-list mt-3">
                                         <?php $currentUser = session()->get('user_id') ?>
+
                                         <?php if (!empty($members)) : ?>
-                                            <?php foreach ($members as $member) : ?>
-                                                <li class="media d-flex">
-                                                    <div class="media-left">
-                                                        <a href="#">
-                                                            <img class="media-object img-radius comment-img" src="<?= base_url() . '/imgs/' . $member['photo'] ?>" alt="Generic placeholder image">
-                                                        </a>
-                                                    </div>
-                                                    <div class="media-body w-100">
-                                                        <h6 class="media-heading txt-primary"><?= $member['username'] ?> <?= session()->get('user_id') == $member['user_id'] ? '(Bạn)' : '' ?><span class="f-12 text-muted m-l-5"><?= PROJECT_ROLE[$member['role']] ?></span></h6>
-                                                        <p><?= $member['email'] ?></p>
-                                                        <hr>
-                                                    </div>
-                                                    <div class="media-right">
-                                                        <?php if (session()->get('user_id') == $project['owner'] && OWNER != $member['role']) : ?>
-                                                            <div class="dropdown-secondary dropdown d-inline-block" id="context-menu">
-                                                                <button class="btn btn-sm btn-primary waves-light" type="button" id="owner-power-<?= $member['project_user_id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                                <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                    <?php if (MEMBER == $member['role']) : ?>
-                                                                        <a class="dropdown-item waves-light waves-effect" onclick="changeRoleToLeader(<?= $member['project_user_id'] ?>, <?= $project['id'] ?>)"><i class="icofont icofont-arrow-up "></i> Thăng trưởng nhóm</a>
-                                                                    <?php endif ?>
-                                                                    <?php if (LEADER == $member['role']) : ?>
-                                                                        <a class="dropdown-item waves-light waves-effect" onclick="changeRoleToMember(<?= $member['project_user_id'] ?>)"><i class="icofont icofont-arrow-down"></i> Về thành viên</a>
-                                                                    <?php endif ?>
-                                                                    <a class="dropdown-item waves-light waves-effect" id="btn-delete-member" onclick="removeUser(<?= $member['project_user_id'] ?>, 0)"><i class="icofont icofont-ui-delete p-r-5"></i>Xoá khỏi dự án</a>
-                                                                </div>
+                                            <div class="card-block accordion-block">
+                                                <?php foreach ($members as $user) : ?>
+                                                    <div id="accordion" role="tablist" aria-multiselectable="true">
+                                                        <div class="accordion-panel">
+                                                            <div class="accordion-heading" role="tab" id="headingOne">
+                                                                <h3 class="card-title accordion-title">
+                                                                    <!-- class="accordion-msg" -->
+                                                                    <div class="card shadow-sm border bg-light text-dark m-t-20 m-l-20 m-r-20 m-b-0" style="border-bottom-right-radius: unset;border-bottom-left-radius: unset;">
+                                                                        <div class="row my-3 mx-1">
+                                                                            <div class="col-auto p-r-0">
+                                                                                <div class="u-img">
+                                                                                    <img src="<?= base_url("imgs/{$user['photo']}") ?>" alt="user image" width="70" height="70" class="img-radius cover-img">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col">
+                                                                                <h6 class="m-b-5"><b><a class="text-decoration-none"><?= $user['username'] ?></a></b> <span class="f-12d m-l-5"><?= PROJECT_ROLE[$user['role']] ?></span></h6>
+                                                                                <p class="m-b-0"><?= $user['email'] ?></p>
+                                                                            </div>
+                                                                            <div class="col-1">
+                                                                                <?php if (session()->get('user_id') == $project['owner'] && OWNER != $user['role']) : ?>
+                                                                                    <div class="dropdown-secondary dropdown d-inline-block" id="context-menu">
+                                                                                        <button class="btn btn-sm btn-primary waves-light" type="button" id="owner-power-<?= $user['project_user_id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                            <?php if (MEMBER == $user['role']) : ?>
+                                                                                                <a class="dropdown-item waves-light waves-effect" onclick="changeRoleToLeader(<?= $user['project_user_id'] ?>, <?= $project['id'] ?>)"><i class="icofont icofont-arrow-up "></i> Thăng trưởng nhóm</a>
+                                                                                            <?php endif ?>
+                                                                                            <?php if (LEADER == $user['role']) : ?>
+                                                                                                <a class="dropdown-item waves-light waves-effect" onclick="changeRoleToMember(<?= $user['project_user_id'] ?>)"><i class="icofont icofont-arrow-down"></i> Về thành viên</a>
+                                                                                            <?php endif ?>
+                                                                                            <a class="dropdown-item waves-light waves-effect" id="btn-delete-member" onclick="removeUser(<?= $user['project_user_id'] ?>, 0)"><i class="icofont icofont-ui-delete p-r-5"></i>Xoá khỏi dự án</a>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                <?php else : ?>
+                                                                                    <?php if (session()->get('user_id') == $user['user_id'] && session()->get('user_id') != $project['owner']) : ?>
+                                                                                        <div class="dropdown-secondary dropdown d-inline-block" id="context-menu">
+                                                                                            <button class="btn btn-sm btn-primary waves-light" type="button" id="owner-power-<?= $user['project_user_id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
+                                                                                            <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                                <a class="dropdown-item waves-light waves-effect" id="btn-delete-member" onclick="removeUser(<?= $user['project_user_id'] ?>, 1)"><i class="icofont icofont-ui-delete p-r-5"></i>Rời khỏi dự án</a>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    <?php endif ?>
+                                                                                <?php endif ?>
+                                                                            </div>
+                                                                            <?php if (session()->get('user_id') != $user['user_id']) : ?>
+                                                                                <div class="justify-content-center d-flex" onclick="changeIcon(<?= $user['user_id'] ?>)" id="show-project-<?= $user['user_id'] ?>" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $user['user_id'] ?>" aria-expanded="true" aria-controls="collapse-<?= $user['user_id'] ?>">
+                                                                                    <i class="icofont icofont-curved-down"></i>
+                                                                                </div>
+                                                                            <?php else : ?>
+                                                                                <div class="justify-content-center d-flex">
+                                                                                    &nbsp;
+                                                                                </div>
+                                                                            <?php endif ?>
+                                                                        </div>
+                                                                    </div>
+                                                                </h3>
                                                             </div>
-                                                        <?php else : ?>
-                                                            <?php if (session()->get('user_id') == $member['user_id'] && session()->get('user_id') != $project['owner']) : ?>
-                                                                <div class="dropdown-secondary dropdown d-inline-block" id="context-menu">
-                                                                    <button class="btn btn-sm btn-primary waves-light" type="button" id="owner-power-<?= $member['project_user_id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                                    <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                        <a class="dropdown-item waves-light waves-effect" id="btn-delete-member" onclick="removeUser(<?= $member['project_user_id'] ?>, 1)"><i class="icofont icofont-ui-delete p-r-5"></i>Rời khỏi dự án</a>
+                                                            <?php if (session()->get('user_id') != $user['user_id']) : ?>
+                                                                <div id="collapse-<?= $user['user_id'] ?>" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                                                    <div class="accordion-content accordion-desc">
+                                                                        <div class="card border" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
+                                                                            <div class="card-header">
+                                                                                <h5 class="card-header-text">Dự án thành viên đang tham gia chung</h5>
+
+                                                                            </div>
+                                                                            <div class="card-block">
+                                                                                <ul class="media-list mt-3">
+                                                                                    <?php if (!empty($user['projects'])) : ?>
+                                                                                        <?php foreach ($user['projects'] as $project) : ?>
+                                                                                            <hr>
+                                                                                            <li class="media d-flex">
+                                                                                                <div class="media-left">
+                                                                                                    <a href="#">
+                                                                                                        <img class="media-object img-radius comment-img" src="<?= base_url("imgs/{$project['photo']}") ?>" alt="Generic placeholder image">
+                                                                                                    </a>
+                                                                                                </div>
+                                                                                                <div class="media-body w-100">
+                                                                                                    <a href="<?= base_url("project/{$project['prefix']}") ?>" class="text-decoration-none">
+                                                                                                        <h6 class="media-heading txt-primary">[<?= $project['prefix'] ?>] <?= $project['name'] ?></h6>
+                                                                                                    </a>
+                                                                                                    <p class="text-truncate"><?= $project['descriptions'] ?></p>
+                                                                                                </div>
+                                                                                            </li>
+                                                                                        <?php endforeach ?>
+                                                                                    <?php endif ?>
+                                                                                </ul>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             <?php endif ?>
-                                                        <?php endif ?>
+                                                        </div>
                                                     </div>
-                                                </li>
-                                            <?php endforeach ?>
+                                                <?php endforeach ?>
+                                                <div class="m-20">
+                                                    <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
+                                                </div>
+                                            </div>
                                         <?php endif ?>
                                     </ul>
-                                </div>
-                                <div class="mb-3">
-                                    <?= !empty($pager) ? $pager->links('default', 'default') : '' ?>
                                 </div>
                             </div>
                         </div>
@@ -667,6 +723,21 @@
                 deleteUserAlreadyClick = false
                 ownerPower.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
             })
+    }
+
+    var changeIconDirectionUp = true
+
+    function changeIcon(id) {
+        direction = document.getElementById(`show-project-${id}`)
+        if (changeIconDirectionUp) {
+            direction.innerHTML = '<i class="icofont icofont-curved-up"></i>'
+            changeIconDirectionUp = false
+            return
+        }
+
+        direction.innerHTML = '<i class="icofont icofont-curved-down"></i>'
+        changeIconDirectionUp = true
+        return
     }
 </script>
 <?= $this->endSection() ?>

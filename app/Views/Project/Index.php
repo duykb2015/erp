@@ -230,7 +230,7 @@
                                             <div class="col-3">
                                                 <div class="card border">
                                                     <div class="card-block">
-                                                        <form action="" method="post" onsubmit="createSection(event)" id="save-section">
+                                                        <form action="" method="post" onsubmit="createTaskStatus(event)" id="save-section">
                                                             <div class="input-group">
                                                                 <input type="hidden" id="project-id" value="<?= $project['id'] ?>">
                                                                 <input type="text" name="section_name" id="section-name" class="form-control hidden">
@@ -729,7 +729,7 @@
 
     var createSectionAlreadyActive = false
 
-    function createSection(event) {
+    function createTaskStatus(event) {
         event.preventDefault()
 
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'

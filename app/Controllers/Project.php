@@ -285,7 +285,30 @@ class Project extends BaseController
                 ])->join('user', 'user.id = project_user.user_id')
                     ->where('project_user.project_id', $project['id'])
                     ->paginate(5);
+
+                foreach ($members as $key => $member) {
+                    if (session()->get('user_id') == $member['user_id']) continue;
+
+                    $projectIDs = $projectUserModel->select('project_id as id')
+                        ->where("user_id = ({$member['user_id']})")
+                        ->groupBy('id')
+                        ->find();
+
+                    $projectIDs = collect($projectIDs)->filter(function ($id) use ($projectUserModel) {
+                        $isJoinWith = $projectUserModel->where('project_id', $id)
+                            ->where('user_id', session()->get('user_id'))
+                            ->first();
+                        if (!$isJoinWith) {
+                            return FALSE;
+                        }
+                        return TRUE;
+                    })->toArray();
+
+                    $members[$key]['projects'] = $projectModel->find(collect($projectIDs)->pluck('id')->toArray());
+                }
+
                 $data['members'] = $members;
+
                 $data['pager'] = $projectUserModel->pager;
 
                 $data['owner'] = collect($members)->where('role', 'owner')->first();
@@ -451,12 +474,12 @@ class Project extends BaseController
             'user_id' => session()->get('user_id'),
             'role' => OWNER
         ];
-        $pid = $projectUserModel->insert($data);
+        $projectUserModel->insert($data);
         unset($data);
 
         $userName = session()->get('name');
         (new ProjectLog)->insert([
-            'project_id' => $pid,
+            'project_id' => $projectID,
             'log' => "<b>$userName</b> đã khởi tạo dự án."
         ]);
 
