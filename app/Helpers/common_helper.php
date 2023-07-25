@@ -287,3 +287,24 @@ function getFileSize(string $filename, int $index = 0)
             return $size;
     }
 }
+
+function getPriorityColor($priority)
+{
+    switch ($priority) {
+        case LOW:
+            return '#0065ff';
+
+        case NORMAL:
+            return '#ffab00';
+
+        case HIGH:
+            return '#ff5630';
+            
+        case HIGHEST:
+            return '#ff5630';
+
+        default:
+            // LOWEST
+            return '#0065ff';
+    }
+}

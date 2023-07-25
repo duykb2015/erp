@@ -39,7 +39,7 @@ class TaskStatus extends BaseController
 
         $taskDoneStatus['position'] += 1;
         $taskStatusModel->save($taskDoneStatus);
-        
+
         try {
             $taskStatusModel->insert($data);
         } catch (Exception $e) {
@@ -57,7 +57,7 @@ class TaskStatus extends BaseController
         $validation->setRules(
             [
                 'task_status_id'   => 'required|integer|is_not_unique[task_status.id]',
-                'task_status_name' => 'required|string|min_length[1]|max_length[255]|is_unique[task_status.title]',
+                'task_status_name' => 'required|string|min_length[1]|max_length[255]',
             ]
         );
 
@@ -66,6 +66,11 @@ class TaskStatus extends BaseController
         }
 
         $taskStatusModel = new ModelsTaskStatus();
+        $statusNameExist = $taskStatusModel->where('title', $taskStatusData['task_status_name'])->first();
+        if ($taskStatusData['task_status_id'] != $statusNameExist['id']) {
+            return $this->handleResponse(['errors' => ['task_status_name' => 'Trạng thái đã tồn tại']], 400);
+        }
+
 
         $data = [
             'id' => $taskStatusData['task_status_id'],

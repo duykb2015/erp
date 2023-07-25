@@ -107,7 +107,7 @@ define('HIGHEST', 'highest');
 define('TASK_PRIORITY', [
     LOWEST => 'Rất thấp',
     LOW => 'Thấp',
-    NORMAL => 'Bình thường',
+    NORMAL => 'Trung bình',
     HIGH => 'Cao',
     HIGHEST => 'Rất cao',
 ]);

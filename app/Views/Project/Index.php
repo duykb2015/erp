@@ -56,6 +56,26 @@
     .hover-pointer:hover {
         cursor: pointer !important;
     }
+
+    .card-border-0 {
+        border-top: 4px solid #007bff;
+    }
+
+    .card-border-1 {
+        border-top: 4px solid #e9eaee;
+    }
+
+    .card-border-2 {
+        border-top: 4px solid #007bff;
+    }
+
+    .card-border-3 {
+        border-top: 4px solid #007bff;
+    }
+
+    .card-border-4 {
+        border-top: 4px solid #28a745;
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -140,80 +160,53 @@
                                                                 <div class="col-md-12 section-container" id="draggableMultiple">
                                                                     <?php if (!empty($status['tasks'])) : ?>
                                                                         <?php foreach ($status['tasks'] as $task) : ?>
-                                                                            <!-- <div class="col">
-                                                                                <div class="card card-border-default">
+                                                                            <div class="col ">
+                                                                                <div class="card border-left border-right border-bottom card-border-<?= $status['base_status'] ?>">
                                                                                     <div class="card-header text-truncate">
                                                                                         <a href="<?= base_url("project/{$project['prefix']}/task/{$task['task_key']}") ?>" class="card-title text-decoration-none">[<?= $task['task_key'] ?>] <?= $task['title'] ?></a>
                                                                                     </div>
-                                                                                    <div class="card-block">
-                                                                                        <p class="task-due"><strong>Đến hạn: </strong><strong class="label label-primary"><?= $task['due_at'] ?? 'Trống' ?></strong></p>
+                                                                                    <div class="card-block p-b-10">
+                                                                                        <p class="task-due"><strong>Đến hạn: </strong><span class="badge badge-secondary" style="background-color: gray;"><?= $task['due_at'] ?? 'Trống' ?></span></p>
                                                                                     </div>
                                                                                     <div class="card-footer">
                                                                                         <div class="task-list-table">
-                                                                                            <a href="#!"><img class="img-fluid img-radius" src="libraries\assets\images\avatar-1.jpg" alt="1"></a>
+                                                                                            <?php if (!empty($task['user_photo'])) : ?>
+                                                                                                <a><img class="img-fluid rounded-circle" width="40" height="40" src="<?= base_url("imgs/{$task['user_photo']}") ?>" alt="avatar" data-toggle="tooltip" data-placement="top" title="<?= $task['assignee_name'] ?>"></a>
+                                                                                            <?php else : ?>
+                                                                                                <a><img class="img-fluid rounded-circle" width="40" height="40" src="<?= base_url("defaultuser.jpg") ?>" alt="avatar" data-toggle="tooltip" data-placement="top" title="Trống"></a>
+                                                                                            <?php endif ?>
                                                                                         </div>
                                                                                         <div class="task-board">
                                                                                             <div class="dropdown-secondary dropdown">
-                                                                                                <button class="btn btn-primary btn-mini dropdown-toggle waves-effect waves-light" type="button" id="dropdown1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Normal</button>
-                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown1" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><span class="point-marker bg-danger"></span>Highest priority</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><span class="point-marker bg-warning"></span>High priority</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect active" href="#!"><span class="point-marker bg-success"></span>Normal priority</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><span class="point-marker bg-info"></span>Low priority</a>
-                                                                                                </div>
+                                                                                                <button class="btn btn-mini waves-effect waves-light text-truncate" style="height: 26px; background-color: <?= getPriorityColor($task['priority']) ?>; color: white;" type="button" data-toggle="tooltip" data-placement="top" title="Mức độ ưu tiên: <?= TASK_PRIORITY[$task['priority']] ?>"><?= TASK_PRIORITY[$task['priority']] ?></button>
                                                                                             </div>
-                                                                                            <div class="dropdown-secondary dropdown">
-                                                                                                <button class="btn btn-default btn-mini dropdown-toggle waves-light b-none txt-muted" type="button" id="dropdown2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Open</button>
-                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown2" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                                    <a class="dropdown-item waves-light waves-effect active" href="#!">Open</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">On hold</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Resolved</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Closed</a>
-                                                                                                    <div class="dropdown-divider"></div>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Dublicate</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Invalid</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!">Wontfix</a>
+
+                                                                                            <div class="dropdown-secondary dropdown" id="context-menu-<?= $task['id'] ?>">
+                                                                                                <button class="btn btn-sm btn-primary dropdown-toggle btn-mini waves-light b-none text-truncate" style="height: 26px; max-width: 80px;" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?= $status['title'] ?></button>
+                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                                    <?php foreach ($taskStatus as $subStatus) : ?>
+                                                                                                        <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
+                                                                                                            continue;
+                                                                                                        } ?>
+                                                                                                        <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
+                                                                                                            <i class="icofont icofont-listine-dots"></i>
+                                                                                                            <?= $subStatus['title'] ?>
+                                                                                                        </a>
+                                                                                                    <?php endforeach ?>
                                                                                                 </div>
                                                                                             </div>
                                                                                             <div class="dropdown-secondary dropdown">
                                                                                                 <button class="btn btn-default btn-mini dropdown-toggle waves-light b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                                 <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-ui-alarm"></i> Check in</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-attachment"></i> Attach screenshot</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-spinner-alt-5"></i> Reassign</a>
-                                                                                                    <div class="dropdown-divider"></div>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-ui-edit"></i> Edit task</a>
-                                                                                                    <a class="dropdown-item waves-light waves-effect" href="#!"><i class="icofont icofont-close-line"></i> Remove</a>
+                                                                                                    <a class="dropdown-item waves-light waves-effect" href="<?= base_url("project/{$project['prefix']}/task/{$task['task_key']}") ?>"><i class="icofont icofont-eye"></i> Xem chi tiết</a>
+                                                                                                    <?php if (session()->get('user_id') == $task['created_by'] || OWNER == $userRole || LEADER == $userRole) : ?>
+                                                                                                        <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-close-line"></i> Xoá</a>
+                                                                                                    <?php endif ?>
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div> -->
-
-                                                                            <div class="sortable-moves border box d-block ">
-                                                                                <p class="task-name hover-pointer text-truncate" id="task-num-<?= $task['id'] ?>" onclick="redirect_url('<?= base_url('project/') . $project['prefix'] . '/task/' . $task['task_key'] ?>')"><?= $task['title'] ?></p>
-                                                                                <p><b>Người được giao: </b><?= $task['assignee_name'] ?? 'Trống' ?></p>
-                                                                                <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assignee']) || OWNER == $userRole) : ?>
-                                                                                    <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
-                                                                                        <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
-                                                                                        <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                            <?php foreach ($taskStatus as $subStatus) : ?>
-                                                                                                <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
-                                                                                                    continue;
-                                                                                                } ?>
-                                                                                                <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
-                                                                                                    <i class="icofont icofont-listine-dots"></i>
-                                                                                                    <?= $subStatus['title'] ?>
-                                                                                                </a>
-                                                                                            <?php endforeach ?>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                <?php endif ?>
-
-                                                                                <?php if (session()->get('user_id') == $task['created_by'] || OWNER == $userRole || LEADER == $userRole) : ?>
-                                                                                    <button class="btn btn-sm btn-danger waves-light f-right" id="btn-delete-task-<?= $task['id'] ?>" type="button" onclick="deleteTask(<?= $task['id'] ?>)"><i class="icofont icofont-bin"></i></button>
-                                                                                <?php endif ?>
                                                                             </div>
                                                                         <?php endforeach ?>
                                                                     <?php else : ?>

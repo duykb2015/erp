@@ -240,10 +240,17 @@ class Project extends BaseController
                         $builderWhere = 'task.assignee IS NULL';
                         $taskModel->where($builderWhere);
                     }
-                    $taskStatus[$key]['tasks'] = $taskModel->select(['*', 'task.id as id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as assignee_name'])
+                    $taskStatus[$key]['tasks'] = $taskModel->select(['*', 'task.id as id', 'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as assignee_name', 'user.photo as user_photo'])
                         ->join('user', 'user.id = task.assignee', 'left')
                         ->where('parent_id = 0')
                         ->where('task.task_status_id', $status['id'])->findAll();
+                    foreach ($taskStatus[$key]['tasks'] as $subKey => $task) {
+                        if ($task['due_at']) {
+                            $dueDate = Carbon::createFromDate($task['due_at']);
+                            $dueDate->setLocale('vi');
+                            $taskStatus[$key]['tasks'][$subKey]['due_at'] = $dueDate->diffForHumans();
+                        }
+                    }
                 }
                 $data['taskStatus'] = collect($taskStatus)->sortBy('position')->toArray();
 
