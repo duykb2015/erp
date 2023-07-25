@@ -284,6 +284,17 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label for="reporter" class="col-form-label">Người nhận báo cáo</label>
+                        <select id="reporter" class="form-control">
+                            <option value="">Trống</option>
+                            <?php if (!empty($reporters)) : ?>
+                                <?php foreach ($reporters as $reporter) : ?>
+                                    <option value="<?= $reporter['user_id'] ?>"><?= $reporter['name'] ?></option>
+                                <?php endforeach ?>
+                            <?php endif ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label for="task_descriptions" class="col-form-label">Chọn mức độ ưu tiên</label>
                         <select id="task_priority" name="priority" class="form-control">
                             <?php foreach (TASK_PRIORITY as $key => $priority) : ?>
@@ -578,6 +589,7 @@
         data.append('name', taskName.value)
         data.append('task_status', document.getElementById('choose_section').value)
         data.append('assignee', document.getElementById('assignee').value)
+        data.append('reporter', document.getElementById('reporter').value)
         data.append('priority', document.getElementById('task_priority').value)
         data.append('start_date', document.getElementById('task_start_date').value)
         data.append('due_date', document.getElementById('task_due_date').value)

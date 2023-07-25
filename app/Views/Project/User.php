@@ -513,6 +513,8 @@
                     message: "Thành công"
                 });
 
+                changeRoleToLeaderAlreadyClick = false
+                ownerPower.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
                 setTimeout(() => {
                     window.location.reload()
                 }, 300)
@@ -539,6 +541,7 @@
 
         const data = new FormData()
         data.append('project_user_id', projectUserId)
+        data.append('project_id', <?= $project['id'] ?>)
 
         var requestOptions = {
             method: 'POST',

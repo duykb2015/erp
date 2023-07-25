@@ -80,15 +80,18 @@ class Task extends BaseController
 
         // Get all assignees
         $projectUserModel = new ProjectUser();
+
+        $whereRole = '"' . OWNER . '","' . LEADER . '"';
+
         $assignees = $projectUserModel->select([
             'user.id as user_id',
             'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
         ])->join('user', 'user.id = project_user.user_id')
             ->where('project_user.project_id', $project['id'])
             ->where('project_user.user_id !=', session()->get('user_id'))
+            ->where("project_user.role NOT IN({$whereRole})")
             ->find();
 
-        $whereRole = '"' . OWNER . '","' . LEADER . '"';
         $reporters = $projectUserModel->select([
             'user.id as user_id',
             'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
@@ -373,17 +376,17 @@ class Task extends BaseController
         $taskLogModel = new TaskLog();
 
         $userName = session()->get('name');
-        if (0 != $taskRawData['parent_id']) {
+        if (isset($taskRawData['parent_id']) && 0 != $taskRawData['parent_id']) {
             $taskLogModel->insert([
                 'task_id' => $taskRawData['parent_id'],
                 'log' => "<b>{$userName}</b> thêm mới một công việc phụ.",
             ]);
+        } else {
+            $taskLogModel->insert([
+                'task_id' => $taskID,
+                'log' => "<b>{$userName}</b> đã tạo mới công việc.",
+            ]);
         }
-
-        $taskLogModel->insert([
-            'task_id' => $taskID,
-            'log' => "<b>{$userName}</b> đã tạo mới công việc.",
-        ]);
 
         return $this->handleResponse(['task_id' => $taskID]);
     }

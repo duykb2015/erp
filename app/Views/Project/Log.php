@@ -60,25 +60,33 @@
                                 <div class="card-header">
                                     <div class="row justify-content-center">
                                         <div class="col-12">
-                                            <h5 class="card-header-text sub-title d-flex">Thống kê dự án</h5>
+                                            <h5 class="card-header-text sub-title d-flex">Các hoạt động trong dự án</h5>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="card-block">
-                                    <div class="row">
-                                        <div class="col-md-12 col-lg-12">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <h5>Công việc</h5>
-                                                    <span>Thống kế số lượng công việc theo từng trạng thái trong dự án.</span>
-
+                                    <ul class="media-list revision-blc">
+                                        <?php if (!empty($projectLog)) : ?>
+                                            <?php foreach ($projectLog as $log) : ?>
+                                                <hr>
+                                                <li class="media d-flex m-t-5 m-b-15">
+                                                    <div class="p-l-15 p-r-15 d-inline-block v-middle">
+                                                        <a class="btn btn-outline-primary btn-lg txt-muted btn-icon"><i class="icofont icofont-clock-time" style="margin-right: 0px !important;"></i></a>
+                                                    </div>
+                                                    <div class="d-inline-block">
+                                                        <?= $log['log'] ?>
+                                                        <div class="media-annotation"><?= $log['created_at'] ?></div>
+                                                    </div>
+                                                </li>
+                                            <?php endforeach ?>
+                                        <?php else : ?>
+                                            <li>
+                                                <div class="d-inline-block">
+                                                    Chưa có nhật ký hoạt động nào.
                                                 </div>
-                                                <div class="card-block">
-                                                    <div id="chart_Donut" style="width: 100%; height: 300px;"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                            </li>
+                                        <?php endif ?>
+                                    </ul>
                                 </div>
                             </div>
                         </div>

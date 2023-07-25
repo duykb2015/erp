@@ -5,12 +5,15 @@ namespace App\Controllers;
 use App\Models\Attachment;
 use App\Models\Comment;
 use App\Models\Project as ModelsProject;
+use App\Models\ProjectLog;
 use App\Models\ProjectUser;
 use App\Models\Task as ModelsTask;
 use App\Models\TaskAttachment;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonInterval;
+use Carbon\CarbonPeriod;
 use CodeIgniter\I18n\Time;
 use Config\Services;
 use Exception;
@@ -244,14 +247,25 @@ class Project extends BaseController
                 }
                 $data['taskStatus'] = collect($taskStatus)->sortBy('position')->toArray();
 
+                $whereRole = '"' . OWNER . '","' . LEADER . '"';
                 $assignees = $projectUserModel->select([
                     'user.id as user_id',
                     'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
                 ])->join('user', 'user.id = project_user.user_id')
                     ->where('project_user.project_id', $project['id'])
                     ->where('project_user.user_id !=', session()->get('user_id'))
+                    ->where("project_user.role NOT IN({$whereRole})")
                     ->find();
                 $data['assignees'] = $assignees;
+
+                $reporters = $projectUserModel->select([
+                    'user.id as user_id',
+                    'COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name',
+                ])->join('user', 'user.id = project_user.user_id')
+                    ->where('project_user.project_id', $project['id'])
+                    ->where("project_user.role IN({$whereRole})")
+                    ->find();
+                $data['reporters'] = $reporters;
 
                 break;
 
@@ -326,6 +340,14 @@ class Project extends BaseController
                 break;
 
             case 'Log':
+                $projectLog = (new ProjectLog())->where('project_id', $project['id'])->orderBy('id', 'DESC')->find();
+
+                foreach ($projectLog as $key => $log) {
+                    $time                           = new Time($log['created_at']);
+                    $projectLog[$key]['created_at'] = $time->humanize();
+                }
+
+                $data['projectLog'] = $projectLog;
                 break;
 
             default:
@@ -353,7 +375,7 @@ class Project extends BaseController
         $validation->setRules(
             [
                 'project_name'         => 'required|string|min_length[5]|max_length[255]|is_unique[project.name]',
-                'project_prefix'          => 'required|string|min_length[1]|max_length[10]|is_unique[project.prefix]',
+                'project_prefix'       => 'required|string|min_length[1]|max_length[10]|is_unique[project.prefix]',
                 'project_descriptions' => 'string|max_length[512]',
                 "project_status"       => 'in_list[' . implode(',', array_keys(PROJECT_STATUS)) . ']',
             ],
@@ -429,8 +451,14 @@ class Project extends BaseController
             'user_id' => session()->get('user_id'),
             'role' => OWNER
         ];
-        $projectUserModel->insert($data);
+        $pid = $projectUserModel->insert($data);
         unset($data);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $pid,
+            'log' => "<b>$userName</b> đã khởi tạo dự án."
+        ]);
 
         $data = collect([
             [
@@ -503,6 +531,15 @@ class Project extends BaseController
         $data['role'] = 'member';
         $projectUserModel->insert($data);
 
+        $member = (new User)->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name')
+            ->find($userID);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectID,
+            'log' => "<b>{$userName}</b> đã thêm {$member['name']} vào dự án."
+        ]);
+
         return redirectWithMessage(base_url("project/{$projectPrefix}/user"), 'success', 'success', FALSE);
     }
 
@@ -537,6 +574,18 @@ class Project extends BaseController
         }
 
         $projectUserModel->delete($projectUserID);
+
+        $data['role'] = 'member';
+        $projectUserModel->insert($data);
+
+        $member = (new User)->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name')
+            ->find($projectUser['user_id']);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectUser['project_id'],
+            'log' => "<b>{$userName}</b> xoá {$member['name']} khỏi dự án."
+        ]);
 
         return $this->handleResponse([]);
     }
@@ -648,6 +697,12 @@ class Project extends BaseController
 
         $projectModel->update($projectID, $data);
 
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectID,
+            'log' => "<b>{$userName}</b> cập nhật thông tin dự án."
+        ]);
+
         return redirectWithMessage(base_url("project/{$projectPrefix}/setting"), 'success', 'success', FALSE);
     }
 
@@ -672,6 +727,12 @@ class Project extends BaseController
         // @unlink(UPLOAD_PATH . $user['photo']);
 
         $projectModel->update($projectID, ['photo' => $fileName]);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectID,
+            'log' => "<b>{$userName}</b> đã thay đổi ảnh đại diện dự án."
+        ]);
 
         return $this->handleResponse($fileName);
     }
@@ -815,6 +876,7 @@ class Project extends BaseController
         }
 
         $projectUserModel = new ProjectUser();
+        $projectUser = $projectUserModel->find($projectUserData['project_user_id']);
 
         $oldLeader = $projectUserModel->where('project_id', $projectUserData['project_id'])
             ->where('role', LEADER)->find();
@@ -823,6 +885,15 @@ class Project extends BaseController
         }
 
         $projectUserModel->update($projectUserData['project_user_id'], ['role' => LEADER]);
+
+        $member = (new User)->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name')
+            ->find($projectUser['user_id']);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectUserData['project_id'],
+            'log' => "<b>{$userName}</b> cấp quyền cho <b>{$member['name']}</b> làm trưởng nhóm."
+        ]);
 
         return $this->handleResponse([]);
     }
@@ -843,9 +914,18 @@ class Project extends BaseController
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
 
-
         $projectUserModel = new ProjectUser();
+        $projectUser = $projectUserModel->find($projectUserData['project_user_id']);
         $projectUserModel->update($projectUserData['project_user_id'], ['role' => MEMBER]);
+
+        $member = (new User)->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name')
+            ->find($projectUser['user_id']);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectUserData['project_id'],
+            'log' => "<b>{$userName}</b> huỷ quyền trường nhóm của <b>{$member['name']}</b>."
+        ]);
 
         return $this->handleResponse([]);
     }
@@ -868,8 +948,14 @@ class Project extends BaseController
 
         $projectModel = new ModelsProject();
         $projectModel->withDeleted()->update($projectData['project_id'], [
-            'status' => INITIALIZE,
+            'status' => ACTIVE,
             'deleted_at' => NULL
+        ]);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectData['project_id'],
+            'log' => "<b>{$userName}</b> mở lại dự án."
         ]);
 
         return $this->handleResponse([]);
@@ -893,6 +979,12 @@ class Project extends BaseController
         $projectModel = new ModelsProject();
         $projectModel->update($projectID, ['status' => 'close']);
         $projectModel->delete($projectID);
+
+        $userName = session()->get('name');
+        (new ProjectLog)->insert([
+            'project_id' => $projectID['project_id'],
+            'log' => "<b>{$userName}</b> đóng dự án."
+        ]);
 
         return $this->handleResponse([]);
     }
