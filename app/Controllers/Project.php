@@ -832,55 +832,64 @@ class Project extends BaseController
             $projectUsers = $projectUserModel->select('id')->where('project_id', $projectID)->find();
             $projectUserIds = collect($projectUsers)->pluck('id')->toArray();
             //Delete member
-            $projectUserModel->delete($projectUserIds);
+            if ($projectUserIds) {
+                $projectUserModel->delete($projectUserIds);
+            }
 
             $taskStatus   = $taskStatusModel->select('id')->where('project_id', $projectID)->find();
             $statusIds = collect($taskStatus)->pluck('id')->toArray();
+            if ($statusIds) {
+                $tasks = $taskModel->select('id')->whereIn('task_status_id', $statusIds)->find();
 
-            $tasks = $taskModel->select('id')->whereIn('task_status_id', $statusIds)->find();
-            $taskIds = collect($tasks)->pluck('id')->toArray();
-            if (!empty($taskIds)) {
+                $taskIds = collect($tasks)->pluck('id')->toArray();
+                if (!empty($taskIds)) {
 
-                $attachmentTasks = $attachmentModel->select([
-                    'attachment.id as attachment_id',
-                    'attachment.name',
-                    'relation_attachment.id as relation_attachment_id'
-                ])->join('relation_attachment', 'relation_attachment.attachment_id = attachment.id')
-                    ->join('task', 'task.id = relation_attachment.relation_id')
-                    ->where('relation_attachment.relation_type', 'task')
-                    ->whereIn('relation_attachment.relation_id', $taskIds)->find();
+                    $attachmentTasks = $attachmentModel->select([
+                        'attachment.id as attachment_id',
+                        'attachment.name',
+                        'relation_attachment.id as relation_attachment_id'
+                    ])->join('relation_attachment', 'relation_attachment.attachment_id = attachment.id')
+                        ->join('task', 'task.id = relation_attachment.relation_id')
+                        ->where('relation_attachment.relation_type', 'task')
+                        ->whereIn('relation_attachment.relation_id', $taskIds)->find();
 
-                $attachmentTaskIds         = collect($attachmentTasks)->pluck('attachment_id')->toArray();
-                $relationAttachmentTaskIds = collect($attachmentTasks)->pluck('relation_attachment_id')->toArray();
-                if (!empty($attachmentTaskIds)) {
-                    $relationAttachmentModel->delete($relationAttachmentTaskIds);
-                    $attachmentModel->delete($attachmentTaskIds);
+                    $attachmentTaskIds         = collect($attachmentTasks)->pluck('attachment_id')->toArray();
+                    $relationAttachmentTaskIds = collect($attachmentTasks)->pluck('relation_attachment_id')->toArray();
+                    if (!empty($attachmentTaskIds)) {
+                        $relationAttachmentModel->delete($relationAttachmentTaskIds);
+                        $attachmentModel->delete($attachmentTaskIds);
+                    }
+
+                    $comments = $commentModel->select('id')->whereIn('task_id', $taskIds)->find();
+                    $commentIds = collect($comments)->pluck('id')->toArray();
+                    if (empty($commentIds)) {
+                        return $this->handleResponse([]);
+                    }
+
+                    $attachmentComments = $attachmentModel->select([
+                        'attachment.id as attachment_id',
+                        'attachment.name',
+                        'relation_attachment.id as relation_attachment_id'
+                    ])->join('relation_attachment', 'relation_attachment.attachment_id = attachment.id')
+                        ->join('comment', 'comment.id = relation_attachment.relation_id')
+                        ->where('relation_attachment.relation_type', 'comment')
+                        ->whereIn('relation_attachment.relation_id', $commentIds)->find();
+
+                    $attachmentCommentIds         = collect($attachmentComments)->pluck('attachment_id')->toArray();
+                    if (!empty($attachmentCommentIds)) {
+                        $attachmentModel->delete($attachmentCommentIds);
+                    }
+                    $commentModel->delete($commentIds);
+                    $taskModel->delete($taskIds);
                 }
-
-                $comments = $commentModel->select('id')->whereIn('task_id', $taskIds)->find();
-                $commentIds = collect($comments)->pluck('id')->toArray();
-                if (empty($commentIds)) {
-                    return $this->handleResponse([]);
-                }
-
-                $attachmentComments = $attachmentModel->select([
-                    'attachment.id as attachment_id',
-                    'attachment.name',
-                    'relation_attachment.id as relation_attachment_id'
-                ])->join('relation_attachment', 'relation_attachment.attachment_id = attachment.id')
-                    ->join('comment', 'comment.id = relation_attachment.relation_id')
-                    ->where('relation_attachment.relation_type', 'comment')
-                    ->whereIn('relation_attachment.relation_id', $commentIds)->find();
-
-                $attachmentCommentIds         = collect($attachmentComments)->pluck('attachment_id')->toArray();
-                if (!empty($attachmentCommentIds)) {
-                    $attachmentModel->delete($attachmentCommentIds);
-                }
-                $commentModel->delete($commentIds);
-                $taskModel->delete($taskIds);
+                $taskStatusModel->delete($statusIds);
             }
 
-            $taskStatusModel->delete($statusIds);
+            $projectLog = (new ProjectLog())->where('project_id', $projectID)->find();
+            if ($projectLog) {
+                (new ProjectLog())->delete(collect($projectLog)->pluck('id')->toArray());
+            }
+
             $projectModel->delete($projectID, true);
             return $this->handleResponse([]);
         } catch (Exception $e) {
