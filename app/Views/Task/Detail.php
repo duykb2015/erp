@@ -159,6 +159,7 @@
                                             </div>
                                         <?php endif ?>
                                         <?php if (0 == $task['parent_id']) : ?>
+                                            <?php if (LEADER == $userRole || OWNER == $userRole || $task['created_by'] == $currentUser || $task['assignee'] == $currentUser || $task['reporter'] == $currentUser) : ?>
                                             <div class="m-t-20 m-b-30">
                                                 <h6 class="sub-title m-b-15">Công việc phụ</h6>
                                                 <div class="dropdown-secondary dropdown d-inline-block">
@@ -193,6 +194,7 @@
                                                     </div>
                                                 <?php endif ?>
                                             </div>
+                                            <?php endif ?>
                                         <?php endif ?>
                                     </div>
                                 </div>
@@ -260,7 +262,7 @@
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <?php if ($currentUser == $comment['user_id']) : ?>
+                                                                <?php if ($currentUser == $comment['user_id'] || OWNER == $userRole || LEADER == $userRole) : ?>
                                                                     <div class="m-t-10 m-b-25 edit-and-delete">
                                                                         <span><a class="m-r-10 f-12 text-decoration-none" onclick="showEditCommentEditor(<?= $comment['id'] ?>)">Sửa</a></span><span><a class="m-r-10 f-12 text-decoration-none" id="btn-delete-comment" onclick="deleteComment(<?= $comment['id'] ?>)">Xoá</a> </span>
                                                                     </div>
@@ -398,7 +400,7 @@
                                     </table>
                                 </div>
                                 <div class="card-footer">
-                                    <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assigneeID']) || OWNER == $userRole) : ?>
+                                    <?php if ((session()->get('user_id') == $task['created_by']) || (session()->get('user_id') == $task['assigneeID']) || OWNER == $userRole || LEADER == $userRole) : ?>
                                         <div class="dropdown-secondary dropdown d-inline-block" id="context-menu-<?= $task['id'] ?>">
                                             Trạng thái:
                                             <button class="btn btn-sm btn-primary  waves-light" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
@@ -1040,13 +1042,16 @@
                     }
                 }
 
+                isSaveEditCommentAlreadyClick = false
+                btnSaveEditComment.innerHTML = 'Lưu'
+
                 $.growl.notice({
                     message: 'Đã lưu bình luận',
                 });
 
                 setTimeout(() => {
                     window.location.reload()
-                }, 1000)
+                }, 300)
 
                 return
             }).catch(() => {

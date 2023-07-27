@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Attachment;
 use App\Models\Comment;
+use App\Models\Notification as ModelsNotification;
 use App\Models\Project as ModelsProject;
 use App\Models\ProjectLog;
 use App\Models\ProjectUser;
@@ -12,11 +13,10 @@ use App\Models\TaskAttachment;
 use App\Models\TaskStatus;
 use App\Models\User;
 use Carbon\Carbon;
-use Carbon\CarbonInterval;
-use Carbon\CarbonPeriod;
 use CodeIgniter\I18n\Time;
 use Config\Services;
 use Exception;
+use Notification;
 
 class Project extends BaseController
 {
@@ -244,11 +244,13 @@ class Project extends BaseController
                         ->join('user', 'user.id = task.assignee', 'left')
                         ->where('parent_id = 0')
                         ->where('task.task_status_id', $status['id'])->findAll();
-                    foreach ($taskStatus[$key]['tasks'] as $subKey => $task) {
-                        if ($task['due_at']) {
-                            $dueDate = Carbon::createFromDate($task['due_at']);
-                            $dueDate->setLocale('vi');
-                            $taskStatus[$key]['tasks'][$subKey]['due_at'] = $dueDate->diffForHumans();
+                    if (DONE != $status['base_status']) {
+                        foreach ($taskStatus[$key]['tasks'] as $subKey => $task) {
+                            if ($task['due_at']) {
+                                $dueDate = Carbon::createFromDate($task['due_at']);
+                                $dueDate->setLocale('vi');
+                                $taskStatus[$key]['tasks'][$subKey]['due_at'] = $dueDate->diffForHumans();
+                            }
                         }
                     }
                 }
@@ -327,7 +329,7 @@ class Project extends BaseController
             case 'Statistic':
                 $taskStatusModel = new TaskStatus();
                 $taskModel       = new ModelsTask();
-                $taskStatus      = $taskStatusModel->where('project_id', $project['id'])->find();
+                $taskStatus      = $taskStatusModel->where('project_id', $project['id'])->orderBy('position', 'ASC')->find();
                 $statusDoneID    = NULL;
 
                 $chartData['Trạng thái'] = 'Số lượng';
@@ -526,7 +528,7 @@ class Project extends BaseController
         return $this->handleResponse($result);
     }
 
-    public function addUser()
+    public function inviteUser()
     {
         $validation = service('validation');
         $validation->setRules(
@@ -538,13 +540,22 @@ class Project extends BaseController
             customValidationErrorMessage()
         );
 
-        $projectID = ($this->request->getPost('project_id'));
         $projectPrefix = ($this->request->getPost('project_prefix'));
-        $userID = ($this->request->getPost('user_id'));
 
         if (!$validation->run($this->request->getPost())) {
             return redirectWithMessage(base_url("project/{$projectPrefix}/user"), $validation->getErrors());
         }
+
+        $projectID = ($this->request->getPost('project_id'));
+        $userID = ($this->request->getPost('user_id'));
+
+        $cache = Services::cache();
+        if ($cache->get("isAlreadyInvite_{$userID}")) {
+            return redirectWithMessage(base_url("project/{$projectPrefix}/user"), "Lời mời đã được gửi đi cho người dùng này!");
+        }
+        $cache->save("isAlreadyInvite_{$userID}", TRUE, 864000);
+
+        $project = (new ModelsProject())->select('name')->find($projectID);
 
         $projectUserModel = new ProjectUser();
         $data = [
@@ -558,19 +569,69 @@ class Project extends BaseController
             return redirectWithMessage(base_url("project/{$projectPrefix}/user"), 'Người dùng đã tham gia dự án');
         }
 
-        $data['role'] = 'member';
+        $notificationModel = new ModelsNotification();
+
+        $notificationID = $notificationModel->insert([
+            'title' => session()->get('name'),
+            'message' => '',
+            'sender_id' => session()->get('user_id'),
+            'recipient_id' => $userID,
+            'is_read' => FALSE
+        ]);
+
+        $data = [
+            'project_id' => $projectID,
+            'project_name' => $project['name'],
+            'user_id' => $userID
+        ];
+
+        $notificationModel->update($notificationID, [
+            'message' => Notification::inviteRequest(session()->get('name'), $data, $notificationID)
+        ]);
+
+        $cache = Services::cache();
+        $cache->save('userSendInvite', session()->get('name'), 864000);
+
+        return redirectWithMessage(base_url("project/{$projectPrefix}/user"), 'Đã gửi lời mời tới người dùng!', 'success', FALSE);
+    }
+
+    public function addUser()
+    {
+        $projectID = $this->request->getPost('project_id');
+        $userID    = $this->request->getPost('user_id');
+
+        $project = (new ModelsProject())->select('prefix')->find($projectID);
+
+        $projectUserModel = new ProjectUser();
+
+        $data = [
+            'user_id' => $userID,
+            'project_id' => $projectID,
+        ];
+
+        $projectUser = $projectUserModel->where($data)->find();
+        if ($projectUser) {
+            return $this->handleResponse(['errors' => 'Bạn đã tham gia dự án này!'], 400);
+        }
+
+        $data['role'] = MEMBER;
         $projectUserModel->insert($data);
 
         $member = (new User)->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name')
             ->find($userID);
 
-        $userName = session()->get('name');
+        $cache = Services::cache();
+        $userName = $cache->get('userSendInvite');
+
+        $cache->delete('userSendInvite');
+        $cache->delete("isAlreadyInvite_{$userID}");
+
         (new ProjectLog)->insert([
             'project_id' => $projectID,
             'log' => "<b>{$userName}</b> đã thêm {$member['name']} vào dự án."
         ]);
 
-        return redirectWithMessage(base_url("project/{$projectPrefix}/user"), 'success', 'success', FALSE);
+        return $this->handleResponse(['link' => base_url("project/{$project['prefix']}")]);
     }
 
     public function removeUser()
@@ -586,6 +647,8 @@ class Project extends BaseController
         if (!$validation->run($this->request->getPost())) {
             return $this->handleResponse(['errors' => $validation->getErrors()], 400);
         }
+
+        $type = $this->request->getPost('type');
 
         $projectUserID = $this->request->getPost('project_user_id');
 
@@ -605,16 +668,21 @@ class Project extends BaseController
 
         $projectUserModel->delete($projectUserID);
 
-        $data['role'] = 'member';
-        $projectUserModel->insert($data);
-
         $member = (new User)->select('COALESCE(CONCAT(user.firstname, " ", user.lastname), user.username) as name')
             ->find($projectUser['user_id']);
 
+        if ($type == 1) {
+            $userName = session()->get('name');
+            (new ProjectLog)->insert([
+                'project_id' => $projectUser['project_id'],
+                'log' => "<b>{$userName}</b> đã rời khỏi dự án."
+            ]);
+            return $this->handleResponse([]);
+        }
         $userName = session()->get('name');
         (new ProjectLog)->insert([
             'project_id' => $projectUser['project_id'],
-            'log' => "<b>{$userName}</b> xoá {$member['name']} khỏi dự án."
+            'log' => "<b>{$userName}</b> đã xoá {$member['name']} khỏi dự án."
         ]);
 
         return $this->handleResponse([]);

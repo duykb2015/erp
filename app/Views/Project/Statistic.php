@@ -106,7 +106,7 @@
                                                             </div>
                                                             <div class="col-9">
                                                                 <div class="progress">
-                                                                    <div class="progress-bar progress-bar-primary" role="progressbar" style="width: <?= $user['percentComplete'] ?>%" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: <?= $user['percentComplete'] ?>%" aria-valuemin="0" aria-valuemax="100"></div>
                                                                 </div>
                                                             </div>
                                                             <div class="col-1">
@@ -141,20 +141,20 @@
         return [key, parseInt(jsonData[key])]
     });
 
-    temp = [
-        ['Task', 'Hours per Day'],
-        ['Work', 11],
-        ['Eat', 2],
-        ['Commute', 2],
-        ['Watch TV', 2],
-        ['Sleep', 7]
-    ]
-    console.log(result, temp)
     //Donut chart
     google.charts.load("current", {
         packages: ["corechart"]
     });
     google.charts.setOnLoadCallback(drawChartDonut);
+
+    var colors = ['lightgray']
+
+    for (let i = 1; i < result.length - 2; i++) {
+        colors.push('#007bff')
+    }
+
+    colors.push('#0ac282')
+    console.log(colors)
 
     function drawChartDonut() {
         var dataDonut = google.visualization.arrayToDataTable(result);
@@ -162,7 +162,7 @@
         var optionsDonut = {
             width: 1488,
             pieHole: 0.4,
-            colors: ['#93BE52', '#69CEC6', '#FE8A7D', '#4680ff', '#FFB64D']
+            colors: colors
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('chart_Donut'));

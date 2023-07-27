@@ -14,13 +14,13 @@
             <ul class="nav-left">
                 <li class="header-notification">
                     <div class="dropdown-primary dropdown">
-                        <div class="dropdown-toggle <?= url_is('/') ? 'nav-active' : '' ?>" data-toggle="dropdown">
-                            <div class="hover px-2">
+                        <div class="dropdown-toggle <?= url_is('/') ? 'nav-active' : '' ?>"> <!-- data-toggle="dropdown" -->
+                            <div class="hover px-2" onclick="redirect_url('/')">
                                 <span>Không gian làm việc</span>
-                                <i class="feather icon-chevron-down"></i>
+                                <!-- <i class="feather icon-chevron-down"></i> -->
                             </div>
                         </div>
-                        <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                        <!-- <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                             <li class="nav-item dropdown" onclick="redirect_url('/')">
                                 <div class="media">
                                     <a class="text-decoration-none d-flex">
@@ -28,7 +28,7 @@
                                     </a>
                                 </div>
                             </li>
-                        </ul>
+                        </ul> -->
                     </div>
                 </li>
                 <li class="header-notification">
@@ -47,7 +47,7 @@
                                     </a>
                                 </div>
                             </li>
-                            <li class="nav-item dropdown" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">
+                            <li class="nav-item dropdown" style="display: <?= url_is('/project*') ? 'none' : 'block' ?>;" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">
                                 <div class="media">
                                     <a class="text-decoration-none d-flex">
                                         Tạo dự án mới
@@ -60,13 +60,13 @@
                 <?php if (ADMIN == session()->get('type')) : ?>
                     <li class="header-notification">
                         <div class="dropdown-primary dropdown">
-                            <div class="dropdown-toggle <?= url_is('/user-management*') ? 'nav-active' : '' ?>" data-toggle="dropdown">
-                                <div class="hover px-2">
+                            <div class="dropdown-toggle <?= url_is('/user-management*') ? 'nav-active' : '' ?>" > <!-- data-toggle="dropdown" -->
+                                <div class="hover px-2" onclick="redirect_url('/user-management')">
                                     <span>Thành viên</span>
-                                    <i class="feather icon-chevron-down"></i>
+                                    <!-- <i class="feather icon-chevron-down"></i> -->
                                 </div>
                             </div>
-                            <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                            <!-- <ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                 <li class="nav-item dropdown" onclick="redirect_url('/user-management')">
                                     <div class="media">
                                         <a class="text-decoration-none d-flex">
@@ -74,14 +74,7 @@
                                         </a>
                                     </div>
                                 </li>
-                                <!-- <li class="nav-item dropdown" data-bs-toggle="modal" data-bs-target="#createNewProject" data-bs-whatever="@mdo">
-                                <div class="media">
-                                    <a class="text-decoration-none d-flex">
-                                        Tạo dự án mới
-                                    </a>
-                                </div>
-                            </li> -->
-                            </ul>
+                            </ul> -->
                         </div>
                     </li>
                 <?php endif ?>
@@ -156,7 +149,7 @@
                                                 <span class="notification-time"><?= $notify['created_at'] ?></span>
                                             </div>
                                             <div class="media-right">
-                                            <label class="label label-primary">Mới</label>
+                                                <label class="label label-primary">Mới</label>
                                             </div>
                                         </div>
                                     </li>

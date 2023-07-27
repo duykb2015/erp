@@ -35,10 +35,9 @@ class Notification
         </br><a onclick='markAsRead({$notification})'>Bấm vào đây để xem!</a>";
     }
 
-    public static function inviteRequest(string $sender, string $project)
+    public static function inviteRequest(string $sender, array $data, int $notification)
     {
-        $link = base_url("project/{$project}/invite");
-        return "<b>{$sender}</b> mời bạn tham gia dự án! </br><a href='$link'>Bấm vào đây chấp thuận hoặc tự chối!</a>";
+        return "<b>{$sender}</b> đã mời bạn tham gia dự án <b>{$data['project_name']}</b></br><div class='d-flex'><div class='mx-2'><a class='text-success text-decoration-none' onclick='confirmInvite({$data['project_id']}, {$data['user_id']}, {$notification})'>Chấp thuận</a></div><div class='mx-2'><a class='text-danger text-decoration-none' onclick='refuseInvite({$notification})'>Từ chối!</a></div></div>";
     }
 
     // public static function inviteRequestRefuse(string $sender)

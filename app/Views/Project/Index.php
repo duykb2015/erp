@@ -162,13 +162,15 @@
                                                                         <?php foreach ($status['tasks'] as $task) : ?>
                                                                             <div class="col ">
                                                                                 <div class="card border-left border-right border-bottom card-border-<?= $status['base_status'] ?>">
-                                                                                    <div class="card-header text-truncate">
+                                                                                    <div class="card-header text-truncate py-2" style="padding-left: 25px !important;">
                                                                                         <a href="<?= base_url("project/{$project['prefix']}/task/{$task['task_key']}") ?>" class="card-title text-decoration-none">[<?= $task['task_key'] ?>] <?= $task['title'] ?></a>
                                                                                     </div>
                                                                                     <div class="card-block p-b-10">
-                                                                                        <p class="task-due"><strong>Đến hạn: </strong><span class="badge badge-secondary" style="background-color: gray;"><?= $task['due_at'] ?? 'Trống' ?></span></p>
+                                                                                        <?php if (DONE != $status['base_status']) : ?>
+                                                                                            <p class="task-due"><strong>Đến hạn: </strong><span class="badge badge-secondary" style="background-color: gray;"><?= $task['due_at'] ?? 'Trống' ?></span></p>
+                                                                                        <?php endif ?>
                                                                                     </div>
-                                                                                    <div class="card-footer">
+                                                                                    <div class="card-footer pb-3" style="padding-left: 25px !important;">
                                                                                         <div class="task-list-table">
                                                                                             <?php if (!empty($task['user_photo'])) : ?>
                                                                                                 <a><img class="img-fluid rounded-circle" width="40" height="40" src="<?= base_url("imgs/{$task['user_photo']}") ?>" alt="avatar" data-toggle="tooltip" data-placement="top" title="<?= $task['assignee_name'] ?>"></a>
@@ -699,16 +701,19 @@
     var sectionName = document.getElementById('section-name')
     var submitButton = document.getElementById('submit-button')
 
-    sectionName.addEventListener("focusout", () => {
-        if (sectionName.value == '') {
-            sectionName.required = false
-            sectionName.style.display = 'none'
+    console.log(sectionName)
+    if (sectionName) {
+        sectionName.addEventListener("focusout", () => {
+            if (sectionName.value == '') {
+                sectionName.required = false
+                sectionName.style.display = 'none'
 
-            submitButton.type = 'button'
+                submitButton.type = 'button'
 
-            return
-        }
-    });
+                return
+            }
+        });
+    }
 
     function doCreateSection(event) {
         if (sectionName.style.display != 'block') {

@@ -75,7 +75,7 @@
                                                     <div class="alert alert-success mb-1 rounded">
                                                         <div class="row">
                                                             <div class="col-11">
-                                                                Đã thêm thành viên.
+                                                                <?= $success ?>
                                                             </div>
                                                             <div class="col-1">
                                                                 <i onclick="removeAlert()" class="feather icon-x-circle float-end"></i>
@@ -116,20 +116,26 @@
                                             </div>
                                         </div>
                                         <!-- End notification -->
-                                        <form action="" method="post">
-                                            <div class="row m-b-20">
-                                                <div class="col-11 mb-2">
-                                                    <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
-                                                    <input type="hidden" name="project_prefix" value="<?= $project['prefix'] ?>">
-                                                    <label for="add_new_member" class="p-b-10">Nhập email người dùng</label>
-                                                    <select name="user_id" class="add-member col-sm-12"></select>
-                                                </div>
-                                                <div class="col-1">
-                                                    <label class="p-b-10 d-block">&nbsp;</label>
-                                                    <button class="btn btn-primary rounded custom-height">Thêm</button>
-                                                </div>
+                                        <div class="card border">
+                                            <div class="card-block">
+                                                <form action="" method="post">
+                                                    <div class="row ">
+                                                        <div class="col-12">
+                                                            <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
+                                                            <input type="hidden" name="project_prefix" value="<?= $project['prefix'] ?>">
+                                                            <label for="add_new_member" class="p-b-10">Nhập email người dùng</label>
+                                                            <select name="user_id" class="add-member col-sm-12 rounded"></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row m-b-10">
+                                                        <div class="col-12">
+                                                            <label class="p-b-10 d-block">&nbsp;</label>
+                                                            <button class="btn btn-primary rounded custom-height f-right">Thêm</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
-                                        </form>
+                                        </div>
 
                                         <?php if (OWNER == $userRole && ADMIN == session()->get('type')) : ?>
                                             <div class="row">
@@ -665,6 +671,7 @@
 
         const data = new FormData()
         data.append('project_user_id', id)
+        data.append('type', type)
 
         var requestOptions = {
             method: 'POST',
@@ -703,12 +710,17 @@
                     }
                 }
 
+                deleteUserAlreadyClick = false
+                ownerPower.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
+
+                if (type == 1) {
+                    window.location.href = '<?= base_url('project') ?>'
+                    return
+                }
+
                 $.growl.notice({
                     message: "Đã xoá thành viên khỏi dự án!"
                 });
-
-                deleteUserAlreadyClick = false
-                ownerPower.innerHTML = '<i class="icofont icofont-navigation-menu"></i>'
 
                 setTimeout(() => {
                     window.location.reload()

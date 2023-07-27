@@ -277,7 +277,51 @@
     <?= $this->renderSection('js') ?>
 
     <script>
-        function markAsRead(id) {
+        function confirmInvite(project, user, notification) {
+            const data = new FormData();
+            data.append('project_id', project);
+            data.append('user_id', user);
+
+            var requestOptions = {
+                method: 'POST',
+                body: data,
+                redirect: 'follow'
+            };
+            fetch('<?= base_url('project/invite/confirm') ?>', requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    markAsRead(notification, false)
+
+                    if (result.errors) {
+                        $.growl.error({
+                            message: "Bạn đã tham gia dự án này!",
+                            location: 'tr',
+                            size: 'large'
+                        });
+                        window.location.reload()
+                        return
+                    }
+
+                    window.location.href = result.link
+                    return
+                }).catch(e => {
+                    $.growl.error({
+                        message: "Bạn đã tham gia dự án này!",
+                        location: 'tr',
+                        size: 'large'
+                    });
+                    window.location.reload()
+                    return
+                })
+        }
+
+        function refuseInvite(id) {
+            if (!confirm('Bạn có chắc là muốn từ chối lời mời này?')) return
+
+            markAsRead(id)
+        }
+
+        function markAsRead(id, reload = true) {
 
             const data = new FormData();
             data.append('id', id);
@@ -289,7 +333,15 @@
             };
             fetch('<?= base_url('notification/mask-as-read') ?>', requestOptions)
                 .then(() => {
-                    window.location.href = document.getElementById(`notification-link-${id}`).value
+                    link = document.getElementById(`notification-link-${id}`)
+                    if (!link) {
+                        if (reload) {
+                            window.location.reload()
+                        }
+                        return TRUE
+                    }
+                    window.location.href = link.value
+                    return TRUE
                 })
         }
 

@@ -77,12 +77,14 @@ $routes->group('project', ['filter' => 'login'], function ($routes) {
 
     $routes->get('(:num)/task/(:num)', 'Task::index');
 
+    $routes->post('invite/confirm', 'Project::addUser');
+
     $routes->group('(:segment)', function ($routes) {
         
         $routes->get('/', 'Project::detail');
 
         $routes->get('user', 'Project::detail');
-        $routes->post('user', 'Project::addUser');
+        $routes->post('user', 'Project::inviteUser');
 
         $routes->get('setting', 'Project::detail');
         $routes->post('setting', 'Project::saveSetting');
