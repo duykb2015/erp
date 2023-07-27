@@ -182,7 +182,7 @@
                                                                                             <div class="dropdown-secondary dropdown">
                                                                                                 <button class="btn btn-mini waves-effect waves-light text-truncate" style="height: 26px; background-color: <?= getPriorityColor($task['priority']) ?>; color: white;" type="button" data-toggle="tooltip" data-placement="top" title="Mức độ ưu tiên: <?= TASK_PRIORITY[$task['priority']] ?>"><?= TASK_PRIORITY[$task['priority']] ?></button>
                                                                                             </div>
-
+                                                                                            <?php if (session()->get('user_id') == $task['created_by'] || session()->get('user_id') == $task['assignee'] || OWNER == $userRole || LEADER == $userRole) : ?>
                                                                                             <div class="dropdown-secondary dropdown" id="context-menu-<?= $task['id'] ?>">
                                                                                                 <button class="btn btn-sm btn-primary dropdown-toggle btn-mini waves-light b-none text-truncate" style="height: 26px; max-width: 80px;" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?= $status['title'] ?></button>
                                                                                                 <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
@@ -197,6 +197,7 @@
                                                                                                     <?php endforeach ?>
                                                                                                 </div>
                                                                                             </div>
+                                                                                            <?php endif ?>
                                                                                             <div class="dropdown-secondary dropdown">
                                                                                                 <button class="btn btn-default btn-mini dropdown-toggle waves-light b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
                                                                                                 <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">

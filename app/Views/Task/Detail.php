@@ -172,7 +172,7 @@
                                                                 <h5 class="card-header-text">Tiến độ hoàn thành</h5>
                                                                 <div class="d-flex">
                                                                     <div class="progress" style="width:95%">
-                                                                        <div class="progress-bar progress-bar-primary" role="progressbar" style="width: <?= $percenSubtaskProgress ?>%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                        <div class="progress-bar progress-bar-success" role="progressbar" style="width: <?= $percenSubtaskProgress ?>%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                                                                     </div>
                                                                     <span style="font-weight: bold; color: black; padding-left: 10px; top:-5px; position: relative;" style="width:5%"><?= $percenSubtaskProgress ?>%</span>
                                                                 </div>
