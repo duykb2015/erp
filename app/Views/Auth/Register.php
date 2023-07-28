@@ -117,8 +117,8 @@
                                     <input type="text" name="firstname" value="<?= set_value('firstname') ?>" class="form-control rounded" placeholder="Họ">
                                 </div>
                                 <div class="form-group form-primary">
-                                    <label class="p-1" for="username">Tên</label>
-                                    <input type="text" name="lastname" value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
+                                    <label class="p-1" for="username">Tên <span class="text-danger">*</span></label>
+                                    <input type="text" name="lastname" required value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
                                 </div>
 
                                 <div class="d-grid gap-2">
