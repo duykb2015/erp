@@ -628,7 +628,7 @@ class Project extends BaseController
 
         (new ProjectLog)->insert([
             'project_id' => $projectID,
-            'log' => "<b>{$userName}</b> đã thêm {$member['name']} vào dự án."
+            'log' => "<b>{$userName}</b> đã thêm <b>{$member['name']}</b> vào dự án."
         ]);
 
         return $this->handleResponse(['link' => base_url("project/{$project['prefix']}")]);

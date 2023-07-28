@@ -251,33 +251,30 @@ class Task extends BaseController
         $startDate = NULL;
         $dueDate   = NULL;
 
-        $dateStartPoint = Carbon::now()->subYear();
-        $dateEndPoint = Carbon::createFromDate(2100, 01, 01);
-
         if ($taskRawData['start_date']) {
             $startDate = Carbon::createFromFormat('Y-m-d', $taskRawData['start_date'])->startOfDay();
-
-            if ($startDate->lt($dateStartPoint) || $startDate->gt($dateEndPoint)) {
-                return $this->handleResponse(['errors_datetime' => 'Vui lòng chọn một ngày bắt đầu hợp lệ'], 400);
-            }
         }
 
         if ($taskRawData['due_date']) {
             $dueDate = Carbon::createFromFormat('Y-m-d', $taskRawData['due_date'])->endOfDay();
-
-            if ($dueDate->gt($dateEndPoint)) {
-                return $this->handleResponse(['errors_datetime' => 'Vui lòng chọn một kết thúc hợp lệ'], 400);
-            }
         }
+
+        $projectModel = new Project();
+        $project = $projectModel->select(['prefix', 'start_at', 'due_at'])->where('id', $taskRawData['project_id'])->first();
 
         if ($startDate && $dueDate) {
             if ($dueDate->lt($startDate) || $dueDate->lt(Carbon::now())) {
                 return $this->handleResponse(['errors_datetime' => 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu'], 400);
             }
-        }
 
-        $projectModel = new Project();
-        $project = $projectModel->select('prefix')->where('id', $taskRawData['project_id'])->first();
+            if (
+                !empty($project['start_at']) && $startDate->lt($project['start_at']) ||
+                !empty($project['due_at']) && $dueDate->gt($project['due_at'])
+    
+            ) {
+                return $this->handleResponse(['errors_datetime' => 'Ngày không hợp lệ!'], 400);
+            }
+        }
 
         $taskModel = new ModelsTask();
 
@@ -428,36 +425,33 @@ class Task extends BaseController
         $startDate = NULL;
         $dueDate   = NULL;
 
-        $dateStartPoint = Carbon::now()->subYear();
-        $dateEndPoint = Carbon::createFromDate(2100, 01, 01);
-        // Handle datetime
         if ($taskRawData['start_date']) {
             $startDate = Carbon::createFromFormat('Y-m-d', $taskRawData['start_date']);
-
-            if ($startDate->lt($dateStartPoint) || $startDate->gt($dateEndPoint)) {
-                return $this->handleResponse(['errors_datetime' => 'Vui lòng chọn một ngày bắt đầu hợp lệ'], 400);
-            }
         }
 
         if ($taskRawData['due_date']) {
             $dueDate = Carbon::createFromFormat('Y-m-d', $taskRawData['due_date']);
-
-            if ($dueDate->gt($dateEndPoint)) {
-                return $this->handleResponse(['errors_datetime' => 'Vui lòng chọn một kết thúc hợp lệ'], 400);
-            }
         }
+
+        $projectModel = new Project();
+        $project = $projectModel->select(['prefix', 'start_at', 'due_at'])->where('id', $taskRawData['project_id'])->first();
 
         if ($startDate && $dueDate) {
             if ($dueDate->lt($startDate) || $dueDate->lt(Carbon::now())) {
                 return $this->handleResponse(['errors_datetime' => 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu'], 400);
             }
+
+            if (
+                !empty($project['start_at']) && $startDate->lt($project['start_at']) ||
+                !empty($project['due_at']) && $dueDate->gt($project['due_at'])
+    
+            ) {
+                return $this->handleResponse(['errors_datetime' => 'Ngày không hợp lệ!'], 400);
+            }
         }
 
         $taskModel = new ModelsTask();
         $task = $taskModel->select(['task_key', 'assignee', 'reporter'])->find($taskRawData['task_id']);
-
-        $projectModel = new Project();
-        $project = $projectModel->select('prefix')->where('id', $taskRawData['project_id'])->first();
 
         $data = [
             'id'            => $taskRawData['task_id'],
@@ -467,13 +461,8 @@ class Task extends BaseController
             'priority'      => $taskRawData['priority'],
         ];
 
-        if ($startDate) {
-            $data['start_at'] = $startDate->format('Y-m-d H:i:s');
-        }
-
-        if ($dueDate) {
-            $data['due_at'] = $dueDate->format('Y-m-d H:i:s');
-        }
+        $data['start_at'] = $startDate ? $startDate->format('Y-m-d H:i:s') : NULL;
+        $data['due_at']   = $dueDate   ? $dueDate->format('Y-m-d H:i:s')   : NULL;
 
         $notificationModel = new Notification();
         $data['assignee'] = !empty($taskRawData['assignee']) ? $taskRawData['assignee'] : NULL;
