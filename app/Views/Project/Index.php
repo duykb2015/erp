@@ -152,7 +152,9 @@
                                                             <div class="input-group hidden" id="input-group-section-<?= $status['id'] ?>" onfocusout="inputGroupSectionOut(<?= $status['id'] ?>)">
                                                                 <input type="text" class="form-control" id="section-name-num-<?= $status['id'] ?>" value="<?= $status['title'] ?>">
                                                                 <button type="button" id="save-edit-section-<?= $status['id'] ?>" class="btn btn-primary" onclick="editTaskStatusName(<?= $status['id'] ?>)">Lưu</button>
-                                                                <button type="button" id="delete-section-<?= $status['id'] ?>" class="btn btn-danger" onclick="deleteTaskStatus(<?= $status['id'] ?>)">Xoá</button>
+                                                                <?php if (0 == $status['base_status']) : ?>
+                                                                    <button type="button" id="delete-section-<?= $status['id'] ?>" class="btn btn-danger" onclick="deleteTaskStatus(<?= $status['id'] ?>)">Xoá</button>
+                                                                <?php endif ?>
                                                             </div>
                                                         </div>
                                                         <div class="card-block p-b-0">
@@ -183,20 +185,20 @@
                                                                                                 <button class="btn btn-mini waves-effect waves-light text-truncate" style="height: 26px; background-color: <?= getPriorityColor($task['priority']) ?>; color: white;" type="button" data-toggle="tooltip" data-placement="top" title="Mức độ ưu tiên: <?= TASK_PRIORITY[$task['priority']] ?>"><?= TASK_PRIORITY[$task['priority']] ?></button>
                                                                                             </div>
                                                                                             <?php if (session()->get('user_id') == $task['created_by'] || session()->get('user_id') == $task['assignee'] || OWNER == $userRole || LEADER == $userRole) : ?>
-                                                                                            <div class="dropdown-secondary dropdown" id="context-menu-<?= $task['id'] ?>">
-                                                                                                <button class="btn btn-sm btn-primary dropdown-toggle btn-mini waves-light b-none text-truncate" style="height: 26px; max-width: 80px;" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?= $status['title'] ?></button>
-                                                                                                <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-                                                                                                    <?php foreach ($taskStatus as $subStatus) : ?>
-                                                                                                        <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
-                                                                                                            continue;
-                                                                                                        } ?>
-                                                                                                        <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
-                                                                                                            <i class="icofont icofont-listine-dots"></i>
-                                                                                                            <?= $subStatus['title'] ?>
-                                                                                                        </a>
-                                                                                                    <?php endforeach ?>
+                                                                                                <div class="dropdown-secondary dropdown" id="context-menu-<?= $task['id'] ?>">
+                                                                                                    <button class="btn btn-sm btn-primary dropdown-toggle btn-mini waves-light b-none text-truncate" style="height: 26px; max-width: 80px;" type="button" id="dropdown-<?= $task['id'] ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?= $status['title'] ?></button>
+                                                                                                    <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+                                                                                                        <?php foreach ($taskStatus as $subStatus) : ?>
+                                                                                                            <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
+                                                                                                                continue;
+                                                                                                            } ?>
+                                                                                                            <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>
+                                                                                                                <i class="icofont icofont-listine-dots"></i>
+                                                                                                                <?= $subStatus['title'] ?>
+                                                                                                            </a>
+                                                                                                        <?php endforeach ?>
+                                                                                                    </div>
                                                                                                 </div>
-                                                                                            </div>
                                                                                             <?php endif ?>
                                                                                             <div class="dropdown-secondary dropdown">
                                                                                                 <button class="btn btn-default btn-mini dropdown-toggle waves-light b-none txt-muted" type="button" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="icofont icofont-navigation-menu"></i></button>
