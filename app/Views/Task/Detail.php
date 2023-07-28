@@ -160,40 +160,40 @@
                                         <?php endif ?>
                                         <?php if (0 == $task['parent_id']) : ?>
                                             <?php if (LEADER == $userRole || OWNER == $userRole || $task['created_by'] == $currentUser || $task['assignee'] == $currentUser || $task['reporter'] == $currentUser) : ?>
-                                            <div class="m-t-20 m-b-30">
-                                                <h6 class="sub-title m-b-15">Công việc phụ</h6>
-                                                <div class="dropdown-secondary dropdown d-inline-block">
-                                                    <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm công việc phụ</button>
-                                                </div>
-                                                <?php if (!empty($subtasks)) : ?>
-                                                    <div class="card my-3">
-                                                        <div class="card-header border " style="border-bottom-right-radius: unset; border-bottom-left-radius: unset;">
-                                                            <div class="col-md-12">
-                                                                <h5 class="card-header-text">Tiến độ hoàn thành</h5>
-                                                                <div class="d-flex">
-                                                                    <div class="progress" style="width:95%">
-                                                                        <div class="progress-bar progress-bar-success" role="progressbar" style="width: <?= $percenSubtaskProgress ?>%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <div class="m-t-20 m-b-30">
+                                                    <h6 class="sub-title m-b-15">Công việc phụ</h6>
+                                                    <div class="dropdown-secondary dropdown d-inline-block">
+                                                        <button class="btn btn-sm btn-primary waves-light" type="button" data-bs-toggle="modal" data-bs-target="#createSubTask"><i class="icofont icofont-plus"></i> Thêm công việc phụ</button>
+                                                    </div>
+                                                    <?php if (!empty($subtasks)) : ?>
+                                                        <div class="card my-3">
+                                                            <div class="card-header border " style="border-bottom-right-radius: unset; border-bottom-left-radius: unset;">
+                                                                <div class="col-md-12">
+                                                                    <h5 class="card-header-text">Tiến độ hoàn thành</h5>
+                                                                    <div class="d-flex">
+                                                                        <div class="progress" style="width:95%">
+                                                                            <div class="progress-bar progress-bar-success" role="progressbar" style="width: <?= $percenSubtaskProgress ?>%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                        </div>
+                                                                        <span style="font-weight: bold; color: black; padding-left: 10px; top:-5px; position: relative;" style="width:5%"><?= $percenSubtaskProgress ?>%</span>
                                                                     </div>
-                                                                    <span style="font-weight: bold; color: black; padding-left: 10px; top:-5px; position: relative;" style="width:5%"><?= $percenSubtaskProgress ?>%</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
+                                                                <div class="row d-block">
+                                                                    <?php foreach ($subtasks as $sub) : ?>
+                                                                        <div class="col border bg-light rounded mt-3 mx-2" style="width: 98%;">
+                                                                            <p class="m-b-0 m-t-10"><b><a class="text-decoration-none" href='<?= base_url("project/{$project['prefix']}/task/{$sub['task_key']}") ?>'>[<?= $sub['task_key'] ?>] <?= $sub['title'] ?></a></b></p>
+                                                                            <p class="m-b-10">
+                                                                                <b>Trạng thái:</b>
+                                                                                <span class="badge-custom-<?= $sub['base_status'] ?>"><?= $sub['status'] ?></span>
+                                                                            </p>
+                                                                        </div>
+                                                                    <?php endforeach ?>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="card-block border rounded-bottom" style="border-top: none !important;border-top-left-radius: unset;border-top-right-radius: unset;">
-                                                            <div class="row d-block">
-                                                                <?php foreach ($subtasks as $sub) : ?>
-                                                                    <div class="col border bg-light rounded mt-3 mx-2" style="width: 98%;">
-                                                                        <p class="m-b-0 m-t-10"><b><a class="text-decoration-none" href='<?= base_url("project/{$project['prefix']}/task/{$sub['task_key']}") ?>'>[<?= $sub['task_key'] ?>] <?= $sub['title'] ?></a></b></p>
-                                                                        <p class="m-b-10">
-                                                                            <b>Trạng thái:</b>
-                                                                            <span class="badge-custom-<?= $sub['base_status'] ?>"><?= $sub['status'] ?></span>
-                                                                        </p>
-                                                                    </div>
-                                                                <?php endforeach ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                <?php endif ?>
-                                            </div>
+                                                    <?php endif ?>
+                                                </div>
                                             <?php endif ?>
                                         <?php endif ?>
                                     </div>
@@ -407,6 +407,8 @@
                                             <div class="dropdown-menu" aria-labelledby="dropdown3" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                 <?php foreach ($taskStatus as $subStatus) : ?>
                                                     <?php if (4 == $subStatus['base_status'] && (MEMBER == $userRole)) {
+                                                        continue;
+                                                    } else if (4 == $subStatus['base_status'] && isset($percenSubtaskProgress) && $percenSubtaskProgress != 100) {
                                                         continue;
                                                     } ?>
                                                     <a style="z-index: 9999;" class="dropdown-item waves-light waves-effect <?= $task['task_status_id'] == $subStatus['id'] ? 'active' : '' ?>" <?= $task['task_status_id'] == $subStatus['id'] ? '' : 'onclick="changeTaskStatus(' . $task['id'] . ',' . $subStatus['id'] . ')"' ?>>

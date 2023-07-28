@@ -67,10 +67,10 @@ class TaskStatus extends BaseController
 
         $taskStatusModel = new ModelsTaskStatus();
         $statusNameExist = $taskStatusModel->where('title', $taskStatusData['task_status_name'])->first();
-        if ($taskStatusData['task_status_id'] != $statusNameExist['id']) {
+
+        if (!empty($statusNameExist) && $taskStatusData['task_status_id'] != $statusNameExist['id']) {
             return $this->handleResponse(['errors' => ['task_status_name' => 'Trạng thái đã tồn tại']], 400);
         }
-
 
         $data = [
             'id' => $taskStatusData['task_status_id'],
@@ -104,14 +104,14 @@ class TaskStatus extends BaseController
         $taskStatus = $taskStatusModel->find($taskStatusID);
         if (0 != $taskStatus['base_status']) {
             //Không cho xoá nếu đó là base section
-            return $this->handleResponse(['errors' => 'Không thể xoá base section'], 400);
+            return $this->handleResponse(['errors' => 'Không thể xoá trạng thái gốc!'], 400);
         }
 
         $taskModel = new Task();
         $tasks = $taskModel->where('task_status_id', $taskStatusID)->find();
 
         if (!empty($tasks)) {
-            return $this->handleResponse(['errors' => 'Trạng thái đang chứa công việc, không thể xoá!'], 400);
+            return $this->handleResponse(['errors' => 'Trạng thái có chứa công việc, không thể xoá!'], 400);
         }
 
         try {

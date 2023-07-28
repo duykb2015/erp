@@ -125,8 +125,8 @@
                                                 <option value="all" <?= !empty($filterUser) && $filterUser == 'all' ? 'selected' : '' ?>>Toàn bộ</option>
                                                 <option value="unassigned" <?= !empty($filterUser) && $filterUser == 'unassigned' ? 'selected' : '' ?>>Chưa được giao</option>
                                                 <option value="<?= session()->get('user_id') ?>" <?= !empty($filterUser) && $filterUser == session()->get('user_id') ? 'selected' : '' ?>>Người dùng hiện tại</option>
-                                                <?php if (!empty($assignees)) : ?>
-                                                    <?php foreach ($assignees as $assignee) : ?>
+                                                <?php if (!empty($projectUser)) : ?>
+                                                    <?php foreach ($projectUser as $assignee) : ?>
                                                         <option value="<?= $assignee['user_id'] ?>" <?= !empty($filterUser) && $filterUser == $assignee['user_id'] ? 'selected' : '' ?>><?= $assignee['name'] ?></option>
                                                     <?php endforeach ?>
                                                 <?php endif ?>
@@ -704,7 +704,6 @@
     var sectionName = document.getElementById('section-name')
     var submitButton = document.getElementById('submit-button')
 
-    console.log(sectionName)
     if (sectionName) {
         sectionName.addEventListener("focusout", () => {
             if (sectionName.value == '') {

@@ -16,7 +16,7 @@
                     <div class="dropdown-primary dropdown">
                         <div class="dropdown-toggle <?= url_is('/') ? 'nav-active' : '' ?>"> <!-- data-toggle="dropdown" -->
                             <div class="hover px-2" onclick="redirect_url('/')">
-                                <span>Không gian làm việc</span>
+                                <span>Trang chủ</span>
                                 <!-- <i class="feather icon-chevron-down"></i> -->
                             </div>
                         </div>

@@ -137,7 +137,8 @@
                                             </div>
                                         </div>
 
-                                        <?php if (OWNER == $userRole && ADMIN == session()->get('type')) : ?>
+                                        <!-- && ADMIN == session()->get('type') -->
+                                        <?php if (OWNER == $userRole ) : ?>
                                             <div class="row">
                                                 <div class="col-11 mb-2">
                                                     <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
@@ -314,8 +315,8 @@
                                 <input type="text" id="firstname1" value="<?= set_value('firstname') ?>" class="form-control rounded" placeholder="Họ">
                             </div>
                             <div class="form-group form-primary">
-                                <label class="p-1" for="lastname">Tên</label>
-                                <input type="text" id="lastname1" value="<?= set_value('lastname') ?>" class="form-control rounded" placeholder="Tên">
+                                <label class="p-1" for="lastname">Tên <span class="text-danger">*</span></label>
+                                <input type="text" id="lastname1" value="<?= set_value('lastname') ?>" required class="form-control rounded" placeholder="Tên">
                             </div>
 
                             <div class="d-grid gap-2">

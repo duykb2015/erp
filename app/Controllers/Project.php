@@ -210,6 +210,13 @@ class Project extends BaseController
             ->where('project_id', $project['id'])->find();
         $projectUserID = collect($projectUser)->pluck('user_id')->toArray();
 
+        $data['projectUser'] = collect($projectUser)->filter(function ($item) {
+            if (session()->get('user_id') == $item['user_id']) {
+                return FALSE;
+            }
+            return $item;
+        });
+
         $userID = session()->get('user_id');
 
         if ($project['owner'] != $userID) {
@@ -335,25 +342,32 @@ class Project extends BaseController
                 $chartData['Trạng thái'] = 'Số lượng';
 
                 foreach ($taskStatus as $key => $status) {
-                    if (4 == $status['base_status']) {
+                    if (DONE == $status['base_status']) {
                         $statusDoneID = $status['id'];
                     }
-                    $chartData[$status['title']] = $taskModel->select('COUNT(id) as count')->where('task_status_id', $status['id'])->first()['count'];
+                    $chartData[$status['title']] = $taskModel->select('COUNT(id) as count')
+                        ->where('task_status_id', $status['id'])
+                        ->first()['count'];
                 }
                 $data['chartData'] = json_encode($chartData);
 
                 $teamStatistic = [];
 
                 foreach ($projectUser as $user) {
-                    $countDone = $taskModel->select('count(id) as total')
+                    $countDone = $taskModel->select('count(task.id) as total')
+                        ->join('task_status', 'task_status.id = task.task_status_id')
+                        ->join('project', 'project.id = task_status.project_id')
                         ->where('assignee', $user['user_id'])
                         ->where('task_status_id', $statusDoneID)
+                        ->where('project.id', $project['id'])
                         ->first();
 
-                    $countAll = $taskModel->select('count(id) as total')
+                    $countAll = $taskModel->select('count(task.id) as total')
+                        ->join('task_status', 'task_status.id = task.task_status_id')
+                        ->join('project', 'project.id = task_status.project_id')
                         ->where('assignee', $user['user_id'])
+                        ->where('project.id', $project['id'])
                         ->first();
-
 
                     $percenComplete = 0;
                     if (0 != $countAll['total'] && 0 != $countDone['total']) {
