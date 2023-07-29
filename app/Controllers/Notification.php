@@ -19,7 +19,7 @@ class Notification extends BaseController
 
     public function markAllAsRead()
     {
-        $ids = $this->request->getPost('ids');
+        $ids = explode(',',(string) $this->request->getPost('ids'));
         $notificationModel = new ModelsNotification();
 
         $notificationModel->update($ids, ['is_read' => TRUE]);

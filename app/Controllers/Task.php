@@ -270,7 +270,7 @@ class Task extends BaseController
             if (
                 !empty($project['start_at']) && $startDate->lt($project['start_at']) ||
                 !empty($project['due_at']) && $dueDate->gt($project['due_at'])
-    
+
             ) {
                 return $this->handleResponse(['errors_datetime' => 'Ngày không hợp lệ!'], 400);
             }
@@ -436,22 +436,26 @@ class Task extends BaseController
         $projectModel = new Project();
         $project = $projectModel->select(['prefix', 'start_at', 'due_at'])->where('id', $taskRawData['project_id'])->first();
 
-        if ($startDate && $dueDate) {
-            if ($dueDate->lt($startDate) || $dueDate->lt(Carbon::now())) {
-                return $this->handleResponse(['errors_datetime' => 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu'], 400);
-            }
-
-            if (
-                !empty($project['start_at']) && $startDate->lt($project['start_at']) ||
-                !empty($project['due_at']) && $dueDate->gt($project['due_at'])
-    
-            ) {
-                return $this->handleResponse(['errors_datetime' => 'Ngày không hợp lệ!'], 400);
-            }
-        }
 
         $taskModel = new ModelsTask();
-        $task = $taskModel->select(['task_key', 'assignee', 'reporter'])->find($taskRawData['task_id']);
+        $task = $taskModel->select(['task_key', 'assignee', 'reporter', 'start_at', 'due_at'])->find($taskRawData['task_id']);
+        $taskStart = Carbon::createFromDate($task['start_at'])->startOfDay();
+        $taskEnd = Carbon::createFromDate($task['due_at'])->startOfDay();
+        if ($startDate && $dueDate) {
+            if (!empty($task['start_at']) && !$startDate->clone()->startOfDay()->eq($taskStart) && !empty($task['due_at']) && !$dueDate->clone()->startOfDay()->eq($taskEnd)) {
+                if ($dueDate->lt($startDate) || $dueDate->lt(Carbon::now())) {
+                    return $this->handleResponse(['errors_datetime' => 'Ngày kết thúc phải lớn hơn hiện tại hoặc ngày bắt đầu'], 400);
+                }
+
+                if (
+                    !empty($project['start_at']) && $startDate->lt($project['start_at']) ||
+                    !empty($project['due_at']) && $dueDate->gt($project['due_at'])
+
+                ) {
+                    return $this->handleResponse(['errors_datetime' => 'Ngày không hợp lệ!'], 400);
+                }
+            }
+        }
 
         $data = [
             'id'            => $taskRawData['task_id'],

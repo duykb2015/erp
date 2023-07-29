@@ -110,7 +110,7 @@
                                                     <div class="dropdown-menu" aria-labelledby="dropdown35" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
                                                         <a class="dropdown-item waves-light waves-effect" data-bs-toggle="modal" data-bs-target="#updateTaskInformation"><i class="icofont icofont-edit-alt m-r-10"></i>Chỉnh sửa</a>
                                                         <?php if ($currentUser == $task['created_by'] || OWNER == $userRole || LEADER == $userRole) : ?>
-                                                            <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>, <?= $project['id'] ?>)"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
+                                                            <a class="dropdown-item waves-light waves-effect" id="btn-delete-task-<?= $task['id'] ?>" onclick="deleteTask(<?= $task['id'] ?>, '<?= $project['prefix'] ?>')"><i class="icofont icofont-close m-r-10"></i>Xoá</a>
                                                         <?php endif ?>
                                                     </div>
                                                 </div>

@@ -925,7 +925,7 @@
         deleteTaskStatusAlreadyActive = true
 
         attempt = 1
-        isConfirm = confirm('Bạn có chắc muốn xoá đi section này?')
+        isConfirm = confirm('Bạn có chắc muốn xoá đi trạng thái này?')
         if (!isConfirm) {
             return
         }
