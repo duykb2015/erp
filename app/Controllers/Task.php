@@ -590,6 +590,9 @@ class Task extends BaseController
         $taskLogModel = new TaskLog();
         $logs     = $taskLogModel->select('id')->where('task_id', $taskID)->find();
 
+        $timeTrackingModel = new TimeTracking();
+        $timeTracking     = $timeTrackingModel->select('id')->where('task_id', $taskID)->find();
+
         $attachmentModel = new Attachment();
         $attachments     = $attachmentModel->select('id')->where('task_id', $taskID)->find();
 
@@ -599,6 +602,10 @@ class Task extends BaseController
 
         if ($logs) {
             $taskLogModel->delete(collect($logs)->pluck('id')->toArray());
+        }
+
+        if ($timeTracking) {
+            $timeTrackingModel->delete(collect($timeTracking)->pluck('id')->toArray());
         }
 
         if ($attachments) {
