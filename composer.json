@@ -15,7 +15,7 @@
         "psr/log": "^1.1"
     },
     "require-dev": {
-        "kint-php/kint": "^5.0.4",
+        "kint-php/kint": "^6.1.0",
         "codeigniter/coding-standard": "^1.5",
         "fakerphp/faker": "^1.9",
         "mikey179/vfsstream": "^1.6",
